@@ -10,6 +10,7 @@ Implementation is NOT_STARTED. Readiness means the decisions, contracts, backlog
 
 | Document | Responsibility |
 | --- | --- |
+| [Design brief](docs/DESIGN_BRIEF.md) | Proposed brand, visual language, information architecture, screens, interaction behavior, and design-validation plan |
 | [PRD](docs/PRD.md) | Exact three-pillar scope, requirements and user journeys |
 | [Decisions](docs/DECISIONS.md) | Accepted defaults and change conditions |
 | [Architecture](docs/ARCHITECTURE.md) | Components, sessions, trusted contexts, durable workers |

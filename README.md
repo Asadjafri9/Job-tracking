@@ -13,9 +13,11 @@ Users can supply OpenRouter/DeepSeek, xAI Grok and Gemini keys, with encrypted s
 ## Start here
 
 - [Implementation plan](plan.md): scope, decisions, milestone order and release gates.
+- [Product design brief](docs/DESIGN_BRIEF.md): proposed Aster logo, visual direction, UX principles, screens and accessibility/validation guidance.
+- [Interactive design preview](design-exploration/README.md): browser-only implementation of the design direction; no backend or product data is connected.
 - [Implementation tasks](docs/TASKS.md): dependencies, acceptance and future verification for each task.
 - [Requirements](docs/PRD.md), [architecture](docs/ARCHITECTURE.md), [review resolutions](docs/PLAN_REVIEW.md) and [progress](docs/PROGRESS.md).
 
-**Repository status:** documentation only; application implementation has not started. First task: SET-001. Authentication, storage, provider routing and the future Azure topology now have selected planning defaults. Runtime checks and deployment remain future work. This planning work uses no connected Azure services and provisions no resources.
+**Repository status:** product implementation has not started. The interactive design preview is static HTML/CSS/JavaScript for design review only; it is not the planned React application. First implementation task: SET-001. Authentication, storage, provider routing and the future Azure topology have planning defaults; runtime checks and deployment remain future work. No Azure services were used or provisioned for the prototype.
 
 The [reference roadmap](docs/REFERENCE_ROADMAP.md) and [original review](docs/REFERENCE_PLAN_REVIEW.md) are historical. Active documents linked from `plan.md` govern implementation.
