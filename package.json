@@ -20,6 +20,7 @@
     "test:api": "uv run --project apps/api pytest -c apps/api/pyproject.toml --rootdir apps/api",
     "generate:contracts": "bash scripts/generate-contracts.sh",
     "verify:contracts": "bash scripts/verify-contracts.sh",
+    "verify:database": "bash scripts/verify-database.sh",
     "verify:foundation": "bash scripts/verify-foundation.sh",
     "dev:mocks": "uv run --project apps/api --env-file .env uvicorn app.local_mocks:app --app-dir apps/api --host 127.0.0.1 --port ${MOCKS_HOST_PORT:-18101} --reload",
     "local:services:up": "bash scripts/local-services-up.sh",

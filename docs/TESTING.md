@@ -7,7 +7,7 @@ The repository has working foundation checks for the existing web shell, API fou
 | V-F | Implemented, foundation only | `pnpm verify:frontend` | formatting, ESLint, TypeScript, Vitest, and React web build. Add extension build when EXT-001 exists. |
 | V-B | Implemented, foundation only | `pnpm verify:backend` | uv-locked Ruff/mypy/pytest. Local service integration is opt-in and otherwise reports a skip. |
 | V-C | Implemented | `pnpm verify:contracts` | Export FastAPI OpenAPI, regenerate TS paths in a temporary directory, and compare both artifacts byte-for-byte. |
-| V-DB | Planned; no script registered | Not available | PostgreSQL migrations/upgrades, roles/RLS/FKs/concurrency. |
+| V-DB | `pnpm verify:database` | Requires an explicitly configured loopback PostgreSQL `MIGRATION_DATABASE_URL`; no Azure or external services | DB-001 fresh migration, metadata drift, owner-scoped schema/FKs, revisions/constraints/indexes, protected credential column shape, idempotent synthetic seed. Role/RLS and concurrency checks remain for DB-002/003. |
 | V-X | Planned; no script registered | Not available | Form extraction/fill/options/submit observations/outbox/restarts. |
 | V-E | Planned; no script registered | Not available | Three-pillar journeys with synthetic identity/provider/source/storage. |
 | V-A | Planned; no script registered | Not available | Provider schemas/claims/options, fallback, and key secrecy. |

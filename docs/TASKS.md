@@ -24,7 +24,7 @@ Every task starts NOT_STARTED. Statuses: NOT_STARTED, IN_PROGRESS, BLOCKED, IN_R
 
 | ID | Depends | Planned files | Acceptance / verification |
 | --- | --- | --- | --- |
-| DB-001 | SET-002–003 | models/Alembic/seed | v2 entities/FKs/revisions/constraints/indexes from fresh migrations; synthetic seed. V-DB |
+| DB-001 | SET-002–003 | models/Alembic/seed | **Status: DONE.** v2 entities/FKs/revisions/constraints/indexes from a fresh migration; loopback-only synthetic seed. V-DB evidence: [DB-001](evidence/DB-001.md). Independent review passed October 12, 2026. |
 | DB-002 | DB-001 | RLS/roles/DB dependency | runtime non-owner/no BYPASSRLS; owner context transaction-local; two-user/pool/missing-context checks. V-DB, V-S |
 | DB-003 | DB-002 | revision/idempotency/quota utilities | races handled, duplicate keys reuse entity, altered input conflicts, owner-child constraints and reservations. V-B, V-DB |
 | AUTH-001 | SET-002–003, DB-002 | Authlib/OIDC/login/callback | state/nonce/issuer/audience/signature/PKCE/redirect validation, allowlisted enrollment, verified subject/directory mapping. V-B, V-S |
