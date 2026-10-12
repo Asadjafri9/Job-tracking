@@ -10,6 +10,7 @@ Desktop Chrome MV3, declared minimum 120; release evidence tests current and pre
 | Tested React-controlled native inputs | use tested setters/events and verify post-render persistence |
 | Repeated native education/experience groups | fill only unambiguous selected source/group ordering; no automatic row creation |
 | Legal attestations/terms/consent/demographics | classify and highlight; never automatically accept/infer |
+| Explicit employer/site policy says not to use AI in the application | leave the application manual; do not claim generic extraction/fill detects or honors this policy |
 | Missing/ambiguous scoped facts | report needs_information; leave unchanged |
 | Password/hidden/offscreen/disabled controls | exclude from extraction/fill |
 | File upload | detect/remind selected document; manual attachment |

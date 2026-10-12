@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proposed Rolevo component states</title>
+  <link rel="stylesheet" href="components.css">
+</head>
+<body>
+  <main class="specimen">
+    <p class="eyebrow">Design-system proposal · DGN-002</p>
+    <h1>Calm, clear controls with visible states</h1>
+    <p>These specimens demonstrate the proposed semantic pairs, focus ring, and state language. They are not connected to the product.</p>
+
+    <h2>Actions</h2>
+    <div class="row">
+      <button class="button" type="button">Analyze this job</button>
+      <button class="button secondary" type="button">Review answers</button>
+      <button class="button quiet" type="button">Learn more</button>
+      <button class="button" type="button" disabled>Unavailable</button>
+    </div>
+    <h2>Input and validation</h2>
+    <div class="field">
+      <label for="role">Preferred role</label>
+      <input id="role" value="Product designer">
+    </div>
+    <div class="field" style="margin-top:16px">
+      <label for="recipient">Recipient email</label>
+      <input id="recipient" aria-invalid="true" aria-describedby="recipient-error" value="name@">
+      <span class="field-error" id="recipient-error">Enter a complete email address.</span>
+    </div>
+    <h2>Status</h2>
+    <div class="row">
+      <span class="badge success">✓ Applied · confirmed</span>
+      <span class="badge warning">! Submission attempted</span>
+      <span class="badge danger">× Source check failed</span>
+      <span class="badge info">i Needs review</span>
+      <span class="badge neutral">○ Draft</span>
+    </div>
+    <h2>Decision notices and evidence</h2>
+    <div class="card">
+      <p class="notice info"><strong>Before filling:</strong> these values will be visible to the hiring page before you submit.</p>
+      <p><a class="link" href="#evidence">View the answer source</a></p>
+      <section id="evidence" aria-labelledby="evidence-title"><h3 id="evidence-title">Answer source</h3><p>This specimen illustrates a reviewed profile fact with its source and last-confirmed date.</p></section>
+      <p class="notice warning"><strong>Needs your answer:</strong> we could not confirm this from your profile.</p>
+    </div>
+  </main>
+</body>
+</html>

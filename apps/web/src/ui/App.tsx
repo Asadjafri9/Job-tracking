@@ -75,12 +75,12 @@ export function App() {
         <a className="brand" href="#home" aria-label="Career workspace home">
           <span className="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 32 32">
-              <path d="m7 25 8.5-19L24 25M10 19h11" />
+              <path d="M8 25V7h8a6 6 0 0 1 0 12H8m7 0 9 6" />
               <path d="m24.5 4 .8 2.4 2.4.8-2.4.8-.8 2.4-.8-2.4-2.4-.8 2.4-.8.8-2.4Z" />
             </svg>
           </span>
           <span className="brand-copy">
-            <span className="brand-name">aster</span>
+            <span className="brand-name">Rolevo</span>
             <span className="brand-caption">Career workspace</span>
           </span>
         </a>

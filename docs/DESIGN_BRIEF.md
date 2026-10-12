@@ -1,4 +1,4 @@
-# Aster — product design brief
+# Rolevo — product design brief
 
 **Status:** Proposed product and visual direction
 **Scope:** Dashboard, Chrome extension, onboarding, application/email flows, and job alerts
@@ -6,7 +6,7 @@
 
 ## 1. Design intent
 
-Aster should make a complicated job search feel like a short, understandable sequence of decisions. The product prepares useful work, explains what it did, and leaves consequential actions with the applicant. The user should always be able to answer three questions: **Where am I? What needs my attention? What happens if I continue?**
+Rolevo should make a complicated job search feel like a short, understandable sequence of decisions. The product prepares useful work, explains what it did, and leaves consequential actions with the applicant. The user should always be able to answer three questions: **Where am I? What needs my attention? What happens if I continue?**
 
 The product has three pillars, but they should not compete for attention on every screen:
 
@@ -32,11 +32,11 @@ Design for a first-time applicant who may be short on time, unfamiliar with AI s
 
 ### Name and promise
 
-Keep **Aster** as the working product name. Brand idea: **a steady guide through a moving career path**. Suggested concise promise: **“Your next step, made clearer.”** The name and phrase need a separate trademark/domain check before public launch.
+The owner selected **Rolevo** as the product name. Brand idea: **a steady guide through a moving career path**. Suggested concise promise: **“Your next step, made clearer.”** This product decision does not claim trademark clearance or domain availability; complete any required clearance before public launch.
 
-### Logo concept: “Guiding A”
+### Logo: “Rolevo R”
 
-Create a compact, original symbol from a single continuous path that forms a lowercase **a** and ends in a small four-point north star. It should suggest direction and forward motion without using a briefcase, robot, sparkle cloud, or generic checkmark. Use a simple geometric wordmark reading **aster** in lowercase beside the symbol. A small supporting descriptor, if used in marketing, is “career workspace”; do not lock it into the small product logo.
+Use the compact R-shaped path in `design-system/logos/rolevo-symbol.svg` with the Rolevo wordmark. The open leg suggests a next step while keeping the mark legible in a small extension toolbar. Use the supplied horizontal, monochrome, and reversed variants consistently. The owner selected this identity for product work; no public trademark clearance is claimed. Keep “career workspace” as an optional descriptor, not part of the compact mark.
 
 Logo rules:
 
@@ -97,13 +97,13 @@ The extension is contextual, not a miniature dashboard. It is centered on the cu
 
 ### 6.1 Sign in
 
-Keep sign-in focused: brand, one-sentence product purpose, email/password or the selected identity-provider UI, reset link, and create-account link. Avoid product metrics, AI promises, and dashboard preview clutter. On small viewports, use a single column. Explain account/data privacy on a short linked page.
+Keep sign-in focused: proposed brand, one-sentence product purpose, the hosted email/password/reset flow specified by the current Microsoft Entra External ID contract, and account-creation/reset actions. Avoid product metrics, AI promises, and dashboard preview clutter. On small viewports, use a single column. Explain account/data privacy on a short linked page. Entra External ID is a plan default pending owner confirmation; production identity configuration and UI must not imply that a tenant is provisioned.
 
 ### 6.2 First-run onboarding
 
 Use a short, skippable, resumable sequence with a clear progress indicator. Save each step and show what is optional.
 
-1. **Basics:** name and contact details; optional phone and profile links. Ask age/DOB only when a real supported use case exists, otherwise omit it.
+1. **Basics:** name and contact details; optional phone and profile links. Age/DOB are optional, purpose-scoped facts under the onboarding contract. Do not request them by default or infer them. Do not expose a collection/use flow until a specific supported purpose and disclosure are approved; otherwise omit the fields.
 2. **Experience:** roles, skills, projects, education, preferred roles/locations, and concise application notes.
 3. **Documents:** résumé first; LinkedIn-export PDF and existing cover letter optional. Show private-storage explanation, parse preview, source, and explicit confirmation for extracted facts. Never turn cover-letter style into proof of an accomplishment.
 4. **AI setup (optional):** introduce provider choices in plain language. Let a user skip and continue with manual tools. Explain per-provider data routing, key storage, cost responsibility, fallback behavior, and that background monitoring needs saved-key consent. Ask for a key only when the user chooses to configure one.
@@ -128,13 +128,15 @@ The side panel should use a concise vertical flow:
 2. **Analyze this job:** one explicit action and just-in-time notice describing which visible job text and selected profile facts will be sent to the chosen provider(s).
 3. **Suggestions:** group answers by form section. Each suggestion shows a short source label and confidence/explanation when useful. Highlight missing evidence as **Needs your answer**; keep attestations, demographic and legal declarations manual. Never show opaque AI confidence percentages without calibration.
 4. **Apply answers:** fill only supported fields/options and show per-field outcome. Keep a failed/unsupported field visibly untouched. Preserve user edits and current values.
-5. **Review on the site:** durable reminder that Aster did not submit and the applicant should verify each answer, attach the résumé manually, and use the site's own submit button.
+5. **Review on the site:** durable reminder that Rolevo did not submit and the applicant should verify each answer, attach the résumé manually, and use the site's own submit button.
 
-Do not add settings, key management, application history, or job-alert setup to the extension's primary flow. Offer a single “Open Aster” link for those tasks. On a recognized user submit, record **Submission attempted**; only a tested positive site signal or user confirmation changes it to **Applied**. Clearly expose uncertainty and validation failure.
+Do not add settings, key management, application history, or job-alert setup to the extension's primary flow. Offer a single “Open Rolevo” link for those tasks. On a recognized user submit, record **Submission attempted**; only a tested positive site signal or user confirmation changes it to **Applied**. Clearly expose uncertainty and validation failure.
+
+Form writes expose values to the hiring page and its scripts before final submission. Explain this before the first fill and require the initiating user action; never imply values remain private until Submit. If a site auto-submits on input, classify it unsupported. The extension never triggers or prevents Submit/Next.
 
 ### 6.6 Application history
 
-Provide a simple list/table with employer, role, date, channel, and plain-language status. Default view prioritizes actionable recent records; filters and search are secondary. Status vocabulary: **Draft**, **Ready to review**, **Submission attempted**, **Applied**, **Needs follow-up**, and **Closed** (only where supported). A detail view shows a dated evidence timeline and the context/answer snapshot. A click on Submit is not a success claim. Discovered vacancies never appear as applications.
+Provide a simple list/table with employer, role, date, channel, and plain-language status. Default view prioritizes actionable recent records; filters and search are secondary. Drafts and prepared form sessions remain separate from application records. The UI may summarize canonical application states with **Submission attempted**, **Applied**, and **Needs follow-up**; **Draft** and **Ready to review** describe drafts/sessions, not application statuses, while **Closed** is available only where supported by canonical state/history. A detail view shows a dated evidence timeline and the context/answer snapshot. A click on Submit is not a success claim. Discovered vacancies never appear as applications. The backend statuses and evidence rules in the PRD/API remain authoritative.
 
 ### 6.7 Email studio
 
@@ -142,7 +144,7 @@ Use a compact form with recipient, employer/role, job description, optional star
 
 ### 6.8 Job alerts
 
-Explain the feature in one sentence: Aster checks selected public career pages at the user's chosen local time. Setup adds one source at a time with a URL, parsing/support preview, role/location preferences, timezone, and explicit background-check/saved-key consent. Show a maximum and current number of sources, source health, last success, next check, pause/remove, and a restrained **Check now** action. Separate **New matches** from **Applications**. A daily digest shows role, company, location if known, source link, discovery time, and one short reason it matched. If a scan is partial, unsupported, paused, or failed, say so; do not display “no jobs found” as if coverage were complete.
+Explain the feature in one sentence: Rolevo checks selected public career pages at the user's chosen local time. Setup adds one source at a time, up to the contract maximum of five, with a URL, parsing/support preview, role/location preferences, timezone, and explicit scheduled-check and saved-key/background-use consent. Only bounded public sources are supported; login, CAPTCHA, access denial, and JavaScript-only pages remain unsupported, with no bypass. Background matching receives job text and role/location preferences, not contact details, DOB, or private documents. Show source health, last success, next check, pause/remove, and a restrained **Check now** action. Separate **New matches** from **Applications**. A daily digest shows role, company, location if known, source link, discovery time, and one short reason it matched. If a scan is partial, unsupported, paused, or failed, say so; do not display “no jobs found” as if coverage were complete.
 
 ### 6.9 Notifications
 
@@ -203,10 +205,10 @@ This direction takes structural inspiration rather than copying a brand:
 - [Figma’s design-system foundations guide](https://www.figma.com/blog/design-systems-102-how-to-build-your-design-system/): treat color, type, iconography, dimensions, component reuse, and accessibility as one system.
 - [Figma’s accessibility guide for design systems](https://www.figma.com/blog/the-future-of-design-systems-is-accessible/): bake keyboard, focus, contrast, target size, and responsive behavior into reusable patterns from the outset.
 
-The product should feel as orderly as a well-designed productivity tool while making application evidence and AI boundaries more visible than a conventional task tracker. The result is an Aster-specific system, not a replica of these products.
+The product should feel as orderly as a well-designed productivity tool while making application evidence and AI boundaries more visible than a conventional task tracker. The result is a Rolevo-specific system, not a replica of these products.
 
 ## 12. Relationship to the implementation plan
 
-This brief is the proposed design source of truth for visual language, information hierarchy, and screen behavior. `plan.md` remains the implementation and engineering contract. Existing requirements for fact provenance, consent, manual attestations, user-controlled submission/sending, local-time job scans, and truthful tracking remain binding. If this design direction conflicts with the contracts in `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/AUTOFILL_TRACKING.md`, `docs/EMAIL_APPLICATIONS.md`, `docs/JOB_MONITORING.md`, or `docs/SECURITY_PRIVACY.md`, update both documents through a recorded product decision before code is implemented.
+This brief is the proposed design source of truth for visual language, information hierarchy, and screen behavior. `plan.md` and its active product/security contracts remain the implementation and engineering authority. Existing requirements for fact provenance, purpose-specific consent, manual attestations, user-controlled submission/sending, local-time job scans, safe public-source limits, and truthful tracking remain binding. The reconciliation and open owner decisions are recorded in `docs/DECISIONS.md` ADR-011 and [DGN-001 evidence](evidence/DGN-001.md). If later design changes conflict with `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ONBOARDING.md`, `docs/AUTOFILL_TRACKING.md`, `docs/PROVIDERS.md`, `docs/EMAIL_APPLICATIONS.md`, `docs/JOB_MONITORING.md`, `docs/API.md`, or `docs/SECURITY_PRIVACY.md`, update both documents through a recorded product decision before code is implemented.
 
-**Prototype status:** this direction is represented in `design-exploration/dist/` as a browser-only visual prototype, including an initial Guiding A logo mark and core screen flows. It has no product backend or persistence and does not represent a final approved brand. Validate the design with users and accessibility checks before adopting it in the React application.
+**Prototype status:** the latest browser-only screen/state prototype is [`design-prototype/`](../design-prototype/README.md); `design-exploration/dist/` is an earlier visual exploration. The latest prototype has no product backend or persistence and does not represent a final approved brand. Review its rendered evidence in `design-prototype/rendered/screens/`. Validate the design with users and accessibility checks before adopting it in the React application.

@@ -17,21 +17,21 @@ class Settings(BaseModel):
 
     app_env: Literal["local", "test", "staging", "production"] = Field(alias="APP_ENV")
     database_url: str = Field(
-        default="postgresql://copilot_runtime:runtime-local-only@127.0.0.1:5432/jobtracking",
+        default="postgresql://copilot_runtime:runtime-local-only@127.0.0.1:55432/jobtracking",
         alias="DATABASE_URL",
     )
     migration_database_url: str = Field(
-        default="postgresql://copilot_migrator:migrator-local-only@127.0.0.1:5432/jobtracking",
+        default="postgresql://copilot_migrator:migrator-local-only@127.0.0.1:55432/jobtracking",
         alias="MIGRATION_DATABASE_URL",
     )
     blob_endpoint_url: str = Field(
-        default="http://127.0.0.1:10000/devstoreaccount1", alias="BLOB_ENDPOINT_URL"
+        default="http://127.0.0.1:11000/devstoreaccount1", alias="BLOB_ENDPOINT_URL"
     )
-    oidc_issuer: str | None = Field(default="http://127.0.0.1:8101/oidc", alias="OIDC_ISSUER")
+    oidc_issuer: str | None = Field(default="http://127.0.0.1:18101/oidc", alias="OIDC_ISSUER")
     oidc_client_id: str | None = Field(default="job-tracking-local", alias="OIDC_CLIENT_ID")
     oidc_client_secret: str | None = Field(default="mock-client-secret", alias="OIDC_CLIENT_SECRET")
     oidc_redirect_uri: str | None = Field(
-        default="http://127.0.0.1:8000/auth/callback", alias="OIDC_REDIRECT_URI"
+        default="http://127.0.0.1:18000/auth/callback", alias="OIDC_REDIRECT_URI"
     )
     local_mocks_enabled: bool = Field(default=True, alias="LOCAL_MOCKS_ENABLED")
     credential_kek_provider: Literal["local", "key_vault"] = Field(

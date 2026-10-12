@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Local application form fixture</title>
+    <style>
+      :root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #1f2a24; background: #f3f6f3; }
+      body { max-width: 48rem; margin: 3rem auto; padding: 0 1.25rem; }
+      main { padding: 2rem; border: 1px solid #dce6df; border-radius: 1rem; background: white; }
+      h1 { margin-top: 0; }
+      .note { padding: 1rem; border-radius: .75rem; background: #edf4ef; }
+      form { display: grid; gap: 1rem; margin-top: 1.5rem; }
+      label, legend { font-weight: 650; }
+      input, select { box-sizing: border-box; width: 100%; min-height: 2.75rem; padding: .6rem .75rem; border: 1px solid #b9cbbf; border-radius: .5rem; font: inherit; }
+      fieldset { display: flex; flex-wrap: wrap; gap: 1rem; border: 1px solid #dce6df; border-radius: .75rem; }
+      fieldset label { display: inline-flex; align-items: center; gap: .4rem; font-weight: 450; }
+      fieldset input { width: auto; min-height: auto; }
+      footer { margin-top: 1.5rem; color: #59685f; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="note"><strong>Local test fixture.</strong> Use fictional values only. Nothing is sent or saved, and this page has no submit control.</p>
+      <form aria-label="Local application form">
+        <h1>Application details</h1>
+        <div>
+          <label for="name">Full name</label>
+          <input id="name" name="name" autocomplete="off" />
+        </div>
+        <div>
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="off" />
+        </div>
+        <div>
+          <label for="role">Preferred role</label>
+          <select id="role" name="role">
+            <option value="">Choose one</option>
+            <option value="designer">Product designer</option>
+            <option value="researcher">UX researcher</option>
+            <option value="engineer">Software engineer</option>
+          </select>
+        </div>
+        <fieldset>
+          <legend>Work style</legend>
+          <label><input type="radio" name="work-style" value="remote" /> Remote</label>
+          <label><input type="radio" name="work-style" value="hybrid" /> Hybrid</label>
+          <label><input type="radio" name="work-style" value="onsite" /> On-site</label>
+        </fieldset>
+      </form>
+      <footer>This page is served from your computer for extension feasibility checks.</footer>
+    </main>
+  </body>
+</html>

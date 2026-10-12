@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Safe autofill demo</title>
+    <link rel="stylesheet" href="panel.css" />
+    <script src="filling.js" defer></script>
+    <script type="module" src="demo.js"></script>
+  </head>
+  <body>
+    <header class="topbar"><div class="brandmark" aria-hidden="true">R<span>✦</span></div><div><p class="eyebrow">SAFE LOCAL DEMO</p><h1>Practice a reviewed fill</h1></div></header>
+    <main>
+      <section class="intro"><h2>Sample data only</h2><p>This bundled form is a prototype fixture. It does not submit, email, or contact a site.</p></section>
+      <section class="card" aria-label="Synthetic application form">
+        <label for="demo-name">Name</label><input id="demo-name" value="" autocomplete="off" />
+        <label for="demo-email">Email</label><input id="demo-email" type="email" required value="" />
+        <label for="demo-role">Preferred role</label>
+        <select id="demo-role"><option value="">Choose one</option><option value="designer">Product designer</option><option value="engineer">Software engineer</option></select>
+        <label for="demo-terms">Sample preference (not a legal agreement)</label><select id="demo-terms"><option value="">Choose one</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option></select>
+        <button id="apply-sample" type="button" class="button primary">Fill sample values</button>
+        <p id="demo-result" class="job-summary" role="status" aria-live="polite">No changes made.</p>
+        <p class="muted">No Submit control is included. This demonstration cannot send a form.</p>
+      </section>
+    </main>
+  </body>
+</html>

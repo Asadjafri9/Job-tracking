@@ -1,0 +1,84 @@
+/* Proposed Rolevo design tokens. Not imported by the product application. */
+:root {
+  color-scheme: light;
+
+  /* Semantic color roles */
+  --color-canvas: #f7f8f6;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f0f3f0;
+  --color-text-primary: #202824;
+  --color-text-secondary: #526157;
+  --color-text-inverse: #ffffff;
+  --color-brand: #356d50;
+  --color-brand-hover: #28593f;
+  --color-brand-subtle: #eaf2ed;
+  --color-border: #d4ddd6;
+  --color-control-border: #68776c;
+  --color-focus: #17643a;
+  --color-focus-on-brand: #ffffff;
+
+  /* Status foreground/background pairs; always pair with text and an icon. */
+  --color-success-text: #1f633d;
+  --color-success-surface: #e8f2eb;
+  --color-warning-text: #754500;
+  --color-warning-surface: #fff4df;
+  --color-danger-text: #8c2b27;
+  --color-danger-surface: #fcecea;
+  --color-info-text: #28547b;
+  --color-info-surface: #ecf3f8;
+  --color-neutral-text: #3f4b44;
+  --color-neutral-surface: #f0f2f0;
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+  --font-size-display: clamp(2rem, 4vw, 2.75rem);
+  --line-height-tight: 1.2;
+  --line-height-body: 1.5;
+  --line-height-relaxed: 1.65;
+  --font-weight-regular: 400;
+  --font-weight-medium: 550;
+  --font-weight-semibold: 650;
+  --font-weight-bold: 700;
+
+  /* 4px base spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Shape, focus, and motion */
+  --radius-control: 0.5rem;
+  --radius-card: 0.875rem;
+  --radius-pill: 999px;
+  --border-width: 1px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --motion-fast: 120ms;
+  --motion-standard: 180ms;
+  --motion-easing: ease-out;
+}
+
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

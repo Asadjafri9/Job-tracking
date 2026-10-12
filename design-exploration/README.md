@@ -1,4 +1,4 @@
-# Aster design preview
+# Rolevo design preview
 
 This is a buildless, browser-only front-end prototype of the design direction in [`../docs/DESIGN_BRIEF.md`](../docs/DESIGN_BRIEF.md). Serve `dist/` with a local static HTTP server and open its root URL.
 
@@ -12,7 +12,7 @@ This is a buildless, browser-only front-end prototype of the design direction in
 - Contextual browser-extension review flow
 - Notifications, settings, and four-step onboarding
 
-The prototype uses one light “Sage & ink” visual system and a custom “Guiding A” logo concept. It is a design preview, not the final approved brand or the React/FastAPI application.
+The prototype uses the light “Sage & ink” visual system and the owner-selected Rolevo identity. It is a design preview, not the React/FastAPI application. Public trademark clearance is not claimed.
 
 ## Preview limitations
 
