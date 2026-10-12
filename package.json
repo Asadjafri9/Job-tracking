@@ -1,0 +1,23 @@
+{
+  "name": "job-tracking",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.33.3",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "scripts": {
+    "dev:web": "corepack pnpm --filter @job-tracking/web dev",
+    "build:web": "corepack pnpm --filter @job-tracking/web build",
+    "format:web": "corepack pnpm --filter @job-tracking/web format:check",
+    "lint:web": "corepack pnpm --filter @job-tracking/web lint",
+    "typecheck:web": "corepack pnpm --filter @job-tracking/web typecheck",
+    "test:web": "corepack pnpm --filter @job-tracking/web test",
+    "verify:frontend": "corepack pnpm format:web && corepack pnpm lint:web && corepack pnpm typecheck:web && corepack pnpm test:web && corepack pnpm build:web",
+    "dev:api": "uv run --project apps/api uvicorn app.main:app --app-dir apps/api --reload --host 127.0.0.1 --port 8000",
+    "lint:api": "uv run --project apps/api ruff check apps/api/app",
+    "typecheck:api": "uv run --project apps/api mypy apps/api/app",
+    "test:api": "uv run --project apps/api pytest",
+    "verify:backend": "corepack pnpm lint:api && corepack pnpm typecheck:api && corepack pnpm test:api"
+  }
+}

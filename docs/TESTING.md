@@ -1,6 +1,6 @@
 # Three-pillar verification specification
 
-This repository contains planning documents only. Commands below are future implementation interfaces to create in SET-001–004; they are not currently runnable checks and have not been executed. No live provider calls, email sending or connected Azure validation is authorized by this planning turn.
+The foundation now defines local verification commands. Frontend test files, API test files, the extension, and later integration suites are not implemented yet, so the complete V-F/V-B gates are not currently satisfied. No live provider calls, email sending or connected Azure validation is part of local verification.
 
 | Code | Future command | Purpose |
 | --- | --- | --- |
@@ -18,7 +18,7 @@ This repository contains planning documents only. Commands below are future impl
 | V-L | `pnpm verify:providers:live` | explicit opted-in staging evaluation on supplied keys; no regular PR CI |
 | V-AZ | `pnpm verify:deployment` | future image/IaC and read-only selected-environment checks |
 
-Root scripts orchestrate JS/Python; pnpm doesn't install Python packages. CI freezes locks, uses synthetic data and separate least-privilege credentials. Live evaluations are a later explicit action with key/cost consent; don't fake results or bypass production limits. Save redacted evidence under `docs/evidence/<task>.md` with commit, command, runtime/browser/model/prompt versions, denominators, result and reviewer.
+Root scripts orchestrate JS/Python; pnpm does not install Python packages. The frontend lock is produced by the first successful workspace install; the API uses `apps/api/uv.lock`. Test commands intentionally fail when no tests have been added rather than reporting a false pass. V-F also requires the extension build after EXT-001 exists. CI freezes locks, uses synthetic data and separate least-privilege credentials. Live evaluations are a later explicit action with key/cost consent; do not fake results or bypass production limits. Save redacted evidence under `docs/evidence/<task>.md` with commit, command, runtime/browser/model/prompt versions, denominators, result and reviewer.
 
 ## Corpora and measurable gates
 
