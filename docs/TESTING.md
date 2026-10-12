@@ -1,13 +1,13 @@
 # Three-pillar verification specification
 
-The foundation defines local verification commands. Frontend tests currently cover route parsing; API tests cover configuration guards and synthetic local fixtures. Feature UI/API/database suites, the extension, and later integration suites remain unimplemented, so the complete V-F/V-B gates are not satisfied. No live provider calls, email sending or connected Azure validation is part of local verification.
+The foundation defines local verification commands. V-C now performs OpenAPI export, generated-client creation, and drift checks. Frontend tests cover route parsing and the generated client; API tests cover configuration guards, contracts, and synthetic local fixtures. Feature UI/API/database suites, the extension, and later integration suites remain unimplemented, so the complete V-F/V-B gates are not satisfied. No live provider calls, email sending or connected Azure validation is part of local verification.
 
-| Code | Future command | Purpose |
+| Code | Verification command | Purpose |
 | --- | --- | --- |
 | V-F | `pnpm verify:frontend` | formatting, ESLint, TypeScript, Vitest, dashboard/extension build |
 | V-B | `pnpm verify:backend` | uv-locked Ruff/mypy/pytest unit/API checks |
 | V-DB | `pnpm verify:database` | isolated PostgreSQL migrations/upgrades, roles/RLS/FKs/concurrency |
-| V-C | `pnpm verify:contracts` | OpenAPI regeneration/drift and prior compatible client fixtures |
+| V-C | `pnpm verify:contracts` | OpenAPI regeneration/drift and generated client compatibility fixtures |
 | V-X | `pnpm verify:extension` | form extraction/fill/options/submit observations/outbox/restarts |
 | V-E | `pnpm verify:e2e` | three-pillar journeys with synthetic identity/provider/source/storage |
 | V-A | `pnpm verify:providers` | three adapters, schema/claims/options, fallback and key secrecy |
@@ -21,6 +21,8 @@ The foundation defines local verification commands. Frontend tests currently cov
 Root scripts orchestrate JS/Python; pnpm does not install Python packages. The frontend lock is produced by the first successful workspace install; the API uses `apps/api/uv.lock`. Test commands intentionally fail when no tests have been added rather than reporting a false pass. V-F also requires the extension build after EXT-001 exists. CI freezes locks, uses synthetic data and separate least-privilege credentials. Live evaluations are a later explicit action with key/cost consent; do not fake results or bypass production limits. Save redacted evidence under `docs/evidence/<task>.md` with commit, command, runtime/browser/model/prompt versions, denominators, result and reviewer.
 
 For SET-002's local-services check, start PostgreSQL/Azurite with `pnpm local:services:up` and the loopback fake service with `pnpm dev:mocks`, then set `SET002_LOCAL_SERVICES=1` and the local environment values before running V-B. This enables one integration test for the runtime/migration roles, authenticated Azurite/API readiness, OIDC authorization-code PKCE, and synthetic provider/source routes. Without that opt-in flag, the integration test is skipped, keeping ordinary V-B independent of Docker.
+
+V-C exports the OpenAPI document directly from the FastAPI app without starting a server, regenerates the browser TypeScript definitions from that document, and byte-compares both outputs against checked-in artifacts. Run `pnpm generate:contracts` after an intentional contract change; `pnpm verify:contracts` must then pass with no committed-artifact drift.
 
 ## Corpora and measurable gates
 
