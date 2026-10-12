@@ -1,24 +1,28 @@
 # Three-pillar verification specification
 
-The foundation defines local verification commands. Frontend tests currently cover route parsing; API tests cover configuration guards and synthetic local fixtures. Feature UI/API/database suites, the extension, and later integration suites remain unimplemented, so the complete V-F/V-B gates are not satisfied. No live provider calls, email sending or connected Azure validation is part of local verification.
+The repository has working foundation checks for the existing web shell, API foundation, and OpenAPI/client contract. `pnpm verify:foundation` checks pinned local runtime versions, then runs V-F, V-B, and V-C; GitHub Actions runs this same scope after frozen dependency installation. These checks do not claim product-feature acceptance. Feature UI/API/database suites, the browser extension, and later integration suites remain incomplete. CI needs no secrets, database containers, cloud resources, live identity, provider calls, or outbound messages.
 
-| Code | Future command | Purpose |
-| --- | --- | --- |
-| V-F | `pnpm verify:frontend` | formatting, ESLint, TypeScript, Vitest, dashboard/extension build |
-| V-B | `pnpm verify:backend` | uv-locked Ruff/mypy/pytest unit/API checks |
-| V-DB | `pnpm verify:database` | isolated PostgreSQL migrations/upgrades, roles/RLS/FKs/concurrency |
-| V-C | `pnpm verify:contracts` | OpenAPI regeneration/drift and prior compatible client fixtures |
-| V-X | `pnpm verify:extension` | form extraction/fill/options/submit observations/outbox/restarts |
-| V-E | `pnpm verify:e2e` | three-pillar journeys with synthetic identity/provider/source/storage |
-| V-A | `pnpm verify:providers` | three adapters, schema/claims/options, fallback and key secrecy |
-| V-DOC | `pnpm verify:documents` | bounded parser, candidate provenance/conflicts/quota/private files |
-| V-M | `pnpm verify:monitoring` | fake clock/DST/daily uniqueness, SSRF, source parsing/dedupe/notifications |
-| V-S | `pnpm verify:security` | two-user/key/CSRF/secret-canary/SSRF/account lifecycle checks |
-| V-P | `pnpm verify:performance` | recorded API/inspection/provider/scheduler dataset and latency |
-| V-L | `pnpm verify:providers:live` | explicit opted-in staging evaluation on supplied keys; no regular PR CI |
-| V-AZ | `pnpm verify:deployment` | future image/IaC and read-only selected-environment checks |
+| Code | State | Command | Scope |
+| --- | --- | --- | --- |
+| V-F | Implemented, foundation and extension manifest smoke | `pnpm verify:frontend`, `pnpm build:extension` | web formatting, ESLint, TypeScript, Vitest, React build; extension generated MV3 development package. Browser install and keyboard/accessibility checks are recorded separately. |
+| V-B | Implemented, foundation only | `pnpm verify:backend` | uv-locked Ruff/mypy/pytest. Local service integration is opt-in and otherwise reports a skip. |
+| V-C | Implemented | `pnpm verify:contracts` | Export FastAPI OpenAPI, regenerate TS paths in a temporary directory, and compare both artifacts byte-for-byte. |
+| V-DB | `pnpm verify:database` | Requires an explicitly configured loopback PostgreSQL `MIGRATION_DATABASE_URL`; no Azure or external services | DB-001 fresh migration, metadata drift, owner-scoped schema/FKs, revisions/constraints/indexes, protected credential column shape, idempotent synthetic seed. Role/RLS and concurrency checks remain for DB-002/003. |
+| V-X | Implemented, synthetic prototype scope | `pnpm verify:extension` | Dependency-free extension protocol/schema/fill/observer tests and development MV3 build. Covers bounded DOM traversal/options, pre-read sensitive/group exclusion, opaque tab/document/form context handles, manual-edit preservation and repeat reviewed fills, native/select/radio/checkbox outcomes, validation/revert/unknown states, and passive submit observation. It does not establish Chrome behavior or general vendor/site compatibility. |
+| V-E | Planned; no script registered | Not available | Three-pillar journeys with synthetic identity/provider/source/storage. |
+| V-A | Planned; no script registered | Not available | Provider schemas/claims/options, fallback, and key secrecy. |
+| V-DOC | Planned; no script registered | Not available | Bounded parsing, provenance/conflicts/quota/private files. |
+| V-M | Planned; no script registered | Not available | Fake clock/DST/daily uniqueness, SSRF, source parsing/dedupe/notifications. |
+| V-S | Planned; no script registered | Not available | Two-user/key/CSRF/secret-canary/SSRF/account lifecycle checks. |
+| V-P | Planned; no script registered | Not available | Recorded API/inspection/provider/scheduler dataset and latency. |
+| V-L | Planned, explicit staging opt-in required; no script registered | Not available | Live provider evaluation; never regular PR CI. |
+| V-AZ | Planned; no script registered | Not available | Future image/IaC and read-only selected-environment checks. |
 
-Root scripts orchestrate JS/Python; pnpm does not install Python packages. The frontend lock is produced by the first successful workspace install; the API uses `apps/api/uv.lock`. Test commands intentionally fail when no tests have been added rather than reporting a false pass. V-F also requires the extension build after EXT-001 exists. CI freezes locks, uses synthetic data and separate least-privilege credentials. Live evaluations are a later explicit action with key/cost consent; do not fake results or bypass production limits. Save redacted evidence under `docs/evidence/<task>.md` with commit, command, runtime/browser/model/prompt versions, denominators, result and reviewer.
+Root scripts orchestrate JS/Python; pnpm does not install Python packages. The JS workspace uses `pnpm-lock.yaml`; the API uses `apps/api/uv.lock`. CI uses `corepack pnpm install --frozen-lockfile` and `uv sync --locked`. No placeholder script reports success: a planned gate is explicitly marked unavailable and running a nonexistent package script exits as an error. Only implement a gate when it can perform and report its real checks. CI is scoped to synthetic foundation verification with read-only repository permissions and no secret configuration. Live evaluations require a later explicit action with key/cost consent. Use [the task evidence template](evidence/TASK_TEMPLATE.md) and [the release evidence template](evidence/RELEASE_TEMPLATE.md); record exact commands, observed results, denominators, limitations and reviewer, and redact secrets/personal data.
+
+For SET-002's local-services check, start PostgreSQL/Azurite with `pnpm local:services:up` and the loopback fake service with `pnpm dev:mocks`, then set `SET002_LOCAL_SERVICES=1` and the local environment values before running V-B. This enables one integration test for the runtime/migration roles, authenticated Azurite/API readiness, OIDC authorization-code PKCE, and synthetic provider/source routes. Without that opt-in flag, the integration test is skipped, keeping ordinary V-B independent of Docker.
+
+V-C exports the OpenAPI document directly from the FastAPI app without starting a server, regenerates the browser TypeScript definitions from that document, and byte-compares both outputs against checked-in artifacts. Run `pnpm generate:contracts` after an intentional contract change; `pnpm verify:contracts` must then pass with no committed-artifact drift.
 
 ## Corpora and measurable gates
 

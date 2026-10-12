@@ -15,13 +15,13 @@ from app.main import app as api_app
 def local_values(**overrides: str) -> dict[str, str]:
     values = {
         "APP_ENV": "local",
-        "DATABASE_URL": "postgresql://copilot_runtime:runtime-local-only@127.0.0.1:5432/jobtracking",
-        "MIGRATION_DATABASE_URL": "postgresql://copilot_migrator:migrator-local-only@127.0.0.1:5432/jobtracking",
-        "BLOB_ENDPOINT_URL": "http://127.0.0.1:10000/devstoreaccount1",
-        "OIDC_ISSUER": "http://127.0.0.1:8101/oidc",
+        "DATABASE_URL": "postgresql://copilot_runtime:runtime-local-only@127.0.0.1:55432/jobtracking",
+        "MIGRATION_DATABASE_URL": "postgresql://copilot_migrator:migrator-local-only@127.0.0.1:55432/jobtracking",
+        "BLOB_ENDPOINT_URL": "http://127.0.0.1:11000/devstoreaccount1",
+        "OIDC_ISSUER": "http://127.0.0.1:18101/oidc",
         "OIDC_CLIENT_ID": "job-tracking-local",
         "OIDC_CLIENT_SECRET": "mock-client-secret",
-        "OIDC_REDIRECT_URI": "http://127.0.0.1:8000/auth/callback",
+        "OIDC_REDIRECT_URI": "http://127.0.0.1:18000/auth/callback",
         "LOCAL_MOCKS_ENABLED": "true",
         "CREDENTIAL_KEK_PROVIDER": "local",
         "CREDENTIAL_KEK_BASE64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
@@ -38,6 +38,25 @@ def test_app_environment_must_be_explicit() -> None:
 def test_local_configuration_rejects_remote_mock_endpoints() -> None:
     with pytest.raises(ValidationError, match="loopback"):
         Settings.model_validate(local_values(OIDC_ISSUER="https://identity.contoso.com"))
+
+
+@pytest.mark.parametrize(
+    ("setting", "value"),
+    [
+        ("DATABASE_URL", "postgresql://copilot_runtime:secret@db.example.test/jobtracking"),
+        (
+            "MIGRATION_DATABASE_URL",
+            "postgresql://copilot_migrator:secret@db.example.test/jobtracking",
+        ),
+        ("BLOB_ENDPOINT_URL", "https://storage.example.test/account"),
+        ("OIDC_REDIRECT_URI", "https://app.example.test/auth/callback"),
+    ],
+)
+def test_local_configuration_rejects_non_loopback_service_urls(
+    setting: str, value: str
+) -> None:
+    with pytest.raises(ValidationError, match="loopback"):
+        Settings.model_validate(local_values(**{setting: value}))
 
 
 def test_nonlocal_configuration_rejects_missing_and_local_test_settings() -> None:
@@ -75,6 +94,20 @@ def test_nonlocal_configuration_rejects_missing_and_local_test_settings() -> Non
     assert "OIDC_CLIENT_ID" in str(error.value)
     assert "OIDC_CLIENT_SECRET" in str(error.value)
 
+    valid_nonlocal_values = {
+        **values,
+        "LOCAL_MOCKS_ENABLED": "false",
+        "CREDENTIAL_KEK_PROVIDER": "key_vault",
+    }
+    Settings.model_validate(valid_nonlocal_values)
+
+    fake_identity_values = {
+        **valid_nonlocal_values,
+        "OIDC_ISSUER": "https://fake-identity.contoso.com/tenant/v2.0",
+    }
+    with pytest.raises(ValidationError, match="Missing production configuration"):
+        Settings.model_validate(fake_identity_values)
+
 
 def test_local_oidc_fixture_enforces_state_and_pkce(monkeypatch: pytest.MonkeyPatch) -> None:
     for name, value in local_values().items():
@@ -91,7 +124,7 @@ def test_local_oidc_fixture_enforces_state_and_pkce(monkeypatch: pytest.MonkeyPa
             "/oidc/authorize",
             params={
                 "client_id": "job-tracking-local",
-                "redirect_uri": "http://127.0.0.1:8000/auth/callback",
+                "redirect_uri": "http://127.0.0.1:18000/auth/callback",
                 "response_type": "code",
                 "scope": "openid email",
                 "state": "state-123",
@@ -111,7 +144,7 @@ def test_local_oidc_fixture_enforces_state_and_pkce(monkeypatch: pytest.MonkeyPa
             data={
                 "grant_type": "authorization_code",
                 "code": callback["code"][0],
-                "redirect_uri": "http://127.0.0.1:8000/auth/callback",
+                "redirect_uri": "http://127.0.0.1:18000/auth/callback",
                 "client_id": "job-tracking-local",
                 "client_secret": "mock-client-secret",
                 "code_verifier": verifier,
@@ -127,7 +160,7 @@ def test_local_oidc_fixture_enforces_state_and_pkce(monkeypatch: pytest.MonkeyPa
             data={
                 "grant_type": "authorization_code",
                 "code": callback["code"][0],
-                "redirect_uri": "http://127.0.0.1:8000/auth/callback",
+                "redirect_uri": "http://127.0.0.1:18000/auth/callback",
                 "client_id": "job-tracking-local",
                 "client_secret": "mock-client-secret",
                 "code_verifier": verifier,
@@ -152,14 +185,63 @@ def test_fake_provider_and_source_return_synthetic_fixtures(
     get_settings.cache_clear()
 
 
-def test_readiness_does_not_call_tcp_reachability_full_readiness(
+def test_local_mock_service_refuses_production_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    values = {
+        "APP_ENV": "production",
+        "DATABASE_URL": "postgresql://runtime:secret@db.contoso.com:5432/jobtracking",
+        "MIGRATION_DATABASE_URL": "postgresql://migrator:secret@db.contoso.com:5432/jobtracking",
+        "BLOB_ENDPOINT_URL": "https://storage.contoso.com/account",
+        "OIDC_ISSUER": "https://identity.contoso.com/tenant/v2.0",
+        "OIDC_CLIENT_ID": "app-client",
+        "OIDC_CLIENT_SECRET": "real-secret",
+        "OIDC_REDIRECT_URI": "https://app.contoso.com/auth/callback",
+        "APP_HASH_KEY": "hash-key-with-enough-entropy-from-secret-store",
+        "AUTH_TRANSACTION_ENCRYPTION_KEY": "transaction-key-from-secret-store",
+        "KEY_VAULT_CREDENTIAL_KEK_ID": "https://vault.contoso.com/keys/wrapping/abc",
+        "LOCAL_MOCKS_ENABLED": "false",
+        "CREDENTIAL_KEK_PROVIDER": "key_vault",
+    }
+    for name, value in values.items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.delenv("CREDENTIAL_KEK_BASE64", raising=False)
+    get_settings.cache_clear()
+    with pytest.raises(RuntimeError, match="Local mock services require"):
+        with TestClient(mock_app):
+            pass
+    get_settings.cache_clear()
+
+
+def test_local_readiness_authenticates_services_without_claiming_schema_validation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     for name, value in local_values().items():
         monkeypatch.setenv(name, value)
+    monkeypatch.setattr("app.main._can_authenticate_postgres", lambda _: True)
+    monkeypatch.setattr("app.main._can_authorize_local_blob", lambda _: True)
+    get_settings.cache_clear()
+    with TestClient(api_app) as client:
+        response = client.get("/health/ready")
+    assert response.status_code == 200
+    assert response.json()["dependencies"] == {
+        "postgresql_authentication": "ok",
+        "blob_storage_authorization": "ok",
+    }
+    assert "database_schema_compatibility" in response.json()["unverified"]
+    get_settings.cache_clear()
+
+
+def test_local_readiness_stays_closed_when_a_service_check_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for name, value in local_values().items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.setattr("app.main._can_authenticate_postgres", lambda _: True)
+    monkeypatch.setattr("app.main._can_authorize_local_blob", lambda _: False)
     get_settings.cache_clear()
     with TestClient(api_app) as client:
         response = client.get("/health/ready")
     assert response.status_code == 503
-    assert "database_schema_compatibility" in response.json()["unverified"]
+    assert response.json()["dependencies"]["blob_storage_authorization"] == "unavailable"
     get_settings.cache_clear()

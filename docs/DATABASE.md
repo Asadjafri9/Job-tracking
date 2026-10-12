@@ -8,20 +8,20 @@ PostgreSQL 17, SQLAlchemy 2/psycopg 3/Alembic. Server UUIDs, UTC timestamptz ins
 | --- | --- |
 | users | issuer/subject unique, verified directory object ID/login email, ACTIVE/DELETING/DELETED, IANA timezone, beta eligibility |
 | auth_transactions/sessions/extension_grants | hashed state/token/grant, encrypted short-lived verifier, nonce, exact callback/client/extension/challenge, expiry/consumed/revoked, session auth_time/last_seen; no plaintext long-lived tokens |
-| profiles/profile_facts/profile_fact_versions | grouped typed fact, current_revision, immutable source/confirmation versions, sensitivity/purpose tags, document/page anchors; profile revision increments atomically |
+| profiles/profile_facts/profile_fact_versions | grouped typed fact, current_revision, immutable source/confirmation versions, sensitivity/purpose tags, document/page anchors; CONFIRMED versions require `confirmed_at`; profile revision increments atomically |
 | documents | owner/type/version/private key, filename/media/size/hash, original-ready/parse states, revision, current/default flags; ≤10 files/50 MiB, each ≤5 MiB |
 | document_extractions | document/version, bounded text/anchors/candidates, parse/prompt/model version, user review state; no candidate automatically confirmed |
 | provider_credentials | owner/provider, ciphertext/nonce/wrapped DEK/KEK version, last4, enabled/status, revision, allowed interactive/background purposes; never raw key |
-| provider_settings | ordered enabled credential/model IDs, fallback/background consent revisions, request limits |
+| provider_settings/provider_routes | at most one saved credential per enabled provider and at most three total (provider enum limited to OpenRouter/xAI/Gemini); ordered (1–3) model routes use owner-scoped credential references; positions after the first require explicit shared fallback consent, background routes require shared background consent, and each route also requires matching per-credential purpose consent; settings store separate nullable positive consent revisions and request limits |
 | ai_operations/ai_attempts | operation kind/owner/input HMAC/idempotency/revisions/state, actual credential/provider/model, usage, redacted outcome, dispatch/completion time; no keys or raw prompt trace |
 | application_sessions | prepared form/context/draft snapshots, selected source/doc/fact versions, document/form ref, profile/context revisions; distinct from submitted application |
 | applications | owner/channel/employer/role/raw+canonical URL/attempt/status/application/follow-up dates/revision, linked form session/email draft, immutable context/document metadata snapshots |
 | submission_events | UUID/idempotency key, owner/session/application, evidence type/source/observed+received time, correlated gesture ref, bounded signal code; append-only, no full DOM |
 | application_status_events/application_answers | append-only history and exact historical answer/fact/context snapshots; later profile edits don't rewrite them |
-| email_drafts | owner/recipient/employer/role/job context/subject/body/document refs/revision/state/current source refs; compose-open/sent events append-only |
-| monitored_sources | owner/public URL/source kind/state/region selector?, schedule/timezone/revision/next_run_at/last_success/consent, bounded ETag/hash |
+| email_drafts/email_draft_documents/email_draft_events | owner/recipient/employer/role/job context/subject/body/revision/state/current source refs; selected live documents use owner+revision FKs; compose-open and user-confirmed-send evidence uses idempotent append events |
+| monitored_sources | owner/public URL/source kind/state/region selector?, schedule/timezone/revision/next_run_at/last_success/consent, bounded ETag/hash; due/active DAILY rows require explicit scheduled-check consent and unconfigured rows default PAUSED |
 | monitoring_runs | partial unique (source, scheduled local date) for DAILY only; MANUAL has a distinct request UUID, schedule revision, MANUAL/DAILY, state/completeness, counts/start/end/redacted error |
-| discovered_jobs | owner/source refs/native ID namespace or canonical URL identity, title/employer/location/remote/evidence anchors/first+last_seen/meaningful_revision/match reason/status; no invented URL |
+| discovered_jobs | owner/source refs/namespaced native ID or canonical URL identity, title/employer/location/remote/evidence anchors/first+last_seen/meaningful_revision/match reason/status; native IDs require a namespace; no invented URL |
 | notifications | owner/type/posting/run/ref, idempotent event key, bounded content/read_at, created_at; no key/private doc content |
 | jobs/operations | owner/kind/ref/status/stages/lease/heartbeat/attempts/next_run/expiry/result key/receipt digest as needed; encrypted identity-cleanup payload temporary |
 | idempotency_records | unique owner/route/key, HMAC input fingerprint, entity/result status/expiry; no duplicated private payload |
