@@ -1,6 +1,6 @@
 # Three-pillar verification specification
 
-The foundation now defines local verification commands. Frontend test files, API test files, the extension, and later integration suites are not implemented yet, so the complete V-F/V-B gates are not currently satisfied. No live provider calls, email sending or connected Azure validation is part of local verification.
+The foundation defines local verification commands. Frontend tests currently cover route parsing; API tests cover configuration guards and synthetic local fixtures. Feature UI/API/database suites, the extension, and later integration suites remain unimplemented, so the complete V-F/V-B gates are not satisfied. No live provider calls, email sending or connected Azure validation is part of local verification.
 
 | Code | Future command | Purpose |
 | --- | --- | --- |

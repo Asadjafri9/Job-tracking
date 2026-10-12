@@ -14,10 +14,11 @@
     "typecheck:web": "corepack pnpm --filter @job-tracking/web typecheck",
     "test:web": "corepack pnpm --filter @job-tracking/web test",
     "verify:frontend": "corepack pnpm format:web && corepack pnpm lint:web && corepack pnpm typecheck:web && corepack pnpm test:web && corepack pnpm build:web",
-    "dev:api": "uv run --project apps/api uvicorn app.main:app --app-dir apps/api --reload --host 127.0.0.1 --port 8000",
+    "dev:api": "uv run --project apps/api --env-file .env uvicorn app.main:app --app-dir apps/api --reload --host 127.0.0.1 --port 8000",
     "lint:api": "uv run --project apps/api ruff check apps/api/app",
     "typecheck:api": "uv run --project apps/api mypy apps/api/app",
-    "test:api": "uv run --project apps/api pytest",
+    "test:api": "uv run --project apps/api pytest -c apps/api/pyproject.toml --rootdir apps/api",
+    "dev:mocks": "uv run --project apps/api --env-file .env uvicorn app.local_mocks:app --app-dir apps/api --host 127.0.0.1 --port 8101 --reload",
     "verify:backend": "corepack pnpm lint:api && corepack pnpm typecheck:api && corepack pnpm test:api"
   }
 }

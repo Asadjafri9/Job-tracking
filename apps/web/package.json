@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build --configLoader runner",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"*.{ts,tsx,js,json,html}\"",
     "lint": "eslint .",
     "typecheck": "tsc -b --pretty",
-    "test": "vitest run"
+    "test": "vitest run --configLoader runner"
   },
   "dependencies": {
     "react": "19.2.8",
