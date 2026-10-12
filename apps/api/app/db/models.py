@@ -826,10 +826,8 @@ class Application(Base):
         sa.CheckConstraint("attempt_number >= 1", name="attempt_number_positive"),
         sa.CheckConstraint("revision >= 1", name="positive_revision"),
         sa.CheckConstraint(
-            "(channel = 'WEB_FORM' AND application_session_id IS NOT NULL "
-            "AND email_draft_id IS NULL) OR "
-            "(channel = 'EMAIL' AND application_session_id IS NULL "
-            "AND email_draft_id IS NOT NULL) OR "
+            "(channel = 'WEB_FORM' AND email_draft_id IS NULL) OR "
+            "(channel = 'EMAIL' AND application_session_id IS NULL) OR "
             "(channel = 'MANUAL' AND application_session_id IS NULL "
             "AND email_draft_id IS NULL)",
             name="channel_reference_consistency",

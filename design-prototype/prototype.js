@@ -355,6 +355,10 @@
     else if (route.startsWith("extension/")) app.innerHTML = renderExtension(route);
     else app.innerHTML = renderMain(route);
     app.insertAdjacentHTML("afterbegin", '<a class="skip-link" href="#main-content">Skip to main content</a>');
+    app.querySelector(".skip-link")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      app.querySelector("main")?.focus();
+    });
     const main = app.querySelector("main");
     if (main) {
       main.id = "main-content";

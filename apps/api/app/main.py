@@ -143,9 +143,13 @@ async def identify_and_check_contract(
     else:
         response = await call_next(request)
     content_type = response.headers.get("content-type", "")
+    is_api_documentation = request.url.path == "/api/v1/docs" or request.url.path.startswith(
+        "/api/v1/docs/"
+    )
     if (
         request.url.path.startswith("/api/")
-        and request.url.path != "/api/v1/docs"
+        and not is_api_documentation
+        and response.status_code == status.HTTP_404_NOT_FOUND
         and content_type.startswith("text/html")
     ):
         payload = error_response(

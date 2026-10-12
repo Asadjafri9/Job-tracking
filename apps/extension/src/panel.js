@@ -111,7 +111,7 @@ function renderFields(form) {
     } else {
       card.append(label, make("p", "field-meta", "This control needs a manual answer in this prototype."));
       fieldsRoot.append(card);
-      return;
+      continue;
     }
     control.id = controlId;
     control.setAttribute("aria-label", `Reviewed value for ${field.label}`);

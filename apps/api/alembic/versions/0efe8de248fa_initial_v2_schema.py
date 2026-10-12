@@ -380,7 +380,7 @@ def upgrade() -> None:
     sa.Column('document_metadata_snapshot', postgresql.JSONB(astext_type=sa.Text()), server_default='[]', nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.CheckConstraint("(channel = 'WEB_FORM' AND application_session_id IS NOT NULL AND email_draft_id IS NULL) OR (channel = 'EMAIL' AND application_session_id IS NULL AND email_draft_id IS NOT NULL) OR (channel = 'MANUAL' AND application_session_id IS NULL AND email_draft_id IS NULL)", name=op.f('ck_applications_channel_reference_consistency')),
+    sa.CheckConstraint("(channel = 'WEB_FORM' AND email_draft_id IS NULL) OR (channel = 'EMAIL' AND application_session_id IS NULL) OR (channel = 'MANUAL' AND application_session_id IS NULL AND email_draft_id IS NULL)", name=op.f('ck_applications_channel_reference_consistency')),
     sa.CheckConstraint("status <> 'APPLIED' OR applied_at IS NOT NULL", name=op.f('ck_applications_applied_requires_evidence_time')),
     sa.CheckConstraint('attempt_number >= 1', name=op.f('ck_applications_attempt_number_positive')),
     sa.CheckConstraint('revision >= 1', name=op.f('ck_applications_positive_revision')),
@@ -756,8 +756,15 @@ def upgrade() -> None:
         CREATE FUNCTION reject_email_draft_event_mutation() RETURNS trigger
         LANGUAGE plpgsql AS $$
         BEGIN
-            RAISE EXCEPTION 'email draft events are immutable'
-                USING ERRCODE = '55000';
+            -- Permit referential actions while rejecting direct event mutations.
+            IF pg_trigger_depth() = 1 THEN
+                RAISE EXCEPTION 'email draft events are immutable'
+                    USING ERRCODE = '55000';
+            END IF;
+            IF TG_OP = 'DELETE' THEN
+                RETURN OLD;
+            END IF;
+            RETURN NEW;
         END;
         $$;
         CREATE TRIGGER email_draft_events_immutable

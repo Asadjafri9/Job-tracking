@@ -118,26 +118,34 @@ def test_unknown_api_routes_return_json_not_spa_html(
     get_settings.cache_clear()
 
 
-def test_api_boundary_converts_any_html_fallback_to_json_404(
+def test_api_boundary_only_converts_html_404_fallbacks_to_json(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     local_environment(monkeypatch)
 
     async def dashboard_fallback(_: Request) -> HTMLResponse:
-        return HTMLResponse("<html>dashboard fallback</html>")
+        return HTMLResponse("<html>dashboard fallback</html>", status_code=404)
+
+    async def successful_html(_: Request) -> HTMLResponse:
+        return HTMLResponse("<html>success</html>", status_code=202)
 
     fallback = Route("/api/{unmatched:path}", dashboard_fallback)
-    app.router.routes.append(fallback)
+    success = Route("/api/success-html", successful_html)
+    app.router.routes.extend([success, fallback])
     try:
         with TestClient(app) as client:
             response = client.get("/api/v1/unknown-feature-route")
+            success_response = client.get("/api/success-html")
     finally:
         app.router.routes.remove(fallback)
+        app.router.routes.remove(success)
 
     assert response.status_code == 404
     assert response.headers["content-type"].startswith("application/json")
     assert response.json()["error"]["code"] == "not_found"
     assert "dashboard fallback" not in response.text
+    assert success_response.status_code == 202
+    assert success_response.headers["content-type"].startswith("text/html")
     get_settings.cache_clear()
 
 

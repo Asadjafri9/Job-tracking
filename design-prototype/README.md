@@ -30,4 +30,4 @@ All pages carry a sample-state banner. The email send confirmation, filled form 
 node design-prototype/scripts/render_prototype.mjs
 ```
 
-The renderer uses local Chrome and a temporary profile; it does not contact external services. Run `node scripts/audit_accessibility.mjs` for the 38-route keyboard, semantic, reduced-motion, control-name/target, and 320px reflow audit. See `docs/evidence/DGN-003.md` for the original capture and `docs/evidence/DGN-005.md` for updated accessibility evidence and limits. The owner waived the five-person DGN-004 study for M0; no research findings are claimed.
+The renderer uses local Chrome and a temporary profile; it does not contact external services. Run `node design-prototype/scripts/audit_accessibility.mjs` for the 38-route keyboard, semantic, reduced-motion, control-name/target, and 320px reflow audit. See `docs/evidence/DGN-003.md` for the original capture and `docs/evidence/DGN-005.md` for updated accessibility evidence and limits. The owner waived the five-person DGN-004 study for M0; no research findings are claimed.
