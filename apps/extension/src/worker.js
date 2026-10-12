@@ -1,23 +1,50 @@
 import "./extraction.js";
 
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+// Bind the side panel to the tab whose toolbar action the user clicked. Looking
+// up the "active" tab later from a side panel can return a different tab (or a
+// tab without activeTab access), so keep the user-activated tab explicitly.
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false });
 
 const tabHandles = new Map();
 const documentHandles = new Map();
+let activatedTabId = null;
+
+chrome.action.onClicked.addListener((tab) => {
+  if (!Number.isInteger(tab?.id)) return;
+  activatedTabId = tab.id;
+  chrome.storage.session.set({ activatedTabId }).catch(() => {});
+  // Call open directly in the user-gesture handler; Chrome requires this.
+  chrome.sidePanel.open({ tabId: tab.id }).catch(() => {});
+});
 
 function trustedPanel(sender) {
   return sender.id === chrome.runtime.id && sender.url === chrome.runtime.getURL("panel.html");
 }
 
 async function activeTab() {
-  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-  if (!tab?.id || !tab.url || !/^https?:\/\//.test(tab.url)) return null;
+  if (!Number.isInteger(activatedTabId)) {
+    const saved = await chrome.storage.session.get("activatedTabId");
+    activatedTabId = saved.activatedTabId ?? null;
+  }
+  if (!Number.isInteger(activatedTabId)) {
+    return { error: "not_activated", explanation: "Click the Aster toolbar icon on the page you want to inspect, then try again." };
+  }
+  const [currentTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (currentTab?.id !== activatedTabId) {
+    return { error: "not_activated", explanation: "The active tab changed. Click the Aster toolbar icon on this page, then inspect it." };
+  }
+  let tab;
+  try { tab = await chrome.tabs.get(activatedTabId); }
+  catch { return { error: "not_activated", explanation: "That tab is no longer open. Click the Aster toolbar icon on the page you want to inspect." }; }
+  if (!tab.url || !/^https?:\/\//.test(tab.url)) {
+    return { error: "unsupported_page", explanation: "This browser page cannot be inspected. Open a regular web page." };
+  }
   return tab;
 }
 
 async function sendToActivePage(message, { inject = false, startContext = false, requireForm = false } = {}) {
   const tab = await activeTab();
-  if (!tab) return { error: "unsupported_page", explanation: "This browser page cannot be inspected. Open a regular web page." };
+  if (tab?.error) return tab;
   let tabHandle;
   let contextHandles;
   if (startContext) {
