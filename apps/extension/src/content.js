@@ -18,6 +18,16 @@
     return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0;
   }
 
+  function currentFieldState(saved) {
+    if (["checkbox", "radio"].includes(saved.type)) {
+      return saved.elements.filter((element) => element.checked).map((element) => element.value);
+    }
+    const element = saved.elements[0];
+    return element.tagName === "SELECT" && element.multiple
+      ? [...element.selectedOptions].map((option) => option.value)
+      : element.value;
+  }
+
   function labelFor(element) {
     const labels = [...(element.labels ?? [])].map((label) => label.innerText || label.textContent || "");
     const aria = element.getAttribute("aria-label") || "";
@@ -182,9 +192,7 @@
         results.push({ field_id: entry.field_id, status: "unsupported", reason: "field_changed" });
         continue;
       }
-      const current = ["checkbox", "radio"].includes(saved.type)
-        ? saved.elements.filter((element) => element.checked).map((element) => element.value)
-        : saved.elements[0].value;
+      const current = currentFieldState(saved);
       const expectedState = saved.lastExtensionState ?? saved.initialState;
       if (!globalThis.ExtensionFilling.canApplyReviewedValue(current, expectedState, saved.manuallyEdited)) {
         results.push({ field_id: entry.field_id, status: "unchanged", reason: "manual_edit_preserved" });
@@ -198,11 +206,7 @@
         continue;
       }
       await new Promise((resolve) => setTimeout(resolve, 40));
-      const after = ["checkbox", "radio"].includes(saved.type)
-        ? saved.elements.filter((element) => element.checked).map((element) => element.value)
-        : saved.elements[0].tagName === "SELECT" && saved.elements[0].multiple
-          ? [...saved.elements[0].selectedOptions].map((option) => option.value)
-          : saved.elements[0].value;
+      const after = currentFieldState(saved);
       if (!globalThis.ExtensionFilling.valueMatches(entry.value, after, saved.type)) {
         results.push({ field_id: entry.field_id, status: "unknown", reason: "framework_reverted" });
         continue;

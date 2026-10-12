@@ -224,6 +224,7 @@ async def test_unexpected_errors_hide_exception_details() -> None:
 def test_openapi_declares_versioned_meta_and_shared_error_models() -> None:
     schema = app.openapi()
     meta = schema["paths"]["/api/v1/meta"]["get"]
+    readiness = schema["paths"]["/health/ready"]["get"]
     assert schema["openapi"].startswith("3.")
     assert meta["responses"]["426"]["content"]["application/json"]["schema"]["$ref"] == (
         "#/components/schemas/ErrorResponse"
@@ -235,3 +236,6 @@ def test_openapi_declares_versioned_meta_and_shared_error_models() -> None:
         "request_id",
         "field_errors",
     }
+    assert readiness["responses"]["503"]["content"]["application/json"]["schema"]["$ref"] == (
+        "#/components/schemas/ReadinessResponse"
+    )

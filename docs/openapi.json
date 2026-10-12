@@ -473,11 +473,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ReadinessResponse"
                 }
               }
             },
-            "description": "A required service is unavailable."
+            "description": "A required dependency is unavailable."
           }
         },
         "summary": "Readiness",

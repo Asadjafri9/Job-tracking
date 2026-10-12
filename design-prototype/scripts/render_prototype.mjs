@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
@@ -11,7 +11,7 @@ const output = path.join(root, 'design-prototype', 'rendered', 'screens');
 const chromePath = execFileSync(process.execPath, [path.join(path.dirname(fileURLToPath(import.meta.url)), 'chrome_path.mjs')], { encoding: 'utf8' }).trim();
 const port = 9333;
 const userData = '/tmp/dgn003-render-chrome-profile';
-const base = `file://${prototype}`;
+const base = pathToFileURL(prototype).href;
 const routes = [
   ['signin', 'signin', 1440, 960],
   ['signin-320', 'signin', 320, 780],

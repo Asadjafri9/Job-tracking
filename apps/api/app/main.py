@@ -281,7 +281,13 @@ async def liveness() -> HealthResponse:
 @app.get(
     "/health/ready",
     response_model=ReadinessResponse,
-    responses=ERROR_RESPONSES,
+    responses={
+        **ERROR_RESPONSES,
+        503: {
+            "model": ReadinessResponse,
+            "description": "A required dependency is unavailable.",
+        },
+    },
     tags=["health"],
 )
 async def readiness(response: Response) -> ReadinessResponse:

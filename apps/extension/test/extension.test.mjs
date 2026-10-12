@@ -153,6 +153,22 @@ test("select inspection and filling cap DOM option reads at thirty", () => {
   assert.equal(reads, 0, "oversize controls are declined before enumerating options");
 });
 
+test("multi-select snapshots use the same array shape as observed fill state", () => {
+  const select = {
+    tagName: "SELECT",
+    multiple: true,
+    options: [],
+    selectedOptions: [{ value: "remote" }, { value: "hybrid" }],
+    value: "remote",
+    disabled: false,
+    readOnly: false,
+  };
+
+  const snapshot = Extraction.snapshotControl({ label: "Work style", type: "select", element: select });
+
+  assert.deepEqual(snapshot.initialState, ["remote", "hybrid"]);
+});
+
 test("context envelope validates opaque tab, document, and optional form handles", () => {
   const handles = {
     schema_version: 1,
