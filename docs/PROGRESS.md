@@ -17,7 +17,7 @@ The planning work used no connected Azure services, live provider calls or outgo
 
 ## Next implementation action
 
-**DGN-001 (NEXT):** Reconcile the proposed Aster design with active product and security contracts; record conflicts and owner decisions before production UI work. DGN-001 has no task dependencies. Production user-facing screens remain gated on DGN-005. See `docs/TASKS.md` and [SET-004 evidence](evidence/SET-004.md).
+**DGN-002 (NEXT):** Define semantic color pairs, typography, spacing, focus/status tokens, Guiding A logo variants, and reusable component states; verify rendered contrast and small-size logo legibility. DGN-002 depends on DGN-001. Keep the name/mark and visual direction proposed until the owner accepts them; public brand use remains gated by DGN-006. Production user-facing screens remain gated on DGN-005. See `docs/TASKS.md` and [DGN-001 evidence](evidence/DGN-001.md).
 
 Local foundation has no known external prerequisite. Later tasks need actual External ID configuration, extension IDs, opted-in provider keys/live evaluation, permitted source/form checks and future Azure subscription/region/SKU/quota/cost review. Those prerequisites remain unverified; record a blocker when it affects a task.
 
@@ -32,6 +32,7 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 | SET-002 | DONE | [SET-002 evidence](evidence/SET-002.md): PostgreSQL/Azurite healthy on loopback; runtime and migration roles checked; API readiness and fake OIDC/provider/source integration passed; production fake/missing config rejected | Codex, independent review passed October 12, 2026 |
 | SET-003 | DONE | [SET-003 evidence](evidence/SET-003.md): V-C OpenAPI/client generation and drift; shared error response, compatibility and no-HTML-fallback checks; V-F/V-B passed | Codex, independent review passed October 12, 2026 |
 | SET-004 | DONE | [SET-004 evidence](evidence/SET-004.md): frozen workspace setup, synthetic foundation CI, real V-F/V-B/V-C aggregate, and evidence templates | Codex, independent review passed October 12, 2026 |
+| DGN-001 | DONE | [DGN-001 evidence](evidence/DGN-001.md): design/contract reconciliation, proposed defaults and explicit unresolved owner decisions | Codex, independent review passed October 12, 2026 |
 
 Local document review passed on October 12, 2026: 21 active Markdown documents, 56 existing local links, 52 unique tasks with valid references and an acyclic dependency graph, and all 13 functional requirements mapped. Active-file whitespace and `git diff --check` passed. The original reference documents are archival and excluded from active-contract checks. These checks do not replace any future runtime verification command in TESTING.
 

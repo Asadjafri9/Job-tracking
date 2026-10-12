@@ -97,13 +97,13 @@ The extension is contextual, not a miniature dashboard. It is centered on the cu
 
 ### 6.1 Sign in
 
-Keep sign-in focused: brand, one-sentence product purpose, email/password or the selected identity-provider UI, reset link, and create-account link. Avoid product metrics, AI promises, and dashboard preview clutter. On small viewports, use a single column. Explain account/data privacy on a short linked page.
+Keep sign-in focused: proposed brand, one-sentence product purpose, the hosted email/password/reset flow specified by the current Microsoft Entra External ID contract, and account-creation/reset actions. Avoid product metrics, AI promises, and dashboard preview clutter. On small viewports, use a single column. Explain account/data privacy on a short linked page. Entra External ID is a plan default pending owner confirmation; production identity configuration and UI must not imply that a tenant is provisioned.
 
 ### 6.2 First-run onboarding
 
 Use a short, skippable, resumable sequence with a clear progress indicator. Save each step and show what is optional.
 
-1. **Basics:** name and contact details; optional phone and profile links. Ask age/DOB only when a real supported use case exists, otherwise omit it.
+1. **Basics:** name and contact details; optional phone and profile links. Age/DOB are optional, purpose-scoped facts under the onboarding contract. Do not request them by default or infer them. Do not expose a collection/use flow until a specific supported purpose and disclosure are approved; otherwise omit the fields.
 2. **Experience:** roles, skills, projects, education, preferred roles/locations, and concise application notes.
 3. **Documents:** résumé first; LinkedIn-export PDF and existing cover letter optional. Show private-storage explanation, parse preview, source, and explicit confirmation for extracted facts. Never turn cover-letter style into proof of an accomplishment.
 4. **AI setup (optional):** introduce provider choices in plain language. Let a user skip and continue with manual tools. Explain per-provider data routing, key storage, cost responsibility, fallback behavior, and that background monitoring needs saved-key consent. Ask for a key only when the user chooses to configure one.
@@ -132,9 +132,11 @@ The side panel should use a concise vertical flow:
 
 Do not add settings, key management, application history, or job-alert setup to the extension's primary flow. Offer a single “Open Aster” link for those tasks. On a recognized user submit, record **Submission attempted**; only a tested positive site signal or user confirmation changes it to **Applied**. Clearly expose uncertainty and validation failure.
 
+Form writes expose values to the hiring page and its scripts before final submission. Explain this before the first fill and require the initiating user action; never imply values remain private until Submit. If a site auto-submits on input, classify it unsupported. The extension never triggers or prevents Submit/Next.
+
 ### 6.6 Application history
 
-Provide a simple list/table with employer, role, date, channel, and plain-language status. Default view prioritizes actionable recent records; filters and search are secondary. Status vocabulary: **Draft**, **Ready to review**, **Submission attempted**, **Applied**, **Needs follow-up**, and **Closed** (only where supported). A detail view shows a dated evidence timeline and the context/answer snapshot. A click on Submit is not a success claim. Discovered vacancies never appear as applications.
+Provide a simple list/table with employer, role, date, channel, and plain-language status. Default view prioritizes actionable recent records; filters and search are secondary. Drafts and prepared form sessions remain separate from application records. The UI may summarize canonical application states with **Submission attempted**, **Applied**, and **Needs follow-up**; **Draft** and **Ready to review** describe drafts/sessions, not application statuses, while **Closed** is available only where supported by canonical state/history. A detail view shows a dated evidence timeline and the context/answer snapshot. A click on Submit is not a success claim. Discovered vacancies never appear as applications. The backend statuses and evidence rules in the PRD/API remain authoritative.
 
 ### 6.7 Email studio
 
@@ -142,7 +144,7 @@ Use a compact form with recipient, employer/role, job description, optional star
 
 ### 6.8 Job alerts
 
-Explain the feature in one sentence: Aster checks selected public career pages at the user's chosen local time. Setup adds one source at a time with a URL, parsing/support preview, role/location preferences, timezone, and explicit background-check/saved-key consent. Show a maximum and current number of sources, source health, last success, next check, pause/remove, and a restrained **Check now** action. Separate **New matches** from **Applications**. A daily digest shows role, company, location if known, source link, discovery time, and one short reason it matched. If a scan is partial, unsupported, paused, or failed, say so; do not display “no jobs found” as if coverage were complete.
+Explain the feature in one sentence: Aster checks selected public career pages at the user's chosen local time. Setup adds one source at a time, up to the contract maximum of five, with a URL, parsing/support preview, role/location preferences, timezone, and explicit scheduled-check and saved-key/background-use consent. Only bounded public sources are supported; login, CAPTCHA, access denial, and JavaScript-only pages remain unsupported, with no bypass. Background matching receives job text and role/location preferences, not contact details, DOB, or private documents. Show source health, last success, next check, pause/remove, and a restrained **Check now** action. Separate **New matches** from **Applications**. A daily digest shows role, company, location if known, source link, discovery time, and one short reason it matched. If a scan is partial, unsupported, paused, or failed, say so; do not display “no jobs found” as if coverage were complete.
 
 ### 6.9 Notifications
 
@@ -207,6 +209,6 @@ The product should feel as orderly as a well-designed productivity tool while ma
 
 ## 12. Relationship to the implementation plan
 
-This brief is the proposed design source of truth for visual language, information hierarchy, and screen behavior. `plan.md` remains the implementation and engineering contract. Existing requirements for fact provenance, consent, manual attestations, user-controlled submission/sending, local-time job scans, and truthful tracking remain binding. If this design direction conflicts with the contracts in `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/AUTOFILL_TRACKING.md`, `docs/EMAIL_APPLICATIONS.md`, `docs/JOB_MONITORING.md`, or `docs/SECURITY_PRIVACY.md`, update both documents through a recorded product decision before code is implemented.
+This brief is the proposed design source of truth for visual language, information hierarchy, and screen behavior. `plan.md` and its active product/security contracts remain the implementation and engineering authority. Existing requirements for fact provenance, purpose-specific consent, manual attestations, user-controlled submission/sending, local-time job scans, safe public-source limits, and truthful tracking remain binding. The reconciliation and open owner decisions are recorded in `docs/DECISIONS.md` ADR-011 and [DGN-001 evidence](evidence/DGN-001.md). If later design changes conflict with `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ONBOARDING.md`, `docs/AUTOFILL_TRACKING.md`, `docs/PROVIDERS.md`, `docs/EMAIL_APPLICATIONS.md`, `docs/JOB_MONITORING.md`, `docs/API.md`, or `docs/SECURITY_PRIVACY.md`, update both documents through a recorded product decision before code is implemented.
 
 **Prototype status:** this direction is represented in `design-exploration/dist/` as a browser-only visual prototype, including an initial Guiding A logo mark and core screen flows. It has no product backend or persistence and does not represent a final approved brand. Validate the design with users and accessibility checks before adopting it in the React application.
