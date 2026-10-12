@@ -4,11 +4,11 @@ The repository has working foundation checks for the existing web shell, API fou
 
 | Code | State | Command | Scope |
 | --- | --- | --- | --- |
-| V-F | Implemented, foundation only | `pnpm verify:frontend` | formatting, ESLint, TypeScript, Vitest, and React web build. Add extension build when EXT-001 exists. |
+| V-F | Implemented, foundation and extension manifest smoke | `pnpm verify:frontend`, `pnpm build:extension` | web formatting, ESLint, TypeScript, Vitest, React build; extension generated MV3 development package. Browser install and keyboard/accessibility checks are recorded separately. |
 | V-B | Implemented, foundation only | `pnpm verify:backend` | uv-locked Ruff/mypy/pytest. Local service integration is opt-in and otherwise reports a skip. |
 | V-C | Implemented | `pnpm verify:contracts` | Export FastAPI OpenAPI, regenerate TS paths in a temporary directory, and compare both artifacts byte-for-byte. |
 | V-DB | `pnpm verify:database` | Requires an explicitly configured loopback PostgreSQL `MIGRATION_DATABASE_URL`; no Azure or external services | DB-001 fresh migration, metadata drift, owner-scoped schema/FKs, revisions/constraints/indexes, protected credential column shape, idempotent synthetic seed. Role/RLS and concurrency checks remain for DB-002/003. |
-| V-X | Planned; no script registered | Not available | Form extraction/fill/options/submit observations/outbox/restarts. |
+| V-X | Implemented, synthetic prototype scope | `pnpm verify:extension` | Dependency-free extension protocol/schema/fill/observer tests and development MV3 build. Covers bounded DOM traversal/options, pre-read sensitive/group exclusion, opaque tab/document/form context handles, manual-edit preservation and repeat reviewed fills, native/select/radio/checkbox outcomes, validation/revert/unknown states, and passive submit observation. It does not establish Chrome behavior or general vendor/site compatibility. |
 | V-E | Planned; no script registered | Not available | Three-pillar journeys with synthetic identity/provider/source/storage. |
 | V-A | Planned; no script registered | Not available | Provider schemas/claims/options, fallback, and key secrecy. |
 | V-DOC | Planned; no script registered | Not available | Bounded parsing, provenance/conflicts/quota/private files. |

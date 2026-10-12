@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aster Career Companion</title>
+    <link rel="stylesheet" href="panel.css" />
+    <script src="extraction.js" defer></script>
+    <script type="module" src="panel.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brandmark" aria-hidden="true">a<span>✦</span></div>
+      <div>
+        <p class="eyebrow">ASTER CAREER COMPANION</p>
+        <h1>Application helper</h1>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="intro-title">
+        <h2 id="intro-title">You’re in control.</h2>
+        <p>Choose one visible form. Review every answer before anything is filled.</p>
+      </section>
+
+      <p id="status" class="status" role="status" aria-live="polite">Ready when you are.</p>
+
+      <section class="card" aria-labelledby="page-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">CURRENT PAGE</p><h2 id="page-title">Inspect a form</h2></div>
+          <span id="page-state" class="tag">Not inspected</span>
+        </div>
+        <p class="muted">Only the page you activate is inspected. Passwords, uploads, legal and sensitive questions stay untouched.</p>
+        <button id="inspect" class="button primary" type="button">Inspect this page</button>
+        <div id="form-picker-wrap" class="hidden">
+          <label for="form-picker">Visible forms</label>
+          <select id="form-picker"><option value="">Choose a form</option></select>
+          <button id="inspect-form" class="button secondary" type="button" disabled>Review selected form</button>
+        </div>
+        <div id="fields" class="field-list" aria-live="polite"></div>
+        <button id="fill" class="button primary hidden" type="button" disabled>Fill reviewed values</button>
+      </section>
+
+      <section class="card" aria-labelledby="job-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">JOB CONTEXT</p><h2 id="job-title">Add selected text</h2></div>
+          <span class="tag quiet">Local preview</span>
+        </div>
+        <p class="muted">Select a job description on the page, then add only that selection. Nothing is sent to a server.</p>
+        <button id="capture-job" class="button secondary" type="button">Use selected job text</button>
+        <p id="job-summary" class="job-summary">No job text selected.</p>
+      </section>
+
+      <section class="card observation-card" aria-labelledby="observation-title">
+        <p class="eyebrow">SUBMISSION</p>
+        <h2 id="observation-title">You submit, always.</h2>
+        <p class="muted">The extension never presses Submit. A click only records an attempt; you confirm the outcome.</p>
+        <p id="observation" class="job-summary" role="status">No submit activity observed.</p>
+      </section>
+
+      <section class="card account-card" aria-labelledby="account-title">
+        <p class="eyebrow">ACCOUNT</p>
+        <h2 id="account-title">Sign-in is not connected yet</h2>
+        <p class="muted">Your profile is not loaded here. For now, values you enter below stay on this page and are filled only after you choose the button.</p>
+        <button id="demo" class="text-button" type="button">Open a safe demo form</button>
+      </section>
+
+      <aside id="unsupported" class="notice hidden" role="status"></aside>
+    </main>
+    <footer><span>Nothing is submitted or emailed for you.</span><span id="version"></span></footer>
+  </body>
+</html>

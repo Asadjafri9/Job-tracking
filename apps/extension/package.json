@@ -1,0 +1,12 @@
+{
+  "name": "@job-tracking/extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs --dev",
+    "build:production": "node scripts/build.mjs --production",
+    "test": "node --test test/*.test.mjs",
+    "verify": "node --test test/*.test.mjs && node scripts/build.mjs --dev"
+  }
+}
