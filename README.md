@@ -10,6 +10,8 @@ The first complete release covers three flows:
 
 Users can supply OpenRouter/DeepSeek, xAI Grok and Gemini keys, with encrypted saved credentials and an explicitly enabled fallback order. A submit click records an attempt; opening Gmail records a compose event. Confirmed application status requires the evidence defined in the plan.
 
+The browser extension assists with form filling but leaves review and final submission to the user.
+
 ## Start here
 
 - [Implementation plan](plan.md): scope, decisions, milestone order and release gates.
