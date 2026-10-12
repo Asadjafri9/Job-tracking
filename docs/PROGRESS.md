@@ -17,7 +17,7 @@ The planning work used no connected Azure services, live provider calls or outgo
 
 ## Next implementation action
 
-**SET-002 (next):** SET-001's fresh setup and frontend/backend quality gates passed in an isolated checkout. Continue with local service/configuration work. No SET-002 implementation or integrated service verification was performed in this step.
+**SET-003 (NEXT):** Implement uniform errors, versioned schemas, the generated TypeScript client and drift checks, and remove API-to-HTML fallback. SET-003 depends on SET-001 and SET-002; both are complete and independently reviewed. See `docs/TASKS.md` for acceptance and verification.
 
 Local foundation has no known external prerequisite. Later tasks need actual External ID configuration, extension IDs, opted-in provider keys/live evaluation, permitted source/form checks and future Azure subscription/region/SKU/quota/cost review. Those prerequisites remain unverified; record a blocker when it affects a task.
 
@@ -29,7 +29,7 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 | --- | --- | --- | --- |
 | v2 planning documents | DONE (documentation only) | plan.md and linked contracts/tasks; local document checks below | Codex, October 12, 2026 |
 | SET-001 | DONE | [SET-001 evidence](evidence/SET-001.md): clean locked setup; V-F passed; V-B passed with host ROS `PYTHONPATH` isolated | Codex, independent review passed October 12, 2026 |
-| SET-002 | NOT_STARTED | Local PostgreSQL/Azurite, separate admin/migration/runtime roles, loopback-only OIDC/provider/source fixtures, and fail-closed environment config await implementation and verification | pending |
+| SET-002 | DONE | [SET-002 evidence](evidence/SET-002.md): PostgreSQL/Azurite healthy on loopback; runtime and migration roles checked; API readiness and fake OIDC/provider/source integration passed; production fake/missing config rejected | Codex, independent review passed October 12, 2026 |
 
 Local document review passed on October 12, 2026: 21 active Markdown documents, 56 existing local links, 52 unique tasks with valid references and an acyclic dependency graph, and all 13 functional requirements mapped. Active-file whitespace and `git diff --check` passed. The original reference documents are archival and excluded from active-contract checks. These checks do not replace any future runtime verification command in TESTING.
 

@@ -8,10 +8,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-local-admin-only}
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-55432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./infra/local/postgres/init.sql:/docker-entrypoint-initdb.d/001-local-roles.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d jobtracking"]
       interval: 5s
@@ -22,11 +21,20 @@ services:
     image: mcr.microsoft.com/azure-storage/azurite:3.35.0
     command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
     ports:
-      - "127.0.0.1:10000:10000"
-      - "127.0.0.1:10001:10001"
-      - "127.0.0.1:10002:10002"
+      - "127.0.0.1:${AZURITE_BLOB_HOST_PORT:-11000}:10000"
+      - "127.0.0.1:${AZURITE_QUEUE_HOST_PORT:-11001}:10001"
+      - "127.0.0.1:${AZURITE_TABLE_HOST_PORT:-11002}:10002"
     volumes:
       - azurite_data:/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://127.0.0.1:10000/', response => process.exit(response.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
   postgres_data:

@@ -3,10 +3,17 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
+from azure.core.exceptions import AzureError
+from azure.storage.blob import BlobServiceClient
 from fastapi import FastAPI, Response, status
+from psycopg import Error as PostgresError
 from pydantic import BaseModel
 
 from app.config import get_settings
+
+_LOCAL_AZURITE_ACCOUNT_KEY = (
+    "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+)
 
 
 class HealthResponse(BaseModel):
@@ -56,6 +63,36 @@ async def _can_connect(url: str, default_port: int) -> bool:
     return True
 
 
+def _can_authenticate_postgres(url: str) -> bool:
+    """Verify the configured Postgres credentials using a read-only query."""
+    try:
+        import psycopg
+
+        with psycopg.connect(url, connect_timeout=2) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                return cursor.fetchone() == (1,)
+    except (PostgresError, OSError, ValueError):
+        return False
+
+
+def _can_authorize_local_blob(endpoint: str) -> bool:
+    """Verify the local Azurite emulator using its public test account only."""
+    try:
+        client = BlobServiceClient(
+            account_url=endpoint,
+            credential=_LOCAL_AZURITE_ACCOUNT_KEY,
+            api_version="2023-11-03",
+            connection_timeout=2,
+            read_timeout=2,
+            retry_total=0,
+        )
+        client.get_service_properties()
+        return True
+    except (AzureError, OSError, ValueError):
+        return False
+
+
 @app.get("/health/live", response_model=HealthResponse, tags=["health"])
 async def liveness() -> HealthResponse:
     """Return process liveness without depending on infrastructure."""
@@ -64,26 +101,39 @@ async def liveness() -> HealthResponse:
 
 @app.get("/health/ready", response_model=ReadinessResponse, tags=["health"])
 async def readiness(response: Response) -> ReadinessResponse:
-    """Check that configured local backing services accept connections."""
+    """Check local service authentication without mutating application data."""
     settings = get_settings()
-    results = await asyncio.gather(
-        _can_connect(settings.database_url, 5432),
-        _can_connect(settings.blob_endpoint_url, 10000),
-    )
-    dependencies = {
-        "postgresql_tcp": "reachable" if results[0] else "unavailable",
-        "blob_storage_tcp": "reachable" if results[1] else "unavailable",
-    }
-    # A listening port does not prove database credentials, schema compatibility,
-    # or blob authorization. Keep readiness closed until those adapters exist.
-    response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-    return ReadinessResponse(
-        status="not_ready",
-        service="job-tracking-api",
-        dependencies=dependencies,
-        unverified=[
+    if settings.app_env in {"local", "test"}:
+        postgres_ready, blob_ready = await asyncio.gather(
+            asyncio.to_thread(_can_authenticate_postgres, settings.database_url),
+            asyncio.to_thread(_can_authorize_local_blob, settings.blob_endpoint_url),
+        )
+        dependencies = {
+            "postgresql_authentication": "ok" if postgres_ready else "unavailable",
+            "blob_storage_authorization": "ok" if blob_ready else "unavailable",
+        }
+        ready = postgres_ready and blob_ready
+        unverified = ["database_schema_compatibility"]
+    else:
+        postgres_reachable, blob_reachable = await asyncio.gather(
+            _can_connect(settings.database_url, 5432),
+            _can_connect(settings.blob_endpoint_url, 10000),
+        )
+        dependencies = {
+            "postgresql_tcp": "reachable" if postgres_reachable else "unavailable",
+            "blob_storage_tcp": "reachable" if blob_reachable else "unavailable",
+        }
+        ready = False
+        unverified = [
             "postgresql_authentication",
             "database_schema_compatibility",
             "blob_storage_authorization",
-        ],
+        ]
+
+    response.status_code = status.HTTP_200_OK if ready else status.HTTP_503_SERVICE_UNAVAILABLE
+    return ReadinessResponse(
+        status="ready" if ready else "not_ready",
+        service="job-tracking-api",
+        dependencies=dependencies,
+        unverified=unverified,
     )

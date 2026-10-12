@@ -14,7 +14,7 @@ Every task starts NOT_STARTED. Statuses: NOT_STARTED, IN_PROGRESS, BLOCKED, IN_R
 | DGN-006 (owner/operator) | DGN-001 | brand decision/release evidence | Before public brand use, record the owner's decision after name/logo/domain availability and distinctiveness checks; retain evidence and any resulting rename work. No public-launch clearance is implied by this planning task. |
 | SET-001 | none | root manifests/locks, apps/web, apps/api | Node 22/Python 3.12/React/FastAPI shells, exact locked dependencies, real quality script interfaces and fresh setup. V-F, V-B |
 | SET-002 | SET-001 | compose/config/health/test services | PostgreSQL/Azurite/fake identity/provider/source/test KEK work locally; production rejects fake/missing config. V-B |
-| SET-003 | SET-001 | error/version/OpenAPI/client scripts | uniform errors, versioned schemas, generated TS client/drift, no API-to-HTML fallback. V-C |
+| SET-003 | SET-001–002 | error/version/OpenAPI/client scripts | uniform errors, versioned schemas, generated TS client/drift, no API-to-HTML fallback. V-C |
 | SET-004 | SET-001–003 | CI/workspace verification/evidence templates | frozen JS/Python setup and scoped synthetic CI; scripts do real checks, no unimplemented-feature fake success. V-F, V-B, V-C |
 | EXT-001 | SET-001 | manifest/side panel/worker/build IDs | exact permissions/origins/stable dev ID; installs/accessibility/unsupported states; no broad permissions/secrets. V-F, install smoke |
 | EXT-002 | EXT-001 | detector/field+option schema/fixtures | selected visible form/job extraction, bounded metadata, sensitive/unrelated exclusions, valid sender/document handles. V-X |

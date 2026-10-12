@@ -20,18 +20,22 @@ The browser extension assists with form filling but leaves review and final subm
 - [Implementation tasks](docs/TASKS.md): dependencies, acceptance and future verification for each task.
 - [Requirements](docs/PRD.md), [architecture](docs/ARCHITECTURE.md), [review resolutions](docs/PLAN_REVIEW.md) and [progress](docs/PROGRESS.md).
 
-**Implementation status:** SET-001 has started. `apps/web` is the React application shell and `apps/api` is the FastAPI service foundation. The design preview remains a separate static HTML/CSS/JavaScript reference; it is not connected to application data. Authentication, persistence, provider routing, and deployment remain future work. No Azure services were provisioned.
+**Implementation status:** SET-001 is complete and SET-002 is in progress. `apps/web` is the React application shell and `apps/api` is the FastAPI service foundation with local-only dependency health checks and synthetic fixtures. The design preview remains a separate static HTML/CSS/JavaScript reference; it is not connected to application data. Product authentication, persistence, provider routing, and deployment remain future work. No connected Azure services were used or provisioned.
 
 ## Local development
 
 Prerequisites: Node 22, its bundled Corepack, Python 3.12, uv, and Docker Compose. The workspace pins pnpm 10.33.3, which works with the Corepack version bundled with Node 22.16.
 
-```powershell
-Copy-Item .env.example .env
-docker compose up -d
-corepack pnpm install
+```sh
+if [ ! -f .env ]; then cp .env.example .env; fi
+corepack pnpm local:services:up
+corepack pnpm install --frozen-lockfile
 corepack pnpm dev:web
 ```
+
+The local PostgreSQL/Azurite containers bind only to `127.0.0.1` on ports 55432 and 11000–11002 by default. `local:services:up` waits for both containers, then provisions the local migration/runtime roles through `psql` without asking Docker Desktop to mount the repository folder. Override the host ports through `.env` when needed. `local:services:down` stops the containers and preserves their named data volumes.
+
+If `.env` already exists, preserve its secrets and update its loopback service URLs and host-port values to match the new defaults instead of replacing the file.
 
 In another terminal, run the API:
 
@@ -45,6 +49,6 @@ To start the loopback-only synthetic OIDC, provider, and source fixtures, use a 
 corepack pnpm dev:mocks
 ```
 
-The web app serves on `http://127.0.0.1:5173`; API liveness is at `http://127.0.0.1:8000/health/live`. `/health/ready` reports TCP reachability but intentionally remains `503` until database authentication/schema and blob authorization checks are implemented. The local Compose services bind to loopback and use test-only credentials and separate admin, migration, and runtime database roles. Run `docker compose down` when you want to stop them. Run `corepack pnpm verify:frontend` or `corepack pnpm verify:backend` for the configured format, lint, type-check, test, and build commands. The full verification commands remain incomplete until feature tests and the browser extension are implemented.
+The web app serves on `http://127.0.0.1:5173`; API liveness and readiness are at `http://127.0.0.1:18000/health/live` and `/health/ready`. Local readiness verifies a `SELECT 1` using the restricted runtime role and authenticates to Azurite using its emulator-only account. It returns HTTP 200 when both checks pass and reports database schema compatibility as unverified until migrations are implemented. The API and fake OIDC/provider/source service bind to loopback at port 18000 and 18101 by default; both can be overridden with `API_HOST_PORT` and `MOCKS_HOST_PORT`. Local/test credentials and the test KEK must never be reused outside local/test. Production rejects fake endpoints, the test KEK adapter, missing secrets and enabled local mocks. Run `corepack pnpm verify:frontend` or `corepack pnpm verify:backend` for the configured format, lint, type-check, test, and build commands. For V-B against the running local services, set `SET002_LOCAL_SERVICES=1` and the local settings from `.env` before running `corepack pnpm verify:backend`. Broader feature and browser-extension verification remains future work.
 
 The [reference roadmap](docs/REFERENCE_ROADMAP.md) and [original review](docs/REFERENCE_PLAN_REVIEW.md) are historical. Active documents linked from `plan.md` govern implementation.

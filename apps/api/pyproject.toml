@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "API foundation for the job tracking workspace"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+  "azure-storage-blob==12.26.0",
   "fastapi==0.119.0",
+  "psycopg[binary]==3.3.0",
   "pydantic==2.12.0",
   "uvicorn[standard]==0.37.0",
 ]
