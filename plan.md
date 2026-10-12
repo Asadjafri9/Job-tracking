@@ -4,7 +4,7 @@ Version 2.0 · October 12, 2026 · Status: READY_FOR_IMPLEMENTATION
 
 The owner's product scope has three pillars: **autofill and application tracking, personalized email applications, and daily career-page monitoring**. The selected stack is **React + FastAPI + PostgreSQL + Azure**. This version incorporates the owner's detailed workflow and supersedes the earlier narrow MVP defaults. Other concrete defaults are maintainer-selected planning decisions, editable through DECISIONS.
 
-Implementation is NOT_STARTED. Readiness means the decisions, contracts, backlog and gates are defined; it does not claim working software, provider access, live-site compatibility or deployed Azure resources.
+Implementation is IN_PROGRESS. The React and FastAPI foundations are present, and local service/configuration work is underway. Readiness means the decisions, contracts, backlog and gates are defined; it does not claim completed product features, provider access, live-site compatibility or deployed Azure resources.
 
 ## Read these documents
 
@@ -113,4 +113,4 @@ These are initial single-developer estimates, not delivery promises. Re-estimate
 
 ## First task
 
-Start **SET-001** in [TASKS](docs/TASKS.md). Build the locked frontend/Python shells and local services, then prove browser control/event behavior before expanding compatibility. The product decisions are written; do not restart Phase 00 from the historical roadmap. This request changes documentation only and does not authorize cloud provisioning or sending messages.
+Continue the ordered M0 work in [TASKS](docs/TASKS.md): finish SET-001 with fresh-setup and quality-gate evidence, then complete local service/configuration work in SET-002. Browser control/event feasibility remains an M0 gate before expanding form compatibility. The product decisions are written; do not restart Phase 00 from the historical roadmap. Cloud provisioning and external messages remain outside local implementation.

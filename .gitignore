@@ -1,0 +1,16 @@
+node_modules/
+.pnpm-store/
+.cache/
+.temp-bootstrap/
+dist/
+*.tsbuildinfo
+coverage/
+.venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.env
+.env.*
+!.env.example

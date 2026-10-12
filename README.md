@@ -20,6 +20,31 @@ The browser extension assists with form filling but leaves review and final subm
 - [Implementation tasks](docs/TASKS.md): dependencies, acceptance and future verification for each task.
 - [Requirements](docs/PRD.md), [architecture](docs/ARCHITECTURE.md), [review resolutions](docs/PLAN_REVIEW.md) and [progress](docs/PROGRESS.md).
 
-**Repository status:** product implementation has not started. The interactive design preview is static HTML/CSS/JavaScript for design review only; it is not the planned React application. First implementation task: SET-001. Authentication, storage, provider routing and the future Azure topology have planning defaults; runtime checks and deployment remain future work. No Azure services were used or provisioned for the prototype.
+**Implementation status:** SET-001 has started. `apps/web` is the React application shell and `apps/api` is the FastAPI service foundation. The design preview remains a separate static HTML/CSS/JavaScript reference; it is not connected to application data. Authentication, persistence, provider routing, and deployment remain future work. No Azure services were provisioned.
+
+## Local development
+
+Prerequisites: Node 22, its bundled Corepack, Python 3.12, uv, and Docker Compose. The workspace pins pnpm 10.33.3, which works with the Corepack version bundled with Node 22.16.
+
+```powershell
+Copy-Item .env.example .env
+docker compose up -d
+corepack pnpm install
+corepack pnpm dev:web
+```
+
+In another terminal, run the API:
+
+```powershell
+corepack pnpm dev:api
+```
+
+To start the loopback-only synthetic OIDC, provider, and source fixtures, use a third terminal:
+
+```powershell
+corepack pnpm dev:mocks
+```
+
+The web app serves on `http://127.0.0.1:5173`; API liveness is at `http://127.0.0.1:8000/health/live`. `/health/ready` reports TCP reachability but intentionally remains `503` until database authentication/schema and blob authorization checks are implemented. The local Compose services bind to loopback and use test-only credentials and separate admin, migration, and runtime database roles. Run `docker compose down` when you want to stop them. Run `corepack pnpm verify:frontend` or `corepack pnpm verify:backend` for the configured format, lint, type-check, test, and build commands. The full verification commands remain incomplete until feature tests and the browser extension are implemented.
 
 The [reference roadmap](docs/REFERENCE_ROADMAP.md) and [original review](docs/REFERENCE_PLAN_REVIEW.md) are historical. Active documents linked from `plan.md` govern implementation.
