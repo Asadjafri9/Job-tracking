@@ -39,7 +39,7 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 | DGN-004 | BLOCKED | [DGN-004 evidence](evidence/DGN-004.md): moderator kit and templates prepared; awaiting five representative participants; no sessions or findings claimed | — |
 | DGN-005 | BLOCKED | [DGN-005 evidence](evidence/DGN-005.md): awaiting DGN-004 study; no handoff/accessibility sign-off claimed | — |
 | DGN-006 | BLOCKED | [DGN-006 evidence](evidence/DGN-006.md): preliminary name/domain research recorded; owner decision and appropriate clearance outstanding | — |
-| EXT-001 | IN_REVIEW | [EXT-001 evidence](evidence/EXT-001.md): least-permission MV3 build/static checks pass; owner screenshot confirms manual install and side-panel launch; safe-demo fill and accessibility checks remain open | Codex, partial review October 12, 2026 |
+| EXT-001 | IN_REVIEW | [EXT-001 evidence](evidence/EXT-001.md): owner screenshots confirm manual install, side-panel launch, and safe-demo fill; local regular-page inspection and accessibility checks remain open | Codex, partial review October 12, 2026 |
 | EXT-002 | IN_REVIEW | [EXT-002 evidence](evidence/EXT-002.md): bounded selected-form/job schemas, sensitive getter traps, opaque tab/document/form context validation and synthetic exclusion corpus | Codex, partial review October 12, 2026 |
 | EXT-003 | IN_REVIEW | [EXT-003 evidence](evidence/EXT-003.md): reviewed fill/manual-edit protections and passive observation pass synthetic checks; four public form structures reviewed read-only | Codex, partial review October 12, 2026 |
 
