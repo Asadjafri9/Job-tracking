@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="580" viewBox="0 0 880 580">
+<rect width="880" height="580" fill="#f7f8f6"/>
+<text x="32" y="42" font-family="system-ui,sans-serif" font-size="24" font-weight="700" fill="#202824">Proposed semantic contrast specimen</text>
+<text x="32" y="68" font-family="system-ui,sans-serif" font-size="13" fill="#526157">Rendered from token values · ratios calculated with WCAG relative luminance</text>
+<rect x="32" y="91" width="816" height="48" rx="8" fill="#f7f8f6" stroke="#d4ddd6"/>
+<text x="48" y="112" font-family="system-ui,sans-serif" font-size="16" font-weight="600" fill="#202824">Primary text on canvas: Aa 0123</text>
+<text x="824" y="111" text-anchor="end" font-family="ui-monospace,monospace" font-size="13" fill="#202824">14.18:1</text>
+<rect x="32" y="148" width="816" height="48" rx="8" fill="#f7f8f6" stroke="#d4ddd6"/>
+<text x="48" y="169" font-family="system-ui,sans-serif" font-size="16" font-weight="600" fill="#526157">Secondary text on canvas: Aa 0123</text>
+<text x="824" y="168" text-anchor="end" font-family="ui-monospace,monospace" font-size="13" fill="#526157">6.15:1</text>
+<rect x="32" y="205" width="816" height="48" rx="8" fill="#356d50" stroke="#d4ddd6"/>
+<text x="48" y="226" font-family="system-ui,sans-serif" font-size="16" font-weight="600" fill="#ffffff">Primary button label: Aa 0123</text>
+<text x="824" y="225" text-anchor="end" font-family="ui-monospace,monospace" font-size="13" fill="#ffffff">6.08:1</text>
+<rect x="32" y="262" width="816" height="48" rx="8" fill="#e8f2eb" stroke="#d4ddd6"/>
+<text x="48" y="283" font-family="system-ui,sans-serif" font-size="16" font-weight="600" fill="#1f633d">Success status: Aa 0123</text>
+<text x="824" y="282" text-anchor="end" font-family="ui-monospace,monospace" font-size="13" fill="#1f633d">6.30:1</text>
+<rect x="32" y="319" width="816" height="48" rx="8" fill="#fff4df" stroke="#d4ddd6"/>
+<text x="48" y="340" font-family="system-ui,sans-serif" font-size="16" font-weight="600" fill="#754500">Warning status: Aa 0123</text>
+<text x="824" y="339" text-anchor="end" font-family="ui-monospace,monospace" font-size="13" fill="#754500">7.39:1</text>
+<rect x="32" y="376" width="816" height="48" rx="8" fill="#fcecea" stroke="#d4ddd6"/>
+<text x="48" y="397" font-family="system-ui,sans-serif" font-size="16" font-weight="600" fill="#8c2b27">Error status: Aa 0123</text>
+<text x="824" y="396" text-anchor="end" font-family="ui-monospace,monospace" font-size="13" fill="#8c2b27">7.36:1</text>
+<rect x="32" y="433" width="816" height="48" rx="8" fill="#ecf3f8" stroke="#d4ddd6"/>
+<text x="48" y="454" font-family="system-ui,sans-serif" font-size="16" font-weight="600" fill="#28547b">Information status: Aa 0123</text>
+<text x="824" y="453" text-anchor="end" font-family="ui-monospace,monospace" font-size="13" fill="#28547b">7.09:1</text>
+<rect x="32" y="490" width="816" height="48" rx="8" fill="#f0f2f0" stroke="#d4ddd6"/>
+<text x="48" y="511" font-family="system-ui,sans-serif" font-size="16" font-weight="600" fill="#3f4b44">Neutral status: Aa 0123</text>
+<text x="824" y="510" text-anchor="end" font-family="ui-monospace,monospace" font-size="13" fill="#3f4b44">8.11:1</text>
+<rect x="32" y="552" width="260" height="22" rx="4" fill="#ffffff" stroke="#68776c" stroke-width="2"/>
+<text x="42" y="568" font-family="system-ui,sans-serif" font-size="12" fill="#202824">Control border · 4.73:1 on white</text>
+<rect x="308" y="549" width="350" height="28" rx="5" fill="#ffffff" stroke="#17643a" stroke-width="3"/>
+<text x="321" y="568" font-family="system-ui,sans-serif" font-size="12" fill="#202824">Focused control · ring 7.19:1 on white</text>
+<text x="674" y="568" font-family="system-ui,sans-serif" font-size="11" fill="#526157">Canvas ratios 4.44:1 / 6.75:1</text>
+</svg>

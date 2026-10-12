@@ -36,7 +36,7 @@ Keep **Aster** as the working product name. Brand idea: **a steady guide through
 
 ### Logo concept: “Guiding A”
 
-Create a compact, original symbol from a single continuous path that forms a lowercase **a** and ends in a small four-point north star. It should suggest direction and forward motion without using a briefcase, robot, sparkle cloud, or generic checkmark. Use a simple geometric wordmark reading **aster** in lowercase beside the symbol. A small supporting descriptor, if used in marketing, is “career workspace”; do not lock it into the small product logo.
+Create a compact, original symbol from a single continuous path that forms a lowercase **a** and ends in a small four-point north star. It should suggest direction and forward motion without using a briefcase, robot, sparkle cloud, or generic checkmark. At small sizes, the letter and star endpoint must remain visually distinct. Use a simple geometric wordmark reading **aster** in lowercase beside the symbol. The current DGN-002 SVGs are proposals, not a final mark. A small supporting descriptor, if used in marketing, is “career workspace”; do not lock it into the small product logo.
 
 Logo rules:
 
