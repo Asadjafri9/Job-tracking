@@ -17,7 +17,7 @@ The planning work used no connected Azure services, live provider calls or outgo
 
 ## Next implementation action
 
-**DGN-003 (NEXT):** Create responsive screen frames/prototype for the dashboard, onboarding, extension, email, and alerts with the required empty, populated, loading, partial, unsupported, failure, and privacy/review states. DGN-003 depends on DGN-002. Keep the proposed name, logo, and visual direction provisional; public brand use remains gated by DGN-006. Production user-facing screens remain gated on DGN-005. See `docs/TASKS.md` and [DGN-002 evidence](evidence/DGN-002.md).
+**DGN-004 (NOT_STARTED):** Conduct the planned five-person job-seeker usability study on the prototype. Observe profile setup, form review without submission, application confirmation, email/Gmail handoff, and alert-source setup; record anonymized findings and design changes. DGN-004 depends on DGN-003. This study has not been conducted. DGN-005 production handoff remains gated on DGN-004. See [the DGN-003 prototype](../design-prototype/README.md), [DGN-003 evidence](evidence/DGN-003.md), and [the task definition](TASKS.md).
 
 Local foundation has no known external prerequisite. Later tasks need actual External ID configuration, extension IDs, opted-in provider keys/live evaluation, permitted source/form checks and future Azure subscription/region/SKU/quota/cost review. Those prerequisites remain unverified; record a blocker when it affects a task.
 
@@ -34,6 +34,7 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 | SET-004 | DONE | [SET-004 evidence](evidence/SET-004.md): frozen workspace setup, synthetic foundation CI, real V-F/V-B/V-C aggregate, and evidence templates | Codex, independent review passed October 12, 2026 |
 | DGN-001 | DONE | [DGN-001 evidence](evidence/DGN-001.md): design/contract reconciliation, proposed defaults and explicit unresolved owner decisions | Codex, independent review passed October 12, 2026 |
 | DGN-002 | DONE | [DGN-002 evidence](evidence/DGN-002.md): proposed tokens/components, all 16 rendered contrast pairs, and small-size/full-lockup SVG review | Codex, independent review passed October 12, 2026 |
+| DGN-003 | DONE | [DGN-003 evidence](evidence/DGN-003.md): browser-only prototype and 42 rendered screens across 1440/1280/390 and 360/420px targets; user study and accessibility review remain outstanding | Codex, independent review passed October 12, 2026 |
 
 Local document review passed on October 12, 2026: 21 active Markdown documents, 56 existing local links, 52 unique tasks with valid references and an acyclic dependency graph, and all 13 functional requirements mapped. Active-file whitespace and `git diff --check` passed. The original reference documents are archival and excluded from active-contract checks. These checks do not replace any future runtime verification command in TESTING.
 
