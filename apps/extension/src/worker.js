@@ -8,11 +8,13 @@ chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false });
 const tabHandles = new Map();
 const documentHandles = new Map();
 let activatedTabId = null;
+let activatedWindowId = null;
 
 chrome.action.onClicked.addListener((tab) => {
   if (!Number.isInteger(tab?.id)) return;
   activatedTabId = tab.id;
-  chrome.storage.session.set({ activatedTabId }).catch(() => {});
+  activatedWindowId = Number.isInteger(tab.windowId) ? tab.windowId : null;
+  chrome.storage.session.set({ activatedTabId, activatedWindowId }).catch(() => {});
   // Call open directly in the user-gesture handler; Chrome requires this.
   chrome.sidePanel.open({ tabId: tab.id }).catch(() => {});
 });
@@ -25,11 +27,13 @@ async function activeTab() {
   if (!Number.isInteger(activatedTabId)) {
     const saved = await chrome.storage.session.get("activatedTabId");
     activatedTabId = saved.activatedTabId ?? null;
+    activatedWindowId = saved.activatedWindowId ?? null;
   }
   if (!Number.isInteger(activatedTabId)) {
     return { error: "not_activated", explanation: "Click the Aster toolbar icon on the page you want to inspect, then try again." };
   }
-  const [currentTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  const activeTabs = await chrome.tabs.query({ active: true });
+  const currentTab = activeTabs.find((candidate) => candidate.windowId === activatedWindowId);
   if (currentTab?.id !== activatedTabId) {
     return { error: "not_activated", explanation: "The active tab changed. Click the Aster toolbar icon on this page, then inspect it." };
   }

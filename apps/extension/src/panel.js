@@ -145,7 +145,11 @@ fillButton.addEventListener("click", async () => {
     entries,
     context_handles: selectedFormHandles,
   });
-  if (result?.error) { announceUnsupported(result); return; }
+  if (result?.error) {
+    fillButton.disabled = suggestions.size === 0;
+    announceUnsupported(result);
+    return;
+  }
   const counts = { filled: 0, skipped: 0, invalid: 0, unknown: 0 };
   for (const item of result.results || []) {
     if (item.status === "filled") counts.filled += 1;
