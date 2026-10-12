@@ -15,7 +15,7 @@ The browser extension assists with form filling but leaves review and final subm
 ## Start here
 
 - [Implementation plan](plan.md): scope, decisions, milestone order and release gates.
-- [Product design brief](docs/DESIGN_BRIEF.md): proposed Aster logo, visual direction, UX principles, screens and accessibility/validation guidance.
+- [Product design brief](docs/DESIGN_BRIEF.md): Rolevo logo, visual direction, UX principles, screens and accessibility/validation guidance.
 - [Interactive design preview](design-exploration/README.md): browser-only implementation of the design direction; no backend or product data is connected.
 - [Implementation tasks](docs/TASKS.md): dependencies, acceptance and future verification for each task.
 - [Requirements](docs/PRD.md), [architecture](docs/ARCHITECTURE.md), [review resolutions](docs/PLAN_REVIEW.md) and [progress](docs/PROGRESS.md).

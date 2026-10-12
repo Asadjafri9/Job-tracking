@@ -1,4 +1,4 @@
-# Aster — product design brief
+# Rolevo — product design brief
 
 **Status:** Proposed product and visual direction
 **Scope:** Dashboard, Chrome extension, onboarding, application/email flows, and job alerts
@@ -6,7 +6,7 @@
 
 ## 1. Design intent
 
-Aster should make a complicated job search feel like a short, understandable sequence of decisions. The product prepares useful work, explains what it did, and leaves consequential actions with the applicant. The user should always be able to answer three questions: **Where am I? What needs my attention? What happens if I continue?**
+Rolevo should make a complicated job search feel like a short, understandable sequence of decisions. The product prepares useful work, explains what it did, and leaves consequential actions with the applicant. The user should always be able to answer three questions: **Where am I? What needs my attention? What happens if I continue?**
 
 The product has three pillars, but they should not compete for attention on every screen:
 
@@ -32,11 +32,11 @@ Design for a first-time applicant who may be short on time, unfamiliar with AI s
 
 ### Name and promise
 
-Keep **Aster** as the working product name. Brand idea: **a steady guide through a moving career path**. Suggested concise promise: **“Your next step, made clearer.”** The name and phrase need a separate trademark/domain check before public launch.
+The owner selected **Rolevo** as the product name. Brand idea: **a steady guide through a moving career path**. Suggested concise promise: **“Your next step, made clearer.”** This product decision does not claim trademark clearance or domain availability; complete any required clearance before public launch.
 
-### Logo concept: “Guiding A”
+### Logo: “Rolevo R”
 
-Create a compact, original symbol from a single continuous path that forms a lowercase **a** and ends in a small four-point north star. It should suggest direction and forward motion without using a briefcase, robot, sparkle cloud, or generic checkmark. At small sizes, the letter and star endpoint must remain visually distinct. Use a simple geometric wordmark reading **aster** in lowercase beside the symbol. The current DGN-002 SVGs are proposals, not a final mark. A small supporting descriptor, if used in marketing, is “career workspace”; do not lock it into the small product logo.
+Use the compact R-shaped path in `design-system/logos/rolevo-symbol.svg` with the Rolevo wordmark. The open leg suggests a next step while keeping the mark legible in a small extension toolbar. Use the supplied horizontal, monochrome, and reversed variants consistently. The owner selected this identity for product work; no public trademark clearance is claimed. Keep “career workspace” as an optional descriptor, not part of the compact mark.
 
 Logo rules:
 
@@ -128,9 +128,9 @@ The side panel should use a concise vertical flow:
 2. **Analyze this job:** one explicit action and just-in-time notice describing which visible job text and selected profile facts will be sent to the chosen provider(s).
 3. **Suggestions:** group answers by form section. Each suggestion shows a short source label and confidence/explanation when useful. Highlight missing evidence as **Needs your answer**; keep attestations, demographic and legal declarations manual. Never show opaque AI confidence percentages without calibration.
 4. **Apply answers:** fill only supported fields/options and show per-field outcome. Keep a failed/unsupported field visibly untouched. Preserve user edits and current values.
-5. **Review on the site:** durable reminder that Aster did not submit and the applicant should verify each answer, attach the résumé manually, and use the site's own submit button.
+5. **Review on the site:** durable reminder that Rolevo did not submit and the applicant should verify each answer, attach the résumé manually, and use the site's own submit button.
 
-Do not add settings, key management, application history, or job-alert setup to the extension's primary flow. Offer a single “Open Aster” link for those tasks. On a recognized user submit, record **Submission attempted**; only a tested positive site signal or user confirmation changes it to **Applied**. Clearly expose uncertainty and validation failure.
+Do not add settings, key management, application history, or job-alert setup to the extension's primary flow. Offer a single “Open Rolevo” link for those tasks. On a recognized user submit, record **Submission attempted**; only a tested positive site signal or user confirmation changes it to **Applied**. Clearly expose uncertainty and validation failure.
 
 Form writes expose values to the hiring page and its scripts before final submission. Explain this before the first fill and require the initiating user action; never imply values remain private until Submit. If a site auto-submits on input, classify it unsupported. The extension never triggers or prevents Submit/Next.
 
@@ -144,7 +144,7 @@ Use a compact form with recipient, employer/role, job description, optional star
 
 ### 6.8 Job alerts
 
-Explain the feature in one sentence: Aster checks selected public career pages at the user's chosen local time. Setup adds one source at a time, up to the contract maximum of five, with a URL, parsing/support preview, role/location preferences, timezone, and explicit scheduled-check and saved-key/background-use consent. Only bounded public sources are supported; login, CAPTCHA, access denial, and JavaScript-only pages remain unsupported, with no bypass. Background matching receives job text and role/location preferences, not contact details, DOB, or private documents. Show source health, last success, next check, pause/remove, and a restrained **Check now** action. Separate **New matches** from **Applications**. A daily digest shows role, company, location if known, source link, discovery time, and one short reason it matched. If a scan is partial, unsupported, paused, or failed, say so; do not display “no jobs found” as if coverage were complete.
+Explain the feature in one sentence: Rolevo checks selected public career pages at the user's chosen local time. Setup adds one source at a time, up to the contract maximum of five, with a URL, parsing/support preview, role/location preferences, timezone, and explicit scheduled-check and saved-key/background-use consent. Only bounded public sources are supported; login, CAPTCHA, access denial, and JavaScript-only pages remain unsupported, with no bypass. Background matching receives job text and role/location preferences, not contact details, DOB, or private documents. Show source health, last success, next check, pause/remove, and a restrained **Check now** action. Separate **New matches** from **Applications**. A daily digest shows role, company, location if known, source link, discovery time, and one short reason it matched. If a scan is partial, unsupported, paused, or failed, say so; do not display “no jobs found” as if coverage were complete.
 
 ### 6.9 Notifications
 
@@ -205,7 +205,7 @@ This direction takes structural inspiration rather than copying a brand:
 - [Figma’s design-system foundations guide](https://www.figma.com/blog/design-systems-102-how-to-build-your-design-system/): treat color, type, iconography, dimensions, component reuse, and accessibility as one system.
 - [Figma’s accessibility guide for design systems](https://www.figma.com/blog/the-future-of-design-systems-is-accessible/): bake keyboard, focus, contrast, target size, and responsive behavior into reusable patterns from the outset.
 
-The product should feel as orderly as a well-designed productivity tool while making application evidence and AI boundaries more visible than a conventional task tracker. The result is an Aster-specific system, not a replica of these products.
+The product should feel as orderly as a well-designed productivity tool while making application evidence and AI boundaries more visible than a conventional task tracker. The result is a Rolevo-specific system, not a replica of these products.
 
 ## 12. Relationship to the implementation plan
 

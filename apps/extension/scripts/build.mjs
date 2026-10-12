@@ -48,14 +48,14 @@ export function extensionId(publicKey) {
 export function createManifest({ apiOrigin, production = false }) {
   return {
     manifest_version: 3,
-    name: "Aster Career Companion",
+    name: "Rolevo",
     version: "0.1.0",
     description: "Review and prepare answers for the form you choose.",
     key: PUBLIC_DEV_KEY,
     permissions: ["activeTab", "scripting", "storage", "identity", "sidePanel"],
     host_permissions: [`${apiOrigin}/*`],
     background: { service_worker: "worker.js", type: "module" },
-    action: { default_title: "Open Aster Career Companion" },
+    action: { default_title: "Open Rolevo" },
     side_panel: { default_path: "panel.html" },
     content_security_policy: {
       extension_pages: "script-src 'self'; object-src 'self'; base-uri 'self';",

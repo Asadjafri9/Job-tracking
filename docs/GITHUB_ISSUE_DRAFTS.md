@@ -21,7 +21,7 @@ This file contains 58 issue drafts for all task rows. It covers the three produc
 - **Milestone:** M0 — Foundation and browser feasibility
 - **Backlog dependency:** none
 - **Planned files/areas:** docs/DESIGN_BRIEF.md, docs/DECISIONS.md
-- **Acceptance / verification:** Reconcile the proposed Aster design with active product/security contracts; record unresolved conflicts and owner decisions. Brand and visual direction remain proposed until explicitly accepted. Manual evidence: reviewed decision record.
+- **Acceptance / verification:** Reconcile the proposed Rolevo design with active product/security contracts; record unresolved conflicts and owner decisions. The owner-selected Rolevo name and R mark are recorded in DGN-006. Manual evidence: reviewed decision record.
 - **Source:** [docs/TASKS.md](TASKS.md)
 - **Assignee:** leave unassigned until the repository owner confirms the role mapping.
 
@@ -32,7 +32,7 @@ This file contains 58 issue drafts for all task rows. It covers the three produc
 - **Milestone:** M0 — Foundation and browser feasibility
 - **Backlog dependency:** DGN-001
 - **Planned files/areas:** design tokens, logo assets, component library
-- **Acceptance / verification:** Define semantic color pairs, typography, spacing, focus/status tokens, Guiding A logo variants, and reusable component states; verify rendered text/control/status contrast and small-size logo legibility. Manual evidence: token/component spec and contrast results.
+- **Acceptance / verification:** Define semantic color pairs, typography, spacing, focus/status tokens, Rolevo R logo variants, and reusable component states; verify rendered text/control/status contrast and small-size logo legibility. Manual evidence: token/component spec and contrast results.
 - **Source:** [docs/TASKS.md](TASKS.md)
 - **Assignee:** leave unassigned until the repository owner confirms the role mapping.
 
@@ -49,12 +49,12 @@ This file contains 58 issue drafts for all task rows. It covers the three produc
 
 ---
 
-### [DGN-004] Validate the prototype with five representative users
+### [DGN-004] Validate the prototype with five representative users (waived for M0)
 
 - **Milestone:** M0 — Foundation and browser feasibility
 - **Backlog dependency:** DGN-003
 - **Planned files/areas:** design validation notes/prototype revisions
-- **Acceptance / verification:** Test the key journeys with at least five representative job seekers; observe setup, form review without submission, application evidence, email handoff, and alert-source setup; record issues and resulting design changes. Manual evidence: anonymized findings and iteration notes.
+- **Acceptance / verification:** The owner waived this study for M0. No sessions/findings are claimed, and the waiver does not count as user validation. Any later research requires a new owner-approved scope and anonymized findings. See `docs/evidence/DGN-004.md`.
 - **Source:** [docs/TASKS.md](TASKS.md)
 - **Assignee:** leave unassigned until the repository owner confirms the role mapping.
 
@@ -63,20 +63,20 @@ This file contains 58 issue drafts for all task rows. It covers the three produc
 ### [DGN-005] Complete design handoff and accessibility review
 
 - **Milestone:** M0 — Foundation and browser feasibility
-- **Backlog dependency:** DGN-003, DGN-004
+- **Backlog dependency:** DGN-003 (DGN-004 study was explicitly waived for M0; no user research findings are claimed)
 - **Planned files/areas:** design handoff, component states, accessibility/responsive review
-- **Acceptance / verification:** Publish implementation notes and final design references; complete keyboard/focus, screen-reader labels/errors/status, reduced-motion, 200% zoom, touch-target, narrow-layout, and semantic contrast review with no unresolved critical core-flow issue. Manual evidence: handoff and review report. Production UI tasks wait for this gate.
+- **Acceptance / verification:** Completed the M0 prototype handoff audit for keyboard/focus, semantic labels/actions, reduced motion, 320px reflow, 44px controls, and design-token contrast. See `docs/evidence/DGN-005.md` for explicit limitations: no manual screen-reader session or production-screen certification is claimed.
 - **Source:** [docs/TASKS.md](TASKS.md)
 - **Assignee:** leave unassigned until the repository owner confirms the role mapping.
 
 ---
 
-### [DGN-006] Record owner decision on brand availability before public use
+### [DGN-006] Record owner-selected brand and public-clearance gate
 
 - **Milestone:** M0 — Foundation and browser feasibility
 - **Backlog dependency:** DGN-001
 - **Planned files/areas:** brand decision/release evidence
-- **Acceptance / verification:** Before public brand use, record the owner's decision after name/logo/domain availability and distinctiveness checks; retain evidence and any resulting rename work. No public-launch clearance is implied by this planning task.
+- **Acceptance / verification:** The owner selected Rolevo and the R identity for product development, now recorded in `docs/evidence/DGN-006.md`. Do not imply legal clearance or domain availability; obtain any needed professional clearance before public launch.
 - **Source:** [docs/TASKS.md](TASKS.md)
 - **Assignee:** leave unassigned until the repository owner confirms the role mapping.
 

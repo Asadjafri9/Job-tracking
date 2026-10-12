@@ -13,9 +13,11 @@ const userData = '/tmp/dgn003-render-chrome-profile';
 const base = `file://${prototype}`;
 const routes = [
   ['signin', 'signin', 1440, 960],
+  ['signin-320', 'signin', 320, 780],
   ['signin-forgot', 'signin/forgot', 1280, 900],
   ...['basics','experience','documents','ai'].map((state) => [`onboarding-${state}`, `onboarding/${state}`, 1280, 900]),
   ['home-empty-1440', 'home/empty', 1440, 1000], ['home-returning-1280', 'home/returning', 1280, 900], ['home-empty-390', 'home/empty', 390, 844], ['home-returning-390', 'home/returning', 390, 844],
+  ['home-empty-320', 'home/empty', 320, 780],
   ...['summary','documents','providers'].map((state) => [`profile-${state}`, `profile/${state}`, 1280, 900]),
   ...['list','detail','evidence'].map((state) => [`applications-${state}`, `applications/${state}`, 1280, 900]),
   ...['draft','review','handoff','confirm','sent'].map((state) => [`email-${state}`, `email/${state}`, 1280, 900]),
@@ -23,6 +25,7 @@ const routes = [
   ...['inbox','empty','error','revoked'].map((state) => [`notifications-${state}`, `notifications/${state}`, 1280, 900]),
   ...['privacy','export','deletion'].map((state) => [`settings-${state}`, `settings/${state}`, 1280, 900]),
   ...['detected','analyzing','suggestions','manual','filled','review','tracking'].map((state) => [`extension-${state}-360`, `extension/${state}`, 360, 860]),
+  ['extension-detected-320', 'extension/detected', 320, 780], ['extension-review-320', 'extension/review', 320, 780],
   ['extension-detected-420', 'extension/detected', 420, 860], ['extension-review-420', 'extension/review', 420, 860],
 ];
 

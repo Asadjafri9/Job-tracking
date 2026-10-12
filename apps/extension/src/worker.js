@@ -30,16 +30,16 @@ async function activeTab() {
     activatedWindowId = saved.activatedWindowId ?? null;
   }
   if (!Number.isInteger(activatedTabId)) {
-    return { error: "not_activated", explanation: "Click the Aster toolbar icon on the page you want to inspect, then try again." };
+    return { error: "not_activated", explanation: "Click the Rolevo toolbar icon on the page you want to inspect, then try again." };
   }
   const activeTabs = await chrome.tabs.query({ active: true });
   const currentTab = activeTabs.find((candidate) => candidate.windowId === activatedWindowId);
   if (currentTab?.id !== activatedTabId) {
-    return { error: "not_activated", explanation: "The active tab changed. Click the Aster toolbar icon on this page, then inspect it." };
+    return { error: "not_activated", explanation: "The active tab changed. Click the Rolevo toolbar icon on this page, then inspect it." };
   }
   let tab;
   try { tab = await chrome.tabs.get(activatedTabId); }
-  catch { return { error: "not_activated", explanation: "That tab is no longer open. Click the Aster toolbar icon on the page you want to inspect." }; }
+  catch { return { error: "not_activated", explanation: "That tab is no longer open. Click the Rolevo toolbar icon on the page you want to inspect." }; }
   if (!tab.url || !/^https?:\/\//.test(tab.url)) {
     return { error: "unsupported_page", explanation: "This browser page cannot be inspected. Open a regular web page." };
   }
@@ -105,17 +105,17 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   let operation;
   switch (message?.type) {
     case "panel-list-forms":
-      operation = sendToActivePage({ type: "aster-list-forms" }, { inject: true, startContext: true });
+      operation = sendToActivePage({ type: "rolevo-list-forms" }, { inject: true, startContext: true });
       break;
     case "panel-inspect-form":
-      operation = sendToActivePage({ type: "aster-inspect-form", form_id: message.form_id, context_handles: message.context_handles }, { requireForm: true });
+      operation = sendToActivePage({ type: "rolevo-inspect-form", form_id: message.form_id, context_handles: message.context_handles }, { requireForm: true });
       break;
     case "panel-get-selected-job-text":
-      operation = sendToActivePage({ type: "aster-get-selected-job-text", context_handles: message.context_handles });
+      operation = sendToActivePage({ type: "rolevo-get-selected-job-text", context_handles: message.context_handles });
       break;
     case "panel-apply-reviewed-values":
       operation = sendToActivePage({
-        type: "aster-apply-reviewed-values",
+        type: "rolevo-apply-reviewed-values",
         form_id: message.context_handles?.form_handle,
         context_handles: message.context_handles,
         entries: message.entries,

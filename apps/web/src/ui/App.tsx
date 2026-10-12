@@ -80,7 +80,7 @@ export function App() {
             </svg>
           </span>
           <span className="brand-copy">
-            <span className="brand-name">aster</span>
+            <span className="brand-name">Rolevo</span>
             <span className="brand-caption">Career workspace</span>
           </span>
         </a>

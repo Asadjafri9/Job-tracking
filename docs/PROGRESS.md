@@ -15,13 +15,17 @@ Completed documentation: three-pillar PRD, rich onboarding/document confirmation
 
 The planning work used no connected Azure services, live provider calls or outgoing email. Application foundation work is now underway locally; no cloud resource has been provisioned.
 
-## Next implementation action
+## M0 completion
 
-**M0 is not complete.** SET-001–004 and DGN-001–003 are done; EXT-001–003 have passed independent code/synthetic review, and the owner confirmed local Chrome fixture inspection/fill, but accessibility and broader compatibility checks remain open. DGN-004 is **BLOCKED** awaiting five consenting representative job seekers; DGN-005 is blocked on that study; DGN-006 awaits the owner's brand/clearance decision. See the evidence below. No user study, accessibility sign-off, owner brand approval, provider call, or cloud provisioning is claimed.
+**M0 is complete under the owner-approved scope.** SET-001–004, DGN-001–003, DGN-005–006, and EXT-001–003 are complete for their M0 acceptance criteria. The owner explicitly waived the five-job-seeker DGN-004 study for this milestone; it was not conducted and no research findings or user-validation claim are made. The brand is Rolevo by owner decision; legal/trademark clearance remains a public-launch check. DGN-005 records the prototype accessibility and layout audit; no manual screen-reader session or production accessibility certification is claimed. Broader site compatibility remains future work. No provider call or cloud provisioning was performed.
 
 Local foundation has no known external prerequisite. Later tasks need actual External ID configuration, extension IDs, opted-in provider keys/live evaluation, permitted source/form checks and future Azure subscription/region/SKU/quota/cost review. Those prerequisites remain unverified; record a blocker when it affects a task.
 
 Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
+
+## Next implementation action
+
+Proceed to M1 — Identity, persistence and durable work — following the dependency order in [`TASKS.md`](TASKS.md). M0 completion does not mean the full application is implemented or ready to deploy.
 
 ## Evidence ledger
 
@@ -35,13 +39,13 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 | DB-001 | DONE | [DB-001 evidence](evidence/DB-001.md): fresh and idempotent PostgreSQL migration, seed, drift check, nine schema checks, API suite, Ruff, and mypy | Codex, independent review passed October 12, 2026 |
 | DGN-001 | DONE | [DGN-001 evidence](evidence/DGN-001.md): design/contract reconciliation, proposed defaults and explicit unresolved owner decisions | Codex, independent review passed October 12, 2026 |
 | DGN-002 | DONE | [DGN-002 evidence](evidence/DGN-002.md): proposed tokens/components, all 16 rendered contrast pairs, and small-size/full-lockup SVG review | Codex, independent review passed October 12, 2026 |
-| DGN-003 | DONE | [DGN-003 evidence](evidence/DGN-003.md): browser-only prototype and 42 rendered screens across 1440/1280/390 and 360/420px targets; user study and accessibility review remain outstanding | Codex, independent review passed October 12, 2026 |
-| DGN-004 | BLOCKED | [DGN-004 evidence](evidence/DGN-004.md): moderator kit and templates prepared; awaiting five representative participants; no sessions or findings claimed | — |
-| DGN-005 | BLOCKED | [DGN-005 evidence](evidence/DGN-005.md): awaiting DGN-004 study; no handoff/accessibility sign-off claimed | — |
-| DGN-006 | BLOCKED | [DGN-006 evidence](evidence/DGN-006.md): preliminary name/domain research recorded; owner decision and appropriate clearance outstanding | — |
-| EXT-001 | IN_REVIEW | [EXT-001 evidence](evidence/EXT-001.md): owner screenshots confirm manual install, side-panel launch, safe-demo fill, and owner-confirmed local regular-page inspection/fill; accessibility checks remain open | Codex, partial review October 12, 2026 |
-| EXT-002 | IN_REVIEW | [EXT-002 evidence](evidence/EXT-002.md): bounded selected-form/job schemas, sensitive getter traps, opaque tab/document/form context validation and synthetic exclusion corpus; local Chrome fixture inspection confirmed | Codex, partial review October 12, 2026 |
-| EXT-003 | IN_REVIEW | [EXT-003 evidence](evidence/EXT-003.md): reviewed fill/manual-edit protections and passive observation pass synthetic checks; owner confirms local Chrome fixture fill; four public form structures reviewed read-only | Codex, partial review October 12, 2026 |
+| DGN-003 | DONE | [DGN-003 evidence](evidence/DGN-003.md): prototype; latest render has 46 desktop/mobile/extension viewport screens including 320px reflow; accessibility audit in DGN-005 | Codex, reviewed October 12, 2026 |
+| DGN-004 | WAIVED for M0 | [DGN-004 evidence](evidence/DGN-004.md): owner waived five-person research; no participants, sessions, observations, or findings | Owner scope decision, October 12, 2026 |
+| DGN-005 | DONE | [DGN-005 evidence](evidence/DGN-005.md): 38-route keyboard, semantic, reduced-motion, control-target, contrast, and 320px reflow audit; assistive-tech limits recorded | Codex, October 12, 2026 |
+| DGN-006 | DONE for internal name decision | [DGN-006 evidence](evidence/DGN-006.md): owner-selected Rolevo name and R identity applied to app, extension, prototype, and design assets; external clearance is not claimed | Owner decision; implementation review October 12, 2026 |
+| EXT-001 | DONE for M0 | [EXT-001 evidence](evidence/EXT-001.md): owner screenshots/manual confirmation confirm install, side-panel launch, safe-demo fill, and local fixture inspection/fill; 17/17 tests and brand build pass | Codex, October 12, 2026 |
+| EXT-002 | DONE for M0 | [EXT-002 evidence](evidence/EXT-002.md): bounded selected-form/job schemas, sensitive getter traps, opaque context handles and synthetic exclusion corpus | Codex, October 12, 2026 |
+| EXT-003 | DONE for M0 | [EXT-003 evidence](evidence/EXT-003.md): reviewed fill/manual-edit protections and passive observation pass; owner-confirmed local fill; four public forms/two hosts inspected read-only | Codex, October 12, 2026 |
 
 Local document review passed on October 12, 2026: 21 active Markdown documents, 56 existing local links, 52 unique tasks with valid references and an acyclic dependency graph, and all 13 functional requirements mapped. Active-file whitespace and `git diff --check` passed. The original reference documents are archival and excluded from active-contract checks. These checks do not replace any future runtime verification command in TESTING.
 

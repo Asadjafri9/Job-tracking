@@ -1,6 +1,6 @@
 (() => {
-  if (globalThis.__asterContentInstalled) return;
-  globalThis.__asterContentInstalled = true;
+  if (globalThis.__rolevoContentInstalled) return;
+  globalThis.__rolevoContentInstalled = true;
   const { normalizeSelectedForm, snapshotControl } = globalThis.ExtensionExtraction;
   const { normalizeContextHandles, isOpaqueHandle } = globalThis.ExtensionExtraction;
   const forms = new Map();
@@ -235,10 +235,10 @@
 
   chrome.runtime.onMessage.addListener((message, sender, respond) => {
     if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("worker.js")) return false;
-    if (message?.type === "aster-list-forms") { respond(listForms(message.tab_handle)); return false; }
-    if (message?.type === "aster-inspect-form") { respond(inspectForm(message.form_id, message.context_handles)); return false; }
-    if (message?.type === "aster-get-selected-job-text") { respond(selectedJobText(message.context_handles)); return false; }
-    if (message?.type === "aster-apply-reviewed-values") {
+    if (message?.type === "rolevo-list-forms") { respond(listForms(message.tab_handle)); return false; }
+    if (message?.type === "rolevo-inspect-form") { respond(inspectForm(message.form_id, message.context_handles)); return false; }
+    if (message?.type === "rolevo-get-selected-job-text") { respond(selectedJobText(message.context_handles)); return false; }
+    if (message?.type === "rolevo-apply-reviewed-values") {
       applyReviewedValues(message.entries, message.context_handles).then(respond).catch(() => respond({ error: "fill_failed" }));
       return true;
     }
