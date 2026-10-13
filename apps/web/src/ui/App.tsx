@@ -5,6 +5,7 @@ import { DocumentsPage } from "./documents";
 import { EmailPage } from "./email";
 import { LandingPage } from "./Landing";
 import { navigation, resolvePage, type Page } from "./navigation";
+import { PrivacyPage } from "./privacy";
 import { ProfilePage } from "./profile";
 import { ProvidersPage } from "./providers";
 
@@ -65,6 +66,11 @@ function Icon({ name }: { name: string }) {
       <>
         <path d="M7 3h7l5 5v13H7z" />
         <path d="M14 3v5h5M10 13h6M10 17h6" />
+      </>
+    ),
+    shield: (
+      <>
+        <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z" />
       </>
     ),
   };
@@ -268,6 +274,8 @@ export function App() {
             <ProfilePage csrf={account.csrf} signedIn />
           ) : page === "documents" ? (
             <DocumentsPage csrf={account.csrf} signedIn />
+          ) : page === "privacy" ? (
+            <PrivacyPage csrf={account.csrf} signedIn />
           ) : (
             <section
               className="placeholder"

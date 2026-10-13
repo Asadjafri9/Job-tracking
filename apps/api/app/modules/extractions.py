@@ -190,8 +190,8 @@ def run_extraction(
         )
         if document is None:
             raise HTTPException(status_code=404, detail="Document not found")
-        payload = ExtractionInput(
-            document_type=document.document_type, sections=sections
+        payload = ExtractionInput.model_validate(
+            {"document_type": document.document_type, "sections": sections}
         ).model_dump()
         try:
             result = run_operation(

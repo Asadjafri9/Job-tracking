@@ -10,13 +10,15 @@ diff in a second owner transaction.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from uuid import NAMESPACE_URL, uuid5
 
-from sqlalchemy import create_engine, delete, or_, select
+import sqlalchemy as sa
+from sqlalchemy import create_engine, delete, or_, select, update
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session as OrmSession
 
@@ -25,10 +27,15 @@ from app.config import get_settings
 from app.db.connection import sqlalchemy_url
 from app.db.jobs import enqueue_job
 from app.db.models import (
+    ApplicationSession,
+    DeletionJournal,
     Document,
     DocumentExtraction,
+    EmailDraft,
+    ExportArtifact,
     ExtensionGrant,
     IdempotencyRecord,
+    Job,
     MonitoredSource,
     MonitoringRun,
     QuotaReservation,
@@ -44,6 +51,7 @@ from app.monitoring.fetch import (
     FetchUnsupported,
 )
 from app.monitoring.scan import apply_scan_outcome, begin_run, record_fetch_failure
+from app.privacy.exporting import build_export_zip
 from app.storage.blob import DocumentStorage, StorageError, document_storage
 from app.worker.parsing import (
     PARSE_VERSION,
@@ -62,6 +70,12 @@ PARSE_JOB_REFERENCE_TYPE = "document"
 EXTRACT_JOB_KIND = "document.extract_candidates"
 EXTRACT_JOB_REFERENCE_TYPE = "document_extraction"
 BLOB_CLEANUP_JOB_KIND = "document.blob_cleanup"
+EXPORT_JOB_KIND = "privacy.export"
+EXPORT_JOB_REFERENCE_TYPE = "export_artifact"
+DELETE_JOB_KIND = "privacy.account_delete"
+EXPORT_DOWNLOAD_TTL = timedelta(hours=24)
+BUILD_TIMEOUT = timedelta(hours=1)
+DRAFT_RETENTION = timedelta(days=30)
 SOURCE_STALE_REASON = "source_schedule_or_consent_changed"
 
 OwnerWork = Callable[[OrmSession, JobContext], None]
@@ -76,10 +90,30 @@ def _document_storage() -> DocumentStorage:
     return document_storage()
 
 
+def _owner_state(session: OrmSession) -> str | None:
+    """The job owner's current account state through the self-scoped view."""
+    state = session.scalar(
+        sa.text("SELECT state FROM copilot_current_user LIMIT 1")
+    )
+    return state if isinstance(state, str) else None
+
+
 def _claim_scan(session: OrmSession, context: JobContext) -> MonitoringRun | None:
     """Revalidate a dispatched run before any fetch/provider work."""
     if context.reference_type != SCAN_JOB_REFERENCE_TYPE or context.reference_id is None:
         raise ValueError("scan jobs must reference a monitoring run")
+    if _owner_state(session) != "ACTIVE":
+        run = session.scalar(
+            select(MonitoringRun).where(
+                MonitoringRun.id == context.reference_id,
+                MonitoringRun.user_id == context.owner_id,
+            )
+        )
+        if run is not None and run.state == "QUEUED":
+            run.state = "CANCELED"
+            run.started_at = run.ended_at = datetime.now(UTC)
+            run.redacted_error = "account_not_active"
+        return None
     run = session.scalar(
         select(MonitoringRun)
         .where(
@@ -162,6 +196,11 @@ async def handle_daily_scan(context: JobContext, _stopped: asyncio.Event) -> Non
             )
             if run.state != "RUNNING" or source is None:
                 return
+            if _owner_state(session) != "ACTIVE":
+                run.state = "CANCELED"
+                run.ended_at = datetime.now(UTC)
+                run.redacted_error = "account_not_active"
+                return
             if source.state == "DELETED" or source.revision != run.schedule_revision:
                 run.state = "CANCELED"
                 run.ended_at = datetime.now(UTC)
@@ -175,8 +214,13 @@ async def handle_daily_scan(context: JobContext, _stopped: asyncio.Event) -> Non
     await asyncio.to_thread(execute)
 
 
-def _owner_cleanup(session: OrmSession, context: JobContext) -> None:
-    """Purge expired ephemeral records owned by the job's verified owner."""
+def _owner_cleanup(session: OrmSession, context: JobContext) -> list[str]:
+    """Purge expired ephemeral records owned by the job's verified owner.
+
+    Returns artifact storage keys whose blobs must be deleted after commit;
+    the job is restart-safe because unprocessed work simply remains for the
+    next tick.
+    """
     now = datetime.now(UTC)
     session.execute(
         delete(ExtensionGrant).where(
@@ -206,6 +250,60 @@ def _owner_cleanup(session: OrmSession, context: JobContext) -> None:
             QuotaReservation.expires_at <= now,
         )
     )
+    session.execute(
+        update(ApplicationSession)
+        .where(
+            ApplicationSession.user_id == context.owner_id,
+            ApplicationSession.expires_at.is_not(None),
+            ApplicationSession.expires_at <= now,
+            ApplicationSession.state.in_(
+                ["PREPARED", "ANALYZING", "READY_TO_REVIEW"]
+            ),
+        )
+        .values(state="ABANDONED")
+    )
+    session.execute(
+        update(EmailDraft)
+        .where(
+            EmailDraft.user_id == context.owner_id,
+            EmailDraft.state.in_(["DRAFT", "READY_FOR_REVIEW", "COMPOSE_OPENED"]),
+            EmailDraft.updated_at <= now - DRAFT_RETENTION,
+        )
+        .values(state="CANCELED")
+    )
+    session.execute(
+        update(Job)
+        .where(
+            Job.user_id == context.owner_id,
+            Job.state == "QUEUED",
+            Job.expires_at.is_not(None),
+            Job.expires_at <= now,
+        )
+        .values(state="CANCELED", stage="expired")
+    )
+    stale_builds = session.scalars(
+        select(ExportArtifact).where(
+            ExportArtifact.user_id == context.owner_id,
+            ExportArtifact.state == "BUILDING",
+            ExportArtifact.created_at <= now - BUILD_TIMEOUT,
+        )
+    ).all()
+    for artifact in stale_builds:
+        artifact.state = "EXPIRED"
+        artifact.redacted_error = "build_timeout"
+    expired = session.scalars(
+        select(ExportArtifact).where(
+            ExportArtifact.user_id == context.owner_id,
+            ExportArtifact.state == "READY",
+            ExportArtifact.expires_at <= now,
+        )
+    ).all()
+    keys: list[str] = []
+    for artifact in expired:
+        artifact.state = "EXPIRED"
+        if artifact.storage_key:
+            keys.append(artifact.storage_key)
+    return keys
 
 
 def _parse_document(session: OrmSession, context: JobContext, result: ParseResult) -> None:
@@ -283,7 +381,20 @@ async def _run_owner_scoped(context: JobContext, work: OwnerWork) -> None:
 
 
 async def handle_owner_cleanup(context: JobContext, _stopped: asyncio.Event) -> None:
-    await _run_owner_scoped(context, _owner_cleanup)
+    keys: list[str] = []
+
+    def execute() -> None:
+        nonlocal keys
+        with tenant_session(_runtime_engine(), context.owner_id) as session:
+            keys = _owner_cleanup(session, context)
+
+    await asyncio.to_thread(execute)
+    storage = _document_storage()
+    for key in keys:
+        try:
+            storage.delete(key)
+        except StorageError:
+            logger.warning("expired export blob cleanup failed: %s", key)
 
 
 async def handle_document_parse(context: JobContext, _stopped: asyncio.Event) -> None:
@@ -431,6 +542,159 @@ async def handle_blob_cleanup(context: JobContext, _stopped: asyncio.Event) -> N
     await asyncio.to_thread(execute)
 
 
+async def handle_export(context: JobContext, _stopped: asyncio.Event) -> None:
+    """Build the owner-scoped export ZIP and publish a private artifact.
+
+    The snapshot is assembled inside one owner transaction so all exported
+    rows are consistent; the artifact only becomes READY after the blob is
+    written and the owner is still ACTIVE at publish time.
+    """
+    if context.reference_type != EXPORT_JOB_REFERENCE_TYPE or context.reference_id is None:
+        raise ValueError("export jobs must reference an export artifact")
+
+    def execute() -> None:
+        storage = _document_storage()
+        with tenant_session(_runtime_engine(), context.owner_id) as session:
+            artifact = session.scalar(
+                select(ExportArtifact)
+                .where(
+                    ExportArtifact.id == context.reference_id,
+                    ExportArtifact.user_id == context.owner_id,
+                )
+                .with_for_update()
+            )
+            if artifact is None or artifact.state != "BUILDING":
+                return
+            if _owner_state(session) != "ACTIVE":
+                artifact.state = "DELETED"
+                artifact.redacted_error = "account_not_active"
+                return
+            zip_bytes, _checksums = build_export_zip(
+                session, context.owner_id, blob_getter=storage.get
+            )
+            storage_key = f"exports/{context.owner_id}/{artifact.id}.zip"
+            try:
+                storage.put(storage_key, zip_bytes, "application/zip")
+            except StorageError:
+                # A crashed attempt can leave an orphaned blob at this key;
+                # ZIP bytes differ per build, so remove it and rewrite.
+                storage.delete(storage_key)
+                storage.put(storage_key, zip_bytes, "application/zip")
+            # Recheck before publication: a deletion or suspension that
+            # began while the ZIP was being assembled must not publish.
+            if _owner_state(session) != "ACTIVE":
+                artifact.state = "DELETED"
+                artifact.redacted_error = "account_not_active"
+                return
+            artifact.storage_key = storage_key
+            artifact.size_bytes = len(zip_bytes)
+            artifact.sha256 = hashlib.sha256(zip_bytes).hexdigest()
+            artifact.expires_at = datetime.now(UTC) + EXPORT_DOWNLOAD_TTL
+            artifact.state = "READY"
+
+    await asyncio.to_thread(execute)
+
+
+_DELETE_TABLES = (
+    "notifications",
+    "discovered_jobs",
+    "monitoring_runs",
+    "monitored_sources",
+    "application_answers",
+    "application_status_events",
+    "submission_events",
+    "applications",
+    "application_sessions",
+    "email_draft_events",
+    "email_draft_documents",
+    "email_drafts",
+    "ai_attempts",
+    "ai_operations",
+    "provider_routes",
+    "provider_credentials",
+    "provider_settings",
+    "document_extractions",
+    "documents",
+    "profile_fact_versions",
+    "profile_facts",
+    "profiles",
+    "export_artifacts",
+    "extension_grants",
+    "sessions",
+    "idempotency_records",
+    "quota_reservations",
+    "audit_events",
+    "jobs",
+)
+
+
+async def handle_account_delete(context: JobContext, _stopped: asyncio.Event) -> None:
+    """Stage 2: erase owned data and tombstone identity after the journal.
+
+    The independent journal row written by the API endpoint is the receipt;
+    it must exist before any deletion runs. Document and export blobs are
+    collected first and deleted outside the transaction, then all owned
+    rows are removed in FK-safe order and the user row is tombstoned. Late
+    results cannot repopulate data because handlers re-check owner state.
+    """
+    owner_hash = hashlib.sha256(str(context.owner_id).encode()).hexdigest()
+
+    def collect_keys() -> list[str]:
+        with tenant_session(_runtime_engine(), context.owner_id) as session:
+            journal = session.scalar(
+                select(DeletionJournal).where(
+                    DeletionJournal.user_id_hash == owner_hash
+                )
+            )
+            if journal is None:
+                raise ValueError("deletion journal missing; refusing deletion")
+            keys = session.scalars(
+                select(Document.storage_key).where(
+                    Document.user_id == context.owner_id
+                )
+            ).all()
+            keys = list(keys)
+            keys += [
+                key
+                for key in session.scalars(
+                    select(ExportArtifact.storage_key).where(
+                        ExportArtifact.user_id == context.owner_id,
+                        ExportArtifact.storage_key.is_not(None),
+                    )
+                ).all()
+                if key is not None
+            ]
+            return keys
+
+    keys = await asyncio.to_thread(collect_keys)
+    storage = _document_storage()
+    for key in keys:
+        try:
+            storage.delete(key)
+        except StorageError:
+            logger.warning("account deletion blob cleanup failed: %s", key)
+
+    def delete_data() -> None:
+        with tenant_session(_runtime_engine(), context.owner_id) as session:
+            state = _owner_state(session)
+            if state == "DELETED":
+                return
+            if state != "DELETING":
+                logger.warning(
+                    "account deletion skipped: owner %s state %s", context.owner_id, state
+                )
+                return
+            for table in _DELETE_TABLES:
+                session.execute(
+                    sa.text(f'DELETE FROM "{table}" WHERE user_id = :owner'),
+                    {"owner": context.owner_id},
+                )
+            session.execute(sa.text("SELECT copilot_tombstone_user()"))
+            session.flush()
+
+    await asyncio.to_thread(delete_data)
+
+
 def register_builtin_handlers() -> None:
     """Register durable workload handlers once per worker process."""
     if SCAN_JOB_KIND not in HANDLERS:
@@ -443,3 +707,7 @@ def register_builtin_handlers() -> None:
         register(EXTRACT_JOB_KIND, handle_extract_candidates)
     if BLOB_CLEANUP_JOB_KIND not in HANDLERS:
         register(BLOB_CLEANUP_JOB_KIND, handle_blob_cleanup)
+    if EXPORT_JOB_KIND not in HANDLERS:
+        register(EXPORT_JOB_KIND, handle_export)
+    if DELETE_JOB_KIND not in HANDLERS:
+        register(DELETE_JOB_KIND, handle_account_delete)

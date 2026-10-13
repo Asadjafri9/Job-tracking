@@ -39,15 +39,19 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 
 **M4 is IN_PROGRESS with the email application workflow implemented and locally verified.** Owner-scoped versioned email drafts (recipient/header validation, confirmed EMAIL-purpose fact snapshots, consent-gated generation, `If-Match` edits), the Gmail compose handoff (fixed origin, verified encoding, 6,000-char copy fallback, no OAuth/send), and honest send tracking (compose-opened is never Applied; explicit dated confirmation idempotently creates one EMAIL application with an immutable snapshot) all pass: 7 new API tests, 149 total API tests, 15 web tests, contracts regenerated. **No Gmail OAuth, real sending, or live provider call was performed.** See [M4 evidence](evidence/M4.md).
 
-Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
-
 ## M5 progress
 
 **M5 is IN_PROGRESS with the monitoring pipeline implemented and locally verified.** Monitored-source CRUD with ≤five cap, consent-revision scheduling, pause/resume/remove and 3/day check-now; the bounded public fetch boundary (SSRF/DNS-pinning/redirect/robots/byte/time guards); JSON-LD/RSS/Atom/anchor extraction; the claim→fetch→apply scan pipeline with canonical-URL dedupe, meaningful-revision diffs and two-complete-scan closure; and the Job alerts UI with notifications badge/list and run history all pass: 48 monitoring unit tests, 17 PostgreSQL API/pipeline tests, 214 total API tests, contracts regenerated. **No live career page, ATS endpoint, DNS/TLS fetch, or AI matching call was performed; deterministic matching only.** See [M5 evidence](evidence/M5.md).
 
+## M6 progress
+
+**M6 is IN_PROGRESS with the privacy lifecycle implemented and locally verified.** DATA-001/002/003 are done locally: cleanup now expires application sessions, stale drafts, expired jobs and export artifacts; `privacy.export` builds a manifest/checksum ZIP inside one owner transaction with a double secret deny-list, formula-safe CSV, sanitized member names and a private 24-hour download; account deletion requires fresh auth + typed consent, revokes sessions/keys/schedules/jobs and writes the independent journal before acknowledging, then a durable stage-2 job erases owned data and tombstones identity through self-scoped view/SECURITY DEFINER functions (users stays outside tenant RLS for auth bootstrap). The new `#privacy` page covers exports and the deletion flow. Verified: 14 new tests (5 unit + 9 role-backed), 245 total API tests, web checks, `alembic check`, regenerated contracts. QA-001–003 are partially evidenced — key-canary/live-provider adversarial runs, formal perf gates, fresh assistive-tech review and beta runbooks remain open. **No Azure, provider, Gmail or Chrome contact.** See [M6 evidence](evidence/M6.md).
+
+Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
+
 ## Next implementation action
 
-Proceed to M6 — Privacy, reliability and quality — following the dependency order in [`TASKS.md`](TASKS.md). M5 implementation does not mean the product is ready to deploy.
+Proceed to M7 — future Azure private beta — following the dependency order in [`TASKS.md`](TASKS.md). M6 implementation does not mean the product is ready to deploy.
 
 ## Evidence ledger
 

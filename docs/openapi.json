@@ -947,6 +947,67 @@
         "title": "DefaultWrite",
         "type": "object"
       },
+      "DeleteReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "journal_hmac": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Hmac"
+          },
+          "operation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operation Id"
+          },
+          "receipt_expires_at": {
+            "format": "date-time",
+            "title": "Receipt Expires At",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation_id",
+          "state",
+          "journal_hmac",
+          "receipt_expires_at"
+        ],
+        "title": "DeleteReceipt",
+        "type": "object"
+      },
+      "DeleteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmation": {
+            "const": "DELETE",
+            "description": "Type DELETE to confirm irreversible account deletion",
+            "title": "Confirmation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirmation"
+        ],
+        "title": "DeleteRequest",
+        "type": "object"
+      },
       "DocumentList": {
         "properties": {
           "documents": {
@@ -1478,6 +1539,77 @@
           "event_idempotency_key"
         ],
         "title": "EventRequest",
+        "type": "object"
+      },
+      "ExportList": {
+        "additionalProperties": false,
+        "properties": {
+          "exports": {
+            "items": {
+              "$ref": "#/components/schemas/ExportView"
+            },
+            "title": "Exports",
+            "type": "array"
+          }
+        },
+        "required": [
+          "exports"
+        ],
+        "title": "ExportList",
+        "type": "object"
+      },
+      "ExportView": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "boolean"
+          },
+          "sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sha256"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "size_bytes",
+          "sha256",
+          "expires_at",
+          "created_at",
+          "ready"
+        ],
+        "title": "ExportView",
         "type": "object"
       },
       "ExtensionExchange": {
@@ -3426,6 +3558,66 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/account/deletion": {
+      "get": {
+        "operationId": "deletion_status_api_v1_account_deletion_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Deletion Status",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "post": {
+        "operationId": "request_deletion_api_v1_account_deletion_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request Deletion",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
     "/api/v1/application-sessions": {
       "get": {
         "operationId": "list_sessions_api_v1_application_sessions_get",
@@ -4818,6 +5010,87 @@
         "summary": "Generate Draft",
         "tags": [
           "email"
+        ]
+      }
+    },
+    "/api/v1/export-requests": {
+      "get": {
+        "operationId": "list_exports_api_v1_export_requests_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Exports",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "post": {
+        "operationId": "request_export_api_v1_export_requests_post",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Request Export",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/export-requests/{export_id}/download": {
+      "get": {
+        "operationId": "download_export_api_v1_export_requests__export_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "export_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Export Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Export",
+        "tags": [
+          "privacy"
         ]
       }
     },

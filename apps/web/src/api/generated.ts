@@ -4,6 +4,24 @@
  */
 
 export interface paths {
+    "/api/v1/account/deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Deletion Status */
+        get: operations["deletion_status_api_v1_account_deletion_get"];
+        put?: never;
+        /** Request Deletion */
+        post: operations["request_deletion_api_v1_account_deletion_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/application-sessions": {
         parameters: {
             query?: never;
@@ -382,6 +400,41 @@ export interface paths {
         put?: never;
         /** Generate Draft */
         post: operations["generate_draft_api_v1_email_drafts__draft_id__generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/export-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Exports */
+        get: operations["list_exports_api_v1_export_requests_get"];
+        put?: never;
+        /** Request Export */
+        post: operations["request_export_api_v1_export_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/export-requests/{export_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Export */
+        get: operations["download_export_api_v1_export_requests__export_id__download_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1168,6 +1221,29 @@ export interface components {
              */
             is_default: boolean;
         };
+        /** DeleteReceipt */
+        DeleteReceipt: {
+            /** Journal Hmac */
+            journal_hmac: string | null;
+            /** Operation Id */
+            operation_id: string | null;
+            /**
+             * Receipt Expires At
+             * Format: date-time
+             */
+            receipt_expires_at: string;
+            /** State */
+            state: string;
+        };
+        /** DeleteRequest */
+        DeleteRequest: {
+            /**
+             * Confirmation
+             * @description Type DELETE to confirm irreversible account deletion
+             * @constant
+             */
+            confirmation: "DELETE";
+        };
         /** DocumentList */
         DocumentList: {
             /** Documents */
@@ -1369,6 +1445,37 @@ export interface components {
              * Format: uuid
              */
             event_idempotency_key: string;
+        };
+        /** ExportList */
+        ExportList: {
+            /** Exports */
+            exports: components["schemas"]["ExportView"][];
+        };
+        /** ExportView */
+        ExportView: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Ready */
+            ready: boolean;
+            /** Sha256 */
+            sha256: string | null;
+            /** Size Bytes */
+            size_bytes: number;
+            /** State */
+            state: string;
         };
         /** ExtensionExchange */
         ExtensionExchange: {
@@ -2063,6 +2170,59 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    deletion_status_api_v1_account_deletion_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteReceipt"];
+                };
+            };
+        };
+    };
+    request_deletion_api_v1_account_deletion_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteReceipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_sessions_api_v1_application_sessions_get: {
         parameters: {
             query?: {
@@ -2975,6 +3135,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GenerateView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_exports_api_v1_export_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportList"];
+                };
+            };
+        };
+    };
+    request_export_api_v1_export_requests_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportView"];
+                };
+            };
+        };
+    };
+    download_export_api_v1_export_requests__export_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                export_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

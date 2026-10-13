@@ -83,12 +83,12 @@ Every task starts NOT_STARTED. Statuses: NOT_STARTED, IN_PROGRESS, BLOCKED, IN_R
 
 | ID | Depends | Planned files | Acceptance / verification |
 | --- | --- | --- | --- |
-| DATA-001 | JOB-001, DOC-003, KEY-002, MON-004 | lifecycle/cleanup/cancel stages | docs/keys/sources removals stop use/jobs, cleanup bounded/restart safe, expired sessions/drafts/outbox/artifacts handled. V-B, V-S |
-| DATA-002 | DATA-001, MAIL-003, TRACK-003 | export v2/snapshot/ZIP/privacy UI | full three-pillar data/originals/checksums, safe CSV/ZIP, consistent concurrency, private 24 h artifact, no key material. V-E, V-S |
-| DATA-003 | DATA-001–002, AUTH-004 | account delete/journal/receipt/identity operator command | fresh auth/typed consent, immediate session/key/schedule revocation, journal before ack, cancel/late-result guard, visible identity stage/completion. V-E, V-S |
-| QA-001 | DATA-003, AI-004, MON-004, MAIL-003, TRACK-003 | adversarial/three-pillar E2E/security | actual-role owner isolation, key canaries, parser/source SSRF/prompt races, provider unknown/outage, submit/email false-confirm negatives. V-S, V-E |
-| QA-002 | QA-001 | performance/accessibility/fake-clock reports | declared dataset/gates/denominators, worker/scheduler doesn't block API; keyboard/screenreader/360px core paths. V-P, accessibility smoke |
-| QA-003 | QA-001–002 | fresh install/limitations/contracts/evidence | current+previous compatible clients, exact fallback/source limits, private beta docs/operator runbooks, no fake completion claims. V-F, V-B, V-C, V-X, V-E |
+| DATA-001 | JOB-001, DOC-003, KEY-002, MON-004 | lifecycle/cleanup/cancel stages | **Status: DONE for M6 local.** owner_cleanup abandons expired app sessions, cancels stale drafts/expired jobs, expires stuck/old export artifacts + blobs; scan publish re-checks owner ACTIVE. V-B, V-S. [Evidence](evidence/M6.md) |
+| DATA-002 | DATA-001, MAIL-003, TRACK-003 | export v2/snapshot/ZIP/privacy UI | **Status: DONE for M6 local.** Durable `privacy.export` job builds manifest/checksum ZIP in one owner tx, double secret deny-list, safe CSV/member names, private 24 h download; request/list/download API + privacy UI. V-E, V-S. [Evidence](evidence/M6.md) |
+| DATA-003 | DATA-001–002, AUTH-004 | account delete/journal/receipt/identity operator command | **Status: DONE for M6 local.** fresh-auth + typed consent, stage-1 revocation of sessions/keys/schedules/jobs with independent journal before ack, `privacy.account_delete` stage-2 erase + tombstone via SECURITY DEFINER functions, late-result guards. V-E, V-S. [Evidence](evidence/M6.md) |
+| QA-001 | DATA-003, AI-004, MON-004, MAIL-003, TRACK-003 | adversarial/three-pillar E2E/security | **Status: IN_PROGRESS.** Actual-role isolation and deletion/export negatives covered by role-backed tests; key-canary, prompt-race and live-provider-outage runs still open (no live providers). V-S, V-E. [Evidence](evidence/M6.md) |
+| QA-002 | QA-001 | performance/accessibility/fake-clock reports | **Status: IN_PROGRESS.** Declared denominators only (245 tests ≈ 22 s); no formal perf gates or fresh assistive-tech run yet. V-P, accessibility smoke. [Evidence](evidence/M6.md) |
+| QA-003 | QA-001–002 | fresh install/limitations/contracts/evidence | **Status: IN_PROGRESS.** Contracts regenerated and verified; limitations recorded in evidence; private-beta runbooks pending. V-F, V-B, V-C, V-X, V-E. [Evidence](evidence/M6.md) |
 
 ## M7 — Future Azure private beta
 
