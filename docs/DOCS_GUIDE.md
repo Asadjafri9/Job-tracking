@@ -27,8 +27,8 @@ The PRD states what the product should do. DECISIONS records choices and their r
 | [PRD.md](PRD.md) | Product scope, users, functional requirements, and acceptance criteria. |
 | [DECISIONS.md](DECISIONS.md) | Accepted technical and product decisions, defaults, and recorded changes. |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System components, boundaries, and how data or requests move between them. |
-| [DESIGN_BRIEF.md](DESIGN_BRIEF.md) | Proposed Aster visual direction, information architecture, screen behavior, accessibility, and design validation; not an approved final brand. |
-| [DESIGN_RECONCILIATION.md](DESIGN_RECONCILIATION.md) | DGN-001 comparison of the proposed design with active product/security contracts and the owner decisions still open. |
+| [DESIGN_BRIEF.md](DESIGN_BRIEF.md) | Rolevo visual direction, information architecture, screen behavior, accessibility, and design validation; public trademark clearance is not claimed. |
+| [DESIGN_RECONCILIATION.md](DESIGN_RECONCILIATION.md) | DGN-001 comparison of the Rolevo design with active product/security contracts and the owner decisions still open. |
 | [API.md](API.md) | HTTP and browser-client routes, payloads, errors, authentication, and compatibility contracts. |
 | [DATABASE.md](DATABASE.md) | Data entities, ownership, constraints, indexes, revisions, and migration expectations. |
 | [SECURITY_PRIVACY.md](SECURITY_PRIVACY.md) | Threats, privacy boundaries, controls, consent, and the evidence needed to validate them. |

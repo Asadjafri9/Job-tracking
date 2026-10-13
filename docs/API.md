@@ -2,7 +2,7 @@
 
 FastAPI Pydantic/OpenAPI is authoritative at `/api/v1/openapi.json`; run `pnpm generate:contracts` to refresh `docs/openapi.json` and the generated TypeScript contract, and `pnpm verify:contracts` to check for drift. Prefix `/api/v1`, snake_case JSON, UUIDs, RFC3339 UTC instants, ISO dates. Unknown writable fields rejected. Protected requests derive owner from app session, require ACTIVE account and CSRF/exact Origin for cookie mutations. Extension uses opaque bearer token plus exact Origin/version. Owner-scoped resources return 404 for another user.
 
-This document records the target API contract, including routes that are still backlog items. Use generated OpenAPI and `docs/TASKS.md` to distinguish implemented endpoints from planned ones; only the metadata and current auth/credential routes are implemented in this milestone. The checked-in OpenAPI and TypeScript snapshots have not yet been regenerated for those routes because the API environment dependencies are unavailable.
+This document records the target API contract, including routes that are still backlog items. Use generated OpenAPI and `docs/TASKS.md` to distinguish implemented endpoints from planned ones; only the metadata and current auth/credential routes are implemented in this milestone.
 
 ## Shared response behavior
 

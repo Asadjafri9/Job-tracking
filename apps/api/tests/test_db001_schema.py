@@ -120,6 +120,185 @@ def test_synthetic_seed_is_idempotent() -> None:
         )
 
 
+def test_source_deletion_preserves_application_history_and_event_cascades() -> None:
+    user_id, session_id, web_application_id = uuid4(), uuid4(), uuid4()
+    draft_id, email_application_id, event_id = uuid4(), uuid4(), uuid4()
+    now = datetime.now(UTC)
+    with engine.connect() as connection:
+        transaction = connection.begin()
+        connection.execute(
+            text(
+                "INSERT INTO users (id, issuer, subject, directory_object_id, "
+                "login_email, login_email_verified) VALUES "
+                "(:id, :issuer, :subject, :directory_id, :email, true)"
+            ),
+            {
+                "id": user_id,
+                "issuer": "urn:db001:lifecycle",
+                "subject": str(user_id),
+                "directory_id": uuid4(),
+                "email": f"{user_id}@example.test",
+            },
+        )
+        connection.execute(
+            text(
+                "INSERT INTO application_sessions (id, user_id, profile_revision, "
+                "context_revision) VALUES (:id, :user_id, 1, 1)"
+            ),
+            {"id": session_id, "user_id": user_id},
+        )
+        connection.execute(
+            text(
+                "INSERT INTO applications (id, user_id, channel, employer, role, "
+                "application_session_id, context_snapshot) VALUES "
+                "(:id, :user_id, 'WEB_FORM', 'Example', 'Engineer', :session_id, "
+                "CAST(:snapshot AS jsonb))"
+            ),
+            {
+                "id": web_application_id,
+                "user_id": user_id,
+                "session_id": session_id,
+                "snapshot": json.dumps({"reviewed": True}),
+            },
+        )
+        connection.execute(
+            text("DELETE FROM application_sessions WHERE id = :id"), {"id": session_id}
+        )
+        web_history = connection.execute(
+            text(
+                "SELECT application_session_id, context_snapshot FROM applications WHERE id = :id"
+            ),
+            {"id": web_application_id},
+        ).one()
+        assert web_history.application_session_id is None
+        assert web_history.context_snapshot == {"reviewed": True}
+
+        connection.execute(
+            text(
+                "INSERT INTO email_drafts (id, user_id, recipient_email, employer, role, "
+                "subject, body) VALUES (:id, :user_id, 'jobs@example.test', 'Example', "
+                "'Designer', 'Application', 'Reviewed draft')"
+            ),
+            {"id": draft_id, "user_id": user_id},
+        )
+        connection.execute(
+            text(
+                "INSERT INTO applications (id, user_id, channel, employer, role, "
+                "email_draft_id, context_snapshot) VALUES (:id, :user_id, 'EMAIL', "
+                "'Example', 'Designer', :draft_id, CAST(:snapshot AS jsonb))"
+            ),
+            {
+                "id": email_application_id,
+                "user_id": user_id,
+                "draft_id": draft_id,
+                "snapshot": json.dumps({"draft": "snapshot"}),
+            },
+        )
+        connection.execute(
+            text(
+                "INSERT INTO email_draft_events (id, user_id, email_draft_id, application_id, "
+                "event_idempotency_key, event_type, draft_revision, occurred_at) VALUES "
+                "(:id, :user_id, :draft_id, :application_id, :event_key, 'COMPOSE_OPENED', 1, :now)"
+            ),
+            {
+                "id": event_id,
+                "user_id": user_id,
+                "draft_id": draft_id,
+                "application_id": email_application_id,
+                "event_key": uuid4(),
+                "now": now,
+            },
+        )
+        with pytest.raises(DBAPIError):
+            with connection.begin_nested():
+                connection.execute(
+                    text("UPDATE email_draft_events SET evidence = '{}'::jsonb WHERE id = :id"),
+                    {"id": event_id},
+                )
+        connection.execute(text("DELETE FROM email_drafts WHERE id = :id"), {"id": draft_id})
+        email_history = connection.execute(
+            text("SELECT email_draft_id, context_snapshot FROM applications WHERE id = :id"),
+            {"id": email_application_id},
+        ).one()
+        assert email_history.email_draft_id is None
+        assert email_history.context_snapshot == {"draft": "snapshot"}
+        assert connection.scalar(
+            text("SELECT count(*) FROM email_draft_events WHERE id = :id"), {"id": event_id}
+        ) == 0
+
+        unlink_draft_id, unlink_app_id, unlink_event_id = uuid4(), uuid4(), uuid4()
+        connection.execute(
+            text(
+                "INSERT INTO email_drafts (id, user_id, recipient_email, employer, role, "
+                "subject, body) VALUES (:id, :user_id, 'jobs@example.test', 'Example', "
+                "'Researcher', 'Application', 'Reviewed draft')"
+            ),
+            {"id": unlink_draft_id, "user_id": user_id},
+        )
+        connection.execute(
+            text(
+                "INSERT INTO applications (id, user_id, channel, employer, role, email_draft_id) "
+                "VALUES (:id, :user_id, 'EMAIL', 'Example', 'Researcher', :draft_id)"
+            ),
+            {"id": unlink_app_id, "user_id": user_id, "draft_id": unlink_draft_id},
+        )
+        connection.execute(
+            text(
+                "INSERT INTO email_draft_events (id, user_id, email_draft_id, application_id, "
+                "event_idempotency_key, event_type, draft_revision, occurred_at) VALUES "
+                "(:id, :user_id, :draft_id, :application_id, :event_key, 'COMPOSE_OPENED', 1, :now)"
+            ),
+            {
+                "id": unlink_event_id,
+                "user_id": user_id,
+                "draft_id": unlink_draft_id,
+                "application_id": unlink_app_id,
+                "event_key": uuid4(),
+                "now": now,
+            },
+        )
+        connection.execute(text("DELETE FROM applications WHERE id = :id"), {"id": unlink_app_id})
+        assert connection.scalar(
+            text("SELECT application_id FROM email_draft_events WHERE id = :id"),
+            {"id": unlink_event_id},
+        ) is None
+        connection.execute(text("DELETE FROM email_drafts WHERE id = :id"), {"id": unlink_draft_id})
+        assert connection.scalar(
+            text("SELECT count(*) FROM email_draft_events WHERE id = :id"),
+            {"id": unlink_event_id},
+        ) == 0
+
+        account_draft_id, account_event_id = uuid4(), uuid4()
+        connection.execute(
+            text(
+                "INSERT INTO email_drafts (id, user_id, recipient_email, employer, role, "
+                "subject, body) VALUES (:id, :user_id, 'jobs@example.test', 'Example', "
+                "'Account deletion', 'Application', 'Reviewed draft')"
+            ),
+            {"id": account_draft_id, "user_id": user_id},
+        )
+        connection.execute(
+            text(
+                "INSERT INTO email_draft_events (id, user_id, email_draft_id, "
+                "event_idempotency_key, event_type, draft_revision, occurred_at) VALUES "
+                "(:id, :user_id, :draft_id, :event_key, 'COMPOSE_OPENED', 1, :now)"
+            ),
+            {
+                "id": account_event_id,
+                "user_id": user_id,
+                "draft_id": account_draft_id,
+                "event_key": uuid4(),
+                "now": now,
+            },
+        )
+        connection.execute(text("DELETE FROM users WHERE id = :id"), {"id": user_id})
+        assert connection.scalar(
+            text("SELECT count(*) FROM email_draft_events WHERE id = :id"),
+            {"id": account_event_id},
+        ) == 0
+        transaction.rollback()
+
+
 def test_database_rejects_cross_owner_profile_fact_and_oversized_document() -> None:
     owner_a, owner_b, profile_a = uuid4(), uuid4(), uuid4()
     with engine.connect() as connection:

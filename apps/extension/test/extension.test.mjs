@@ -7,9 +7,18 @@ import { fixtureCorpus } from "./fixtures/corpus.mjs";
 await import("../src/extraction.js");
 await import("../src/filling.js");
 await import("../src/observation.js");
+await import("../src/api-origin.js");
 const Extraction = globalThis.ExtensionExtraction;
 const Filling = globalThis.ExtensionFilling;
 const Observation = globalThis.ExtensionObservation;
+const ApiOrigin = globalThis.ExtensionApiOrigin;
+
+test("API origin is extracted from development and production host permissions", () => {
+  assert.equal(ApiOrigin.fromHostPermissions(["http://127.0.0.1:18000/*"]), "http://127.0.0.1:18000");
+  assert.equal(ApiOrigin.fromHostPermissions(["https://api.example.test/*"]), "https://api.example.test");
+  assert.throws(() => ApiOrigin.fromHostPermissions([]), /no API host permission/);
+  assert.throws(() => ApiOrigin.fromHostPermissions(["https://api.example.test/v1/*"]), /origin wildcard/);
+});
 
 class FakeControl {
   constructor({ type = "text", value = "", checked = false, maxLength = -1, valid = true } = {}) {
@@ -151,6 +160,22 @@ test("select inspection and filling cap DOM option reads at thirty", () => {
   reads = 0;
   assert.deepEqual(Filling.setNativeValue(select, "v0"), { applied: false, reason: "unknown_option" });
   assert.equal(reads, 0, "oversize controls are declined before enumerating options");
+});
+
+test("multi-select snapshots use the same array shape as observed fill state", () => {
+  const select = {
+    tagName: "SELECT",
+    multiple: true,
+    options: [],
+    selectedOptions: [{ value: "remote" }, { value: "hybrid" }],
+    value: "remote",
+    disabled: false,
+    readOnly: false,
+  };
+
+  const snapshot = Extraction.snapshotControl({ label: "Work style", type: "select", element: select });
+
+  assert.deepEqual(snapshot.initialState, ["remote", "hybrid"]);
 });
 
 test("context envelope validates opaque tab, document, and optional form handles", () => {

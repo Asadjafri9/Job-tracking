@@ -62,7 +62,9 @@
     const controls = isChoice ? readableChoices.slice(0, MAX_OPTIONS) : [];
     const initialState = controls.length
       ? controls.filter((control) => control.checked).map((control) => String(control.value))
-      : String(element.value ?? "");
+      : type === "select" && element.multiple
+        ? [...element.selectedOptions].map((option) => String(option.value))
+        : String(element.value ?? "");
     return {
       initialState,
       choiceElements: controls,

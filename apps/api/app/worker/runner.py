@@ -15,6 +15,7 @@ from uuid import UUID
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -26,6 +27,7 @@ logger = logging.getLogger("app.worker")
 LEASE_HEARTBEAT = timedelta(seconds=20)
 MAX_RUNTIME = 15 * 60
 MAX_CONCURRENCY = 4
+CLAIM_RETRY_DELAY = 5.0
 
 
 @dataclass(frozen=True)
@@ -74,6 +76,23 @@ def _claim(worker_id: str) -> JobContext | None:
         return _context(job) if job is not None else None
 
 
+def _heartbeat_once(job_id: UUID, worker_id: str) -> bool:
+    with Session(_worker_engine()) as session, session.begin():
+        return heartbeat(session, job_id, worker_id)
+
+
+def _finish(
+    job_id: UUID, worker_id: str, *, state: str, stage: str | None = None
+) -> None:
+    with Session(_worker_engine()) as session, session.begin():
+        finish_job(session, job_id, worker_id, state=state, stage=stage)
+
+
+def _retry(job_id: UUID, worker_id: str, *, delay: timedelta, stage: str) -> None:
+    with Session(_worker_engine()) as session, session.begin():
+        retry_job(session, job_id, worker_id, delay=delay, stage=stage)
+
+
 async def _heartbeat(job: JobContext, worker_id: str, stopped: asyncio.Event) -> None:
     while not stopped.is_set():
         try:
@@ -81,8 +100,11 @@ async def _heartbeat(job: JobContext, worker_id: str, stopped: asyncio.Event) ->
             return
         except TimeoutError:
             pass
-        with Session(_worker_engine()) as session, session.begin():
-            still_owned = heartbeat(session, job.id, worker_id)
+        try:
+            still_owned = await asyncio.to_thread(_heartbeat_once, job.id, worker_id)
+        except SQLAlchemyError:
+            logger.exception("job heartbeat failed; will retry")
+            continue
         if not still_owned:
             stopped.set()
             return
@@ -91,8 +113,9 @@ async def _heartbeat(job: JobContext, worker_id: str, stopped: asyncio.Event) ->
 async def _run_job(job: JobContext, worker_id: str) -> None:
     handler = HANDLERS.get(job.kind)
     if handler is None:
-        with Session(_worker_engine()) as session, session.begin():
-            finish_job(session, job.id, worker_id, state="FAILED", stage="NO_HANDLER")
+        await asyncio.to_thread(
+            _finish, job.id, worker_id, state="FAILED", stage="NO_HANDLER"
+        )
         logger.error("job failed with no handler: kind=%s id=%s", job.kind, job.id)
         return
 
@@ -111,27 +134,30 @@ async def _run_job(job: JobContext, worker_id: str) -> None:
             return
         await handler_task
     except asyncio.CancelledError:
-        with Session(_worker_engine()) as session, session.begin():
-            retry_job(
-                session, job.id, worker_id, delay=timedelta(seconds=0), stage="WORKER_RESTART"
-            )
+        await asyncio.to_thread(
+            _retry,
+            job.id,
+            worker_id,
+            delay=timedelta(seconds=0),
+            stage="WORKER_RESTART",
+        )
         raise
     except Exception as error:
         delay = min(30 * (2 ** max(0, job.attempt - 1)), 1800)
-        with Session(_worker_engine()) as session, session.begin():
-            retry_job(
-                session,
-                job.id,
-                worker_id,
-                delay=timedelta(seconds=delay),
-                stage="RETRYING" if job.attempt < 5 else "RETRY_EXHAUSTED",
-            )
+        await asyncio.to_thread(
+            _retry,
+            job.id,
+            worker_id,
+            delay=timedelta(seconds=delay),
+            stage="RETRYING" if job.attempt < 5 else "RETRY_EXHAUSTED",
+        )
         logger.warning(
             "job attempt failed: kind=%s id=%s error=%s", job.kind, job.id, type(error).__name__
         )
     else:
-        with Session(_worker_engine()) as session, session.begin():
-            finish_job(session, job.id, worker_id, state="SUCCEEDED", stage="COMPLETE")
+        await asyncio.to_thread(
+            _finish, job.id, worker_id, state="SUCCEEDED", stage="COMPLETE"
+        )
     finally:
         stop_heartbeat.set()
         await heartbeat_task
@@ -150,7 +176,15 @@ async def run(stop: asyncio.Event, *, worker_id: str | None = None) -> None:
     while not stop.is_set() or active:
         active = {task for task in active if not task.done()}
         if not stop.is_set() and len(active) < MAX_CONCURRENCY:
-            job = await asyncio.to_thread(_claim, identity)
+            try:
+                job = await asyncio.to_thread(_claim, identity)
+            except SQLAlchemyError:
+                logger.exception("job claim failed; backing off before retry")
+                job = None
+                try:
+                    await asyncio.wait_for(stop.wait(), timeout=CLAIM_RETRY_DELAY)
+                except TimeoutError:
+                    pass
             if job is not None:
                 active.add(asyncio.create_task(run_limited(job)))
                 continue

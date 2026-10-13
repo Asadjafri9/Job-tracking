@@ -69,4 +69,4 @@ Create one row per evidence-backed change; leave the table empty until sessions 
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | — | — | No sessions completed yet | — | — | — | — | — |
 
-After each change, retain the before/after screen references and explain whether it resolves the observed problem without weakening user consent, factual provenance, manual review, or user-controlled submission/sending. User study results do not approve the Aster name or logo; DGN-006 remains separate.
+After each change, retain the before/after screen references and explain whether it resolves the observed problem without weakening user consent, factual provenance, manual review, or user-controlled submission/sending. User study results do not approve the Rolevo name or logo; DGN-006 remains separate.

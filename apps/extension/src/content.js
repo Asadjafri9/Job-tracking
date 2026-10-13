@@ -1,6 +1,6 @@
 (() => {
-  if (globalThis.__asterContentInstalled) return;
-  globalThis.__asterContentInstalled = true;
+  if (globalThis.__rolevoContentInstalled) return;
+  globalThis.__rolevoContentInstalled = true;
   const { normalizeSelectedForm, snapshotControl } = globalThis.ExtensionExtraction;
   const { normalizeContextHandles, isOpaqueHandle } = globalThis.ExtensionExtraction;
   const forms = new Map();
@@ -16,6 +16,16 @@
     const style = getComputedStyle(element);
     const rect = element.getBoundingClientRect();
     return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0;
+  }
+
+  function currentFieldState(saved) {
+    if (["checkbox", "radio"].includes(saved.type)) {
+      return saved.elements.filter((element) => element.checked).map((element) => element.value);
+    }
+    const element = saved.elements[0];
+    return element.tagName === "SELECT" && element.multiple
+      ? [...element.selectedOptions].map((option) => option.value)
+      : element.value;
   }
 
   function labelFor(element) {
@@ -182,9 +192,7 @@
         results.push({ field_id: entry.field_id, status: "unsupported", reason: "field_changed" });
         continue;
       }
-      const current = ["checkbox", "radio"].includes(saved.type)
-        ? saved.elements.filter((element) => element.checked).map((element) => element.value)
-        : saved.elements[0].value;
+      const current = currentFieldState(saved);
       const expectedState = saved.lastExtensionState ?? saved.initialState;
       if (!globalThis.ExtensionFilling.canApplyReviewedValue(current, expectedState, saved.manuallyEdited)) {
         results.push({ field_id: entry.field_id, status: "unchanged", reason: "manual_edit_preserved" });
@@ -198,11 +206,7 @@
         continue;
       }
       await new Promise((resolve) => setTimeout(resolve, 40));
-      const after = ["checkbox", "radio"].includes(saved.type)
-        ? saved.elements.filter((element) => element.checked).map((element) => element.value)
-        : saved.elements[0].tagName === "SELECT" && saved.elements[0].multiple
-          ? [...saved.elements[0].selectedOptions].map((option) => option.value)
-          : saved.elements[0].value;
+      const after = currentFieldState(saved);
       if (!globalThis.ExtensionFilling.valueMatches(entry.value, after, saved.type)) {
         results.push({ field_id: entry.field_id, status: "unknown", reason: "framework_reverted" });
         continue;
@@ -235,10 +239,10 @@
 
   chrome.runtime.onMessage.addListener((message, sender, respond) => {
     if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("worker.js")) return false;
-    if (message?.type === "aster-list-forms") { respond(listForms(message.tab_handle)); return false; }
-    if (message?.type === "aster-inspect-form") { respond(inspectForm(message.form_id, message.context_handles)); return false; }
-    if (message?.type === "aster-get-selected-job-text") { respond(selectedJobText(message.context_handles)); return false; }
-    if (message?.type === "aster-apply-reviewed-values") {
+    if (message?.type === "rolevo-list-forms") { respond(listForms(message.tab_handle)); return false; }
+    if (message?.type === "rolevo-inspect-form") { respond(inspectForm(message.form_id, message.context_handles)); return false; }
+    if (message?.type === "rolevo-get-selected-job-text") { respond(selectedJobText(message.context_handles)); return false; }
+    if (message?.type === "rolevo-apply-reviewed-values") {
       applyReviewedValues(message.entries, message.context_handles).then(respond).catch(() => respond({ error: "fill_failed" }));
       return true;
     }

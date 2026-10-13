@@ -195,7 +195,11 @@ def upgrade() -> None:
         )
         WITH CHECK (user_id = NULLIF(current_setting('app.user_id', true), '')::uuid)"""
     )
-    op.execute("GRANT SELECT, UPDATE ON TABLE public.jobs TO copilot_worker")
+    op.execute("GRANT SELECT ON TABLE public.jobs TO copilot_worker")
+    op.execute(
+        "GRANT UPDATE (state, stage, lease_owner, lease_until, heartbeat_at, attempts, "
+        "next_run_at, updated_at) ON TABLE public.jobs TO copilot_worker"
+    )
     op.execute(
         """CREATE POLICY worker_claim_jobs ON public.jobs
         FOR ALL TO copilot_worker USING (true) WITH CHECK (true)"""

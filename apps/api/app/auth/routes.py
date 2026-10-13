@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import hmac
 import re
@@ -154,7 +153,7 @@ def require_csrf(request: Request, auth: AuthContext) -> None:
         ):
             raise HTTPException(status_code=403, detail="Extension is not registered")
         return
-    if origin != str(request.base_url).rstrip("/") or not verify_csrf(
+    if origin != get_settings().web_app_origin.rstrip("/") or not verify_csrf(
         auth.token, request.headers.get("X-CSRF-Token", ""), _csrf_key()
     ):
         raise HTTPException(status_code=403, detail="Request verification failed")
@@ -168,7 +167,7 @@ def _bearer_token(request: Request) -> str:
 
 
 @router.get("/login", include_in_schema=True)
-async def login(
+def login(
     request: Request,
     extension_id: str | None = None,
     extension_state: str | None = None,
@@ -189,7 +188,7 @@ async def login(
         if not 43 <= len(extension_challenge or "") <= 128:
             raise HTTPException(status_code=400, detail="Invalid extension PKCE challenge")
     try:
-        metadata = await asyncio.to_thread(discover, settings.oidc_issuer or "")
+        metadata = discover(settings.oidc_issuer or "")
         row, state, nonce, verifier = create_transaction(
             db,
             encryption_key=_transaction_key(),
@@ -221,7 +220,7 @@ async def login(
 
 
 @router.get("/callback", include_in_schema=True)
-async def callback(
+def callback(
     request: Request,
     code: str,
     state: str,
@@ -243,9 +242,8 @@ async def callback(
             or transaction.callback_uri != settings.oidc_redirect_uri
         ):
             raise AuthenticationError("OIDC client binding failed")
-        metadata = await asyncio.to_thread(discover, settings.oidc_issuer or "")
-        token = await asyncio.to_thread(
-            exchange_code,
+        metadata = discover(settings.oidc_issuer or "")
+        token = exchange_code(
             metadata=metadata,
             client_id=settings.oidc_client_id or "",
             client_secret=settings.oidc_client_secret or "",
@@ -253,8 +251,7 @@ async def callback(
             code=code,
             verifier=verifier,
         )
-        claims = await asyncio.to_thread(
-            verify_id_token,
+        claims = verify_id_token(
             token,
             metadata=metadata,
             client_id=settings.oidc_client_id or "",
@@ -382,7 +379,7 @@ def logout(request: Request, response: Response, db: DbSession = Depends(_db)) -
             row = authenticate_session(db, raw_token)
             supplied_csrf = request.headers.get("X-CSRF-Token", "")
             origin = request.headers.get("Origin", "")
-            if origin != str(request.base_url).rstrip("/") or not verify_csrf(
+            if origin != get_settings().web_app_origin.rstrip("/") or not verify_csrf(
                 raw_token, supplied_csrf, _csrf_key()
             ):
                 raise HTTPException(status_code=403, detail="Request verification failed")

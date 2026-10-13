@@ -1,5 +1,5 @@
 {
-  "count": 42,
+  "count": 46,
   "errors": [],
   "screens": [
     {
@@ -10,7 +10,18 @@
       "heading": "Make your job search feel more manageable.",
       "scrollWidth": 1440,
       "viewport": 1440,
-      "bodyText": 695,
+      "bodyText": 714,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "signin-320",
+      "route": "signin",
+      "width": 320,
+      "height": 780,
+      "heading": "Make your job search feel more manageable.",
+      "scrollWidth": 320,
+      "viewport": 320,
+      "bodyText": 714,
       "horizontalOverflow": false
     },
     {
@@ -21,7 +32,7 @@
       "heading": "Get back to your workspace.",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 510,
+      "bodyText": 532,
       "horizontalOverflow": false
     },
     {
@@ -32,7 +43,7 @@
       "heading": "Basics",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 505,
+      "bodyText": 527,
       "horizontalOverflow": false
     },
     {
@@ -43,7 +54,7 @@
       "heading": "Experience",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 463,
+      "bodyText": 485,
       "horizontalOverflow": false
     },
     {
@@ -54,7 +65,7 @@
       "heading": "Documents",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 675,
+      "bodyText": 697,
       "horizontalOverflow": false
     },
     {
@@ -65,7 +76,7 @@
       "heading": "Optional AI setup",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 797,
+      "bodyText": 819,
       "horizontalOverflow": false
     },
     {
@@ -76,7 +87,7 @@
       "heading": "Home",
       "scrollWidth": 1440,
       "viewport": 1440,
-      "bodyText": 1257,
+      "bodyText": 1266,
       "horizontalOverflow": false
     },
     {
@@ -87,7 +98,7 @@
       "heading": "Home",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1543,
+      "bodyText": 1552,
       "horizontalOverflow": false
     },
     {
@@ -98,7 +109,7 @@
       "heading": "Home",
       "scrollWidth": 390,
       "viewport": 390,
-      "bodyText": 1005,
+      "bodyText": 1026,
       "horizontalOverflow": false
     },
     {
@@ -109,7 +120,18 @@
       "heading": "Home",
       "scrollWidth": 390,
       "viewport": 390,
-      "bodyText": 1291,
+      "bodyText": 1312,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "home-empty-320",
+      "route": "home/empty",
+      "width": 320,
+      "height": 780,
+      "heading": "Home",
+      "scrollWidth": 320,
+      "viewport": 320,
+      "bodyText": 1026,
       "horizontalOverflow": false
     },
     {
@@ -120,7 +142,7 @@
       "heading": "Profile",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1436,
+      "bodyText": 1445,
       "horizontalOverflow": false
     },
     {
@@ -131,7 +153,7 @@
       "heading": "Documents",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1566,
+      "bodyText": 1575,
       "horizontalOverflow": false
     },
     {
@@ -142,7 +164,7 @@
       "heading": "AI providers",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1487,
+      "bodyText": 1496,
       "horizontalOverflow": false
     },
     {
@@ -153,7 +175,7 @@
       "heading": "Applications",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1413,
+      "bodyText": 1422,
       "horizontalOverflow": false
     },
     {
@@ -164,7 +186,7 @@
       "heading": "Application detail",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1426,
+      "bodyText": 1435,
       "horizontalOverflow": false
     },
     {
@@ -175,7 +197,7 @@
       "heading": "Evidence timeline",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1355,
+      "bodyText": 1364,
       "horizontalOverflow": false
     },
     {
@@ -186,7 +208,7 @@
       "heading": "Email applications",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1360,
+      "bodyText": 1369,
       "horizontalOverflow": false
     },
     {
@@ -197,7 +219,7 @@
       "heading": "Review your email",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1132,
+      "bodyText": 1142,
       "horizontalOverflow": false
     },
     {
@@ -208,7 +230,7 @@
       "heading": "Gmail handoff",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1212,
+      "bodyText": 1221,
       "horizontalOverflow": false
     },
     {
@@ -219,7 +241,7 @@
       "heading": "Did you send it?",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1062,
+      "bodyText": 1071,
       "horizontalOverflow": false
     },
     {
@@ -230,7 +252,7 @@
       "heading": "Email confirmation",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1069,
+      "bodyText": 1078,
       "horizontalOverflow": false
     },
     {
@@ -241,7 +263,7 @@
       "heading": "Job alerts",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1617,
+      "bodyText": 1627,
       "horizontalOverflow": false
     },
     {
@@ -252,7 +274,7 @@
       "heading": "Morning digest",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1513,
+      "bodyText": 1522,
       "horizontalOverflow": false
     },
     {
@@ -263,7 +285,7 @@
       "heading": "Some results may be missing",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1133,
+      "bodyText": 1142,
       "horizontalOverflow": false
     },
     {
@@ -274,7 +296,7 @@
       "heading": "Source check failed",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1348,
+      "bodyText": 1357,
       "horizontalOverflow": false
     },
     {
@@ -285,7 +307,7 @@
       "heading": "Monitoring paused",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 923,
+      "bodyText": 933,
       "horizontalOverflow": false
     },
     {
@@ -296,7 +318,7 @@
       "heading": "Notifications",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1094,
+      "bodyText": 1103,
       "horizontalOverflow": false
     },
     {
@@ -307,7 +329,7 @@
       "heading": "Notifications",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 879,
+      "bodyText": 888,
       "horizontalOverflow": false
     },
     {
@@ -318,7 +340,7 @@
       "heading": "Notifications unavailable",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 855,
+      "bodyText": 864,
       "horizontalOverflow": false
     },
     {
@@ -329,7 +351,7 @@
       "heading": "Permission needed",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1034,
+      "bodyText": 1045,
       "horizontalOverflow": false
     },
     {
@@ -340,7 +362,7 @@
       "heading": "Privacy & settings",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1718,
+      "bodyText": 1728,
       "horizontalOverflow": false
     },
     {
@@ -351,7 +373,7 @@
       "heading": "Review data export",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1187,
+      "bodyText": 1196,
       "horizontalOverflow": false
     },
     {
@@ -362,7 +384,7 @@
       "heading": "Review account deletion",
       "scrollWidth": 1280,
       "viewport": 1280,
-      "bodyText": 1182,
+      "bodyText": 1191,
       "horizontalOverflow": false
     },
     {
@@ -373,7 +395,7 @@
       "heading": "Job detected",
       "scrollWidth": 360,
       "viewport": 360,
-      "bodyText": 724,
+      "bodyText": 747,
       "horizontalOverflow": false
     },
     {
@@ -384,7 +406,7 @@
       "heading": "Analyzing this job",
       "scrollWidth": 360,
       "viewport": 360,
-      "bodyText": 671,
+      "bodyText": 694,
       "horizontalOverflow": false
     },
     {
@@ -395,7 +417,7 @@
       "heading": "Review suggestions",
       "scrollWidth": 360,
       "viewport": 360,
-      "bodyText": 906,
+      "bodyText": 929,
       "horizontalOverflow": false
     },
     {
@@ -406,7 +428,7 @@
       "heading": "Needs your answer",
       "scrollWidth": 360,
       "viewport": 360,
-      "bodyText": 738,
+      "bodyText": 761,
       "horizontalOverflow": false
     },
     {
@@ -417,7 +439,7 @@
       "heading": "Fill results",
       "scrollWidth": 360,
       "viewport": 360,
-      "bodyText": 775,
+      "bodyText": 798,
       "horizontalOverflow": false
     },
     {
@@ -428,7 +450,7 @@
       "heading": "Review on the job site",
       "scrollWidth": 360,
       "viewport": 360,
-      "bodyText": 814,
+      "bodyText": 840,
       "horizontalOverflow": false
     },
     {
@@ -439,7 +461,29 @@
       "heading": "Submission evidence",
       "scrollWidth": 360,
       "viewport": 360,
-      "bodyText": 798,
+      "bodyText": 821,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "extension-detected-320",
+      "route": "extension/detected",
+      "width": 320,
+      "height": 780,
+      "heading": "Job detected",
+      "scrollWidth": 320,
+      "viewport": 320,
+      "bodyText": 747,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "extension-review-320",
+      "route": "extension/review",
+      "width": 320,
+      "height": 780,
+      "heading": "Review on the job site",
+      "scrollWidth": 320,
+      "viewport": 320,
+      "bodyText": 840,
       "horizontalOverflow": false
     },
     {
@@ -450,7 +494,7 @@
       "heading": "Job detected",
       "scrollWidth": 420,
       "viewport": 420,
-      "bodyText": 724,
+      "bodyText": 747,
       "horizontalOverflow": false
     },
     {
@@ -461,7 +505,7 @@
       "heading": "Review on the job site",
       "scrollWidth": 420,
       "viewport": 420,
-      "bodyText": 814,
+      "bodyText": 840,
       "horizontalOverflow": false
     }
   ]
