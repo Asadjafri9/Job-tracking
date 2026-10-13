@@ -7,9 +7,18 @@ import { fixtureCorpus } from "./fixtures/corpus.mjs";
 await import("../src/extraction.js");
 await import("../src/filling.js");
 await import("../src/observation.js");
+await import("../src/api-origin.js");
 const Extraction = globalThis.ExtensionExtraction;
 const Filling = globalThis.ExtensionFilling;
 const Observation = globalThis.ExtensionObservation;
+const ApiOrigin = globalThis.ExtensionApiOrigin;
+
+test("API origin is extracted from development and production host permissions", () => {
+  assert.equal(ApiOrigin.fromHostPermissions(["http://127.0.0.1:18000/*"]), "http://127.0.0.1:18000");
+  assert.equal(ApiOrigin.fromHostPermissions(["https://api.example.test/*"]), "https://api.example.test");
+  assert.throws(() => ApiOrigin.fromHostPermissions([]), /no API host permission/);
+  assert.throws(() => ApiOrigin.fromHostPermissions(["https://api.example.test/v1/*"]), /origin wildcard/);
+});
 
 class FakeControl {
   constructor({ type = "text", value = "", checked = false, maxLength = -1, valid = true } = {}) {
@@ -323,7 +332,7 @@ test("extension UI includes keyboard/live status and explicit unsupported/manual
   assert.match(panel, /aria-live="polite"/);
   assert.match(panel, /role="status"/);
   assert.match(panel, /You submit, always/);
-  assert.match(panel, /Sign-in is not connected yet/);
+  assert.match(panel, /id="sign-in"/);
   assert.match(scripts, /No submission was made/);
   for (const source of ["content.js", "worker.js", "panel.js", "filling.js"])
     assert.doesNotMatch(await readFile(new URL(`../src/${source}`, import.meta.url), "utf8"), /\.requestSubmit\s*\(|\.submit\s*\(/);
@@ -336,4 +345,8 @@ test("extension UI includes keyboard/live status and explicit unsupported/manual
   assert.match(content, /sender\.url !== chrome\.runtime\.getURL\("worker\.js"\)/);
   assert.match(worker, /sender\.url === chrome\.runtime\.getURL\("panel\.html"\)/);
   assert.match(worker, /contextHandles\.tab_handle !== tabHandle/);
+  assert.match(worker, /chrome\.identity\.launchWebAuthFlow/);
+  assert.match(worker, /chrome\.storage\.session\.set\(\{ authSession: session \}\)/);
+  assert.match(worker, /if \(!response\.ok && response\.status !== 401\)/);
+  assert.match(scripts, /if \(result\.error\) \{[\s\S]*?return;/);
 });

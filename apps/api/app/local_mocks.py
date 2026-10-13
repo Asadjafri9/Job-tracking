@@ -153,8 +153,10 @@ async def oidc_token(request: Request) -> JSONResponse:
         {
             "iss": settings.oidc_issuer,
             "sub": "local-test-user",
+            "oid": "b48b1673-12f0-4ac2-a791-7432e8edc100",
             "aud": settings.oidc_client_id,
             "iat": now,
+            "auth_time": now,
             "exp": now + 300,
             "nonce": grant["nonce"],
             "email": "local.user@example.test",

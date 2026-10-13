@@ -24,6 +24,177 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/provider-credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Credentials */
+        get: operations["list_credentials_api_v1_provider_credentials_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/provider-credentials/{credential_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Credential */
+        delete: operations["delete_credential_api_v1_provider_credentials__credential_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/provider-credentials/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Credential */
+        put: operations["put_credential_api_v1_provider_credentials__provider__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/provider-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Provider Settings */
+        get: operations["get_provider_settings_api_v1_provider_settings_get"];
+        /** Put Provider Settings */
+        put: operations["put_provider_settings_api_v1_provider_settings_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Callback */
+        get: operations["callback_auth_callback_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/extension/exchange": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Extension Exchange */
+        post: operations["extension_exchange_auth_extension_exchange_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/extension/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Extension Logout */
+        post: operations["extension_logout_auth_extension_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Login */
+        get: operations["login_auth_login_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout */
+        post: operations["logout_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current Session */
+        get: operations["current_session_auth_session_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -103,6 +274,48 @@ export interface components {
             /** Minimum Compatible Client Version */
             minimum_compatible_client_version: string;
         };
+        /** CredentialList */
+        CredentialList: {
+            /** Credentials */
+            credentials: components["schemas"]["CredentialSummary"][];
+        };
+        /** CredentialSummary */
+        CredentialSummary: {
+            /** Allow Background */
+            allow_background: boolean;
+            /** Allow Interactive */
+            allow_interactive: boolean;
+            /** Enabled */
+            enabled: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last4 */
+            last4: string;
+            /** Provider */
+            provider: string;
+            /** Revision */
+            revision: number;
+            /** Status */
+            status: string;
+        };
+        /** CredentialWrite */
+        CredentialWrite: {
+            /**
+             * Allow Background
+             * @default false
+             */
+            allow_background: boolean;
+            /** Allow Interactive */
+            allow_interactive: boolean;
+            /**
+             * Api Key
+             * Format: password
+             */
+            api_key: string;
+        };
         /** ErrorDetail */
         ErrorDetail: {
             /** Code */
@@ -130,12 +343,67 @@ export interface components {
         ErrorResponse: {
             error: components["schemas"]["ErrorDetail"];
         };
+        /** ExtensionExchange */
+        ExtensionExchange: {
+            /** Code Verifier */
+            code_verifier: string;
+            /** Grant */
+            grant: string;
+            /** State */
+            state: string;
+        };
+        /** ExtensionTokenResponse */
+        ExtensionTokenResponse: {
+            /** Access Token */
+            access_token: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Token Type
+             * @default Bearer
+             */
+            token_type: string;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
         /** HealthResponse */
         HealthResponse: {
             /** Service */
             service: string;
             /** Status */
             status: string;
+        };
+        /** ProviderSettingsResponse */
+        ProviderSettingsResponse: {
+            /** Background Consent */
+            background_consent: boolean;
+            /** Fallback Consent */
+            fallback_consent: boolean;
+            /** Interactive Consent */
+            interactive_consent: boolean;
+            /** Revision */
+            revision: number;
+            /** Routes */
+            routes: components["schemas"]["RouteWrite"][];
+        };
+        /** ProviderSettingsWrite */
+        ProviderSettingsWrite: {
+            /** Background Consent */
+            background_consent: boolean;
+            /** Expected Revision */
+            expected_revision: number;
+            /** Fallback Consent */
+            fallback_consent: boolean;
+            /** Interactive Consent */
+            interactive_consent: boolean;
+            /** Routes */
+            routes: components["schemas"]["RouteWrite"][];
         };
         /** ReadinessResponse */
         ReadinessResponse: {
@@ -149,6 +417,57 @@ export interface components {
             status: string;
             /** Unverified */
             unverified: string[];
+        };
+        /** RouteWrite */
+        RouteWrite: {
+            /**
+             * Background Enabled
+             * @default false
+             */
+            background_enabled: boolean;
+            /**
+             * Credential Id
+             * Format: uuid
+             */
+            credential_id: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * Interactive Enabled
+             * @default true
+             */
+            interactive_enabled: boolean;
+            /** Model Id */
+            model_id: string;
+        };
+        /** SessionResponse */
+        SessionResponse: {
+            /**
+             * Auth Time
+             * Format: date-time
+             */
+            auth_time: string;
+            /** Csrf Token */
+            csrf_token: string;
+            /** Login Email */
+            login_email: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
         };
     };
     responses: never;
@@ -283,6 +602,300 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_credentials_api_v1_provider_credentials_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CredentialList"];
+                };
+            };
+        };
+    };
+    delete_credential_api_v1_provider_credentials__credential_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                credential_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_credential_api_v1_provider_credentials__provider__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: "OPENROUTER" | "XAI" | "GEMINI";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CredentialWrite"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CredentialSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_provider_settings_api_v1_provider_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderSettingsResponse"];
+                };
+            };
+        };
+    };
+    put_provider_settings_api_v1_provider_settings_put: {
+        parameters: {
+            query?: never;
+            header: {
+                "If-Match": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProviderSettingsWrite"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderSettingsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    callback_auth_callback_get: {
+        parameters: {
+            query: {
+                code: string;
+                state: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    extension_exchange_auth_extension_exchange_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExtensionExchange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtensionTokenResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    extension_logout_auth_extension_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    login_auth_login_get: {
+        parameters: {
+            query?: {
+                extension_id?: string | null;
+                extension_state?: string | null;
+                extension_challenge?: string | null;
+                fresh?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    current_session_auth_session_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
                 };
             };
         };

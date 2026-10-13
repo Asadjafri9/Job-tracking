@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import RequestResponseEndpoint
 
+from app.auth.routes import router as auth_router
 from app.config import get_settings
 from app.contracts import (
     API_CONTRACT_VERSION,
@@ -24,6 +25,7 @@ from app.contracts import (
     ErrorField,
     error_response,
 )
+from app.modules.credentials import router as credentials_router
 
 _LOCAL_AZURITE_ACCOUNT_KEY = (
     "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
@@ -57,6 +59,8 @@ app = FastAPI(
     redoc_url=None,
     lifespan=lifespan,
 )
+app.include_router(auth_router)
+app.include_router(credentials_router)
 
 
 def _request_id(request: Request) -> str:
@@ -77,9 +81,7 @@ def _safe_http_error(status_code: int) -> tuple[str, str]:
         502: ("upstream_error", "An upstream service failed."),
         503: ("service_unavailable", "A required service is unavailable."),
     }
-    return public_errors.get(
-        status_code, ("http_error", "The request could not be completed.")
-    )
+    return public_errors.get(status_code, ("http_error", "The request could not be completed."))
 
 
 def _is_compatible_client_version(version: str) -> bool:
@@ -108,6 +110,37 @@ async def identify_and_check_contract(
     request.state.request_id = request_id
 
     response: Response
+    settings = get_settings()
+    origin = request.headers.get("Origin", "")
+    prefix = "chrome-extension://"
+    extension_id = origin.removeprefix(prefix) if origin.startswith(prefix) else ""
+    registered_extensions = {
+        value.strip() for value in settings.chrome_extension_ids.split(",") if value.strip()
+    }
+    allowed_extension_origin = bool(
+        re.fullmatch(r"[a-p]{32}", extension_id) and extension_id in registered_extensions
+    )
+    if (
+        request.method == "OPTIONS"
+        and request.url.path.startswith("/api/")
+        and allowed_extension_origin
+    ):
+        response = Response(status_code=204)
+        response.headers.update(
+            {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": (
+                    "Authorization, Content-Type, X-Copilot-Contract-Version, "
+                    "X-Copilot-Client-Version"
+                ),
+                "Access-Control-Max-Age": "300",
+                "Vary": "Origin",
+                "X-Request-ID": request_id,
+                "Cache-Control": "no-store",
+            }
+        )
+        return response
     contract_header = request.headers.get("X-Copilot-Contract-Version")
     client_version_header = request.headers.get("X-Copilot-Client-Version")
     incompatible_contract = False
@@ -162,8 +195,13 @@ async def identify_and_check_contract(
             content=payload.model_dump(mode="json"),
         )
     response.headers["X-Request-ID"] = request_id
-    if request.url.path.startswith("/api/"):
+    if request.url.path.startswith("/api/") or request.url.path.startswith("/auth/"):
         response.headers["Cache-Control"] = "no-store"
+    if allowed_extension_origin and (
+        request.url.path.startswith("/api/") or request.url.path.startswith("/auth/extension/")
+    ):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
     return response
 
 
@@ -179,9 +217,7 @@ async def handle_http_exception(request: Request, exc: StarletteHTTPException) -
 
 
 @app.exception_handler(RequestValidationError)
-async def handle_validation_error(
-    request: Request, exc: RequestValidationError
-) -> JSONResponse:
+async def handle_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
     field_errors = []
     for issue in exc.errors():
         location = [str(part) for part in issue.get("loc", ()) if part != "body"]

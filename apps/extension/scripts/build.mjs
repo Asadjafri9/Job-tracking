@@ -79,6 +79,7 @@ async function build() {
   await mkdir(destination, { recursive: true });
   for (const file of [
     "worker.js",
+    "api-origin.js",
     "content.js",
     "extraction.js",
     "filling.js",

@@ -27,6 +27,99 @@
         "title": "ApiMetaResponse",
         "type": "object"
       },
+      "CredentialList": {
+        "properties": {
+          "credentials": {
+            "items": {
+              "$ref": "#/components/schemas/CredentialSummary"
+            },
+            "title": "Credentials",
+            "type": "array"
+          }
+        },
+        "required": [
+          "credentials"
+        ],
+        "title": "CredentialList",
+        "type": "object"
+      },
+      "CredentialSummary": {
+        "properties": {
+          "allow_background": {
+            "title": "Allow Background",
+            "type": "boolean"
+          },
+          "allow_interactive": {
+            "title": "Allow Interactive",
+            "type": "boolean"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last4": {
+            "title": "Last4",
+            "type": "string"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "provider",
+          "last4",
+          "enabled",
+          "status",
+          "revision",
+          "allow_interactive",
+          "allow_background"
+        ],
+        "title": "CredentialSummary",
+        "type": "object"
+      },
+      "CredentialWrite": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_background": {
+            "default": false,
+            "title": "Allow Background",
+            "type": "boolean"
+          },
+          "allow_interactive": {
+            "title": "Allow Interactive",
+            "type": "boolean"
+          },
+          "api_key": {
+            "format": "password",
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Api Key",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "api_key",
+          "allow_interactive"
+        ],
+        "title": "CredentialWrite",
+        "type": "object"
+      },
       "ErrorDetail": {
         "additionalProperties": false,
         "properties": {
@@ -97,6 +190,73 @@
         "title": "ErrorResponse",
         "type": "object"
       },
+      "ExtensionExchange": {
+        "additionalProperties": false,
+        "properties": {
+          "code_verifier": {
+            "maxLength": 128,
+            "minLength": 43,
+            "title": "Code Verifier",
+            "type": "string"
+          },
+          "grant": {
+            "maxLength": 128,
+            "minLength": 32,
+            "title": "Grant",
+            "type": "string"
+          },
+          "state": {
+            "maxLength": 128,
+            "minLength": 16,
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "grant",
+          "state",
+          "code_verifier"
+        ],
+        "title": "ExtensionExchange",
+        "type": "object"
+      },
+      "ExtensionTokenResponse": {
+        "properties": {
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "token_type": {
+            "default": "Bearer",
+            "title": "Token Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "access_token",
+          "expires_at"
+        ],
+        "title": "ExtensionTokenResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "service": {
@@ -113,6 +273,81 @@
           "service"
         ],
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "ProviderSettingsResponse": {
+        "properties": {
+          "background_consent": {
+            "title": "Background Consent",
+            "type": "boolean"
+          },
+          "fallback_consent": {
+            "title": "Fallback Consent",
+            "type": "boolean"
+          },
+          "interactive_consent": {
+            "title": "Interactive Consent",
+            "type": "boolean"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "routes": {
+            "items": {
+              "$ref": "#/components/schemas/RouteWrite"
+            },
+            "title": "Routes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "revision",
+          "interactive_consent",
+          "fallback_consent",
+          "background_consent",
+          "routes"
+        ],
+        "title": "ProviderSettingsResponse",
+        "type": "object"
+      },
+      "ProviderSettingsWrite": {
+        "additionalProperties": false,
+        "properties": {
+          "background_consent": {
+            "title": "Background Consent",
+            "type": "boolean"
+          },
+          "expected_revision": {
+            "minimum": 1.0,
+            "title": "Expected Revision",
+            "type": "integer"
+          },
+          "fallback_consent": {
+            "title": "Fallback Consent",
+            "type": "boolean"
+          },
+          "interactive_consent": {
+            "title": "Interactive Consent",
+            "type": "boolean"
+          },
+          "routes": {
+            "items": {
+              "$ref": "#/components/schemas/RouteWrite"
+            },
+            "maxItems": 3,
+            "title": "Routes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "expected_revision",
+          "interactive_consent",
+          "fallback_consent",
+          "background_consent",
+          "routes"
+        ],
+        "title": "ProviderSettingsWrite",
         "type": "object"
       },
       "ReadinessResponse": {
@@ -147,6 +382,106 @@
           "unverified"
         ],
         "title": "ReadinessResponse",
+        "type": "object"
+      },
+      "RouteWrite": {
+        "additionalProperties": false,
+        "properties": {
+          "background_enabled": {
+            "default": false,
+            "title": "Background Enabled",
+            "type": "boolean"
+          },
+          "credential_id": {
+            "format": "uuid",
+            "title": "Credential Id",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "interactive_enabled": {
+            "default": true,
+            "title": "Interactive Enabled",
+            "type": "boolean"
+          },
+          "model_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Model Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "credential_id",
+          "model_id"
+        ],
+        "title": "RouteWrite",
+        "type": "object"
+      },
+      "SessionResponse": {
+        "properties": {
+          "auth_time": {
+            "format": "date-time",
+            "title": "Auth Time",
+            "type": "string"
+          },
+          "csrf_token": {
+            "title": "Csrf Token",
+            "type": "string"
+          },
+          "login_email": {
+            "title": "Login Email",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "login_email",
+          "csrf_token",
+          "auth_time"
+        ],
+        "title": "SessionResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
         "type": "object"
       }
     }
@@ -297,6 +632,419 @@
         "summary": "Api Meta",
         "tags": [
           "meta"
+        ]
+      }
+    },
+    "/api/v1/provider-credentials": {
+      "get": {
+        "operationId": "list_credentials_api_v1_provider_credentials_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Credentials",
+        "tags": [
+          "credentials"
+        ]
+      }
+    },
+    "/api/v1/provider-credentials/{credential_id}": {
+      "delete": {
+        "operationId": "delete_credential_api_v1_provider_credentials__credential_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "credential_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Credential Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Credential",
+        "tags": [
+          "credentials"
+        ]
+      }
+    },
+    "/api/v1/provider-credentials/{provider}": {
+      "put": {
+        "operationId": "put_credential_api_v1_provider_credentials__provider__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "enum": [
+                "OPENROUTER",
+                "XAI",
+                "GEMINI"
+              ],
+              "title": "Provider",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Credential",
+        "tags": [
+          "credentials"
+        ]
+      }
+    },
+    "/api/v1/provider-settings": {
+      "get": {
+        "operationId": "get_provider_settings_api_v1_provider_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderSettingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Provider Settings",
+        "tags": [
+          "credentials"
+        ]
+      },
+      "put": {
+        "operationId": "put_provider_settings_api_v1_provider_settings_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": true,
+            "schema": {
+              "title": "If-Match",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderSettingsWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderSettingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Provider Settings",
+        "tags": [
+          "credentials"
+        ]
+      }
+    },
+    "/auth/callback": {
+      "get": {
+        "operationId": "callback_auth_callback_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "title": "Code",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": true,
+            "schema": {
+              "title": "State",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Callback",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/extension/exchange": {
+      "post": {
+        "operationId": "extension_exchange_auth_extension_exchange_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtensionExchange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtensionTokenResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Extension Exchange",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/extension/logout": {
+      "post": {
+        "operationId": "extension_logout_auth_extension_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Extension Logout",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "get": {
+        "operationId": "login_auth_login_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "extension_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Extension Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "extension_state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Extension State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "extension_challenge",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Extension Challenge"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fresh",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Fresh",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "logout_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Logout",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/session": {
+      "get": {
+        "operationId": "current_session_auth_session_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Current Session",
+        "tags": [
+          "auth"
         ]
       }
     },

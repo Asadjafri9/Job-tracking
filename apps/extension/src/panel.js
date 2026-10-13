@@ -172,6 +172,37 @@ byId("capture-job").addEventListener("click", async () => {
 
 byId("demo").addEventListener("click", () => chrome.tabs.create({ url: chrome.runtime.getURL("demo.html") }));
 
+async function refreshAccount() {
+  const result = await request({ type: "panel-auth-status" });
+  byId("account-status").textContent = result.signed_in
+    ? `Signed in until ${new Date(result.expires_at).toLocaleTimeString()}.`
+    : "Sign in to connect your account.";
+  byId("sign-in").classList.toggle("hidden", Boolean(result.signed_in));
+  byId("sign-out").classList.toggle("hidden", !result.signed_in);
+}
+
+byId("sign-in").addEventListener("click", async () => {
+  byId("sign-in").disabled = true;
+  const result = await request({ type: "panel-auth-sign-in" });
+  byId("sign-in").disabled = false;
+  if (result.error) {
+    byId("account-status").textContent = result.error;
+    return;
+  }
+  setStatus("Extension account connected.");
+  await refreshAccount();
+});
+
+byId("sign-out").addEventListener("click", async () => {
+  const result = await request({ type: "panel-auth-sign-out" });
+  if (result.error) {
+    byId("account-status").textContent = result.error;
+    return;
+  }
+  await refreshAccount();
+  setStatus("Signed out and cleared extension session data.");
+});
+
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.type !== "panel-submit-observation") return;
   const observation = message.observation;
@@ -181,3 +212,4 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 byId("version").textContent = `v${chrome.runtime.getManifest().version}`;
+refreshAccount();
