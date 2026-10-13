@@ -1,10 +1,10 @@
 """Registered durable workload handlers.
 
 Handlers run inside an owner-scoped runtime transaction derived from the
-trusted job row; they never accept an owner from the job body. The daily
-scan handler performs the claim-time revalidation required by the
-monitoring contract and records an honest outcome until the fetch/match
-pipeline lands in M5.
+trusted job row; they never accept an owner from the job body. The scan
+handler revalidates the run's schedule/consent at claim time, performs the
+bounded public fetch outside the transaction, then applies the extracted
+diff in a second owner transaction.
 """
 
 from __future__ import annotations
@@ -36,6 +36,14 @@ from app.db.models import (
 from app.db.models import Session as SessionRecord
 from app.db.tenant import tenant_session
 from app.modules.credentials import _key_encryption_provider
+from app.monitoring.fetch import (
+    FetchDenied,
+    Fetcher,
+    FetchFailed,
+    FetchOutcome,
+    FetchUnsupported,
+)
+from app.monitoring.scan import apply_scan_outcome, begin_run, record_fetch_failure
 from app.storage.blob import DocumentStorage, StorageError, document_storage
 from app.worker.parsing import (
     PARSE_VERSION,
@@ -54,7 +62,6 @@ PARSE_JOB_REFERENCE_TYPE = "document"
 EXTRACT_JOB_KIND = "document.extract_candidates"
 EXTRACT_JOB_REFERENCE_TYPE = "document_extraction"
 BLOB_CLEANUP_JOB_KIND = "document.blob_cleanup"
-PIPELINE_PENDING_REASON = "daily_scan_pipeline_pending_m5"
 SOURCE_STALE_REASON = "source_schedule_or_consent_changed"
 
 OwnerWork = Callable[[OrmSession, JobContext], None]
@@ -69,11 +76,10 @@ def _document_storage() -> DocumentStorage:
     return document_storage()
 
 
-def _daily_scan(session: OrmSession, context: JobContext) -> None:
-    """Revalidate a dispatched daily run before any fetch/provider work."""
-    now = datetime.now(UTC)
+def _claim_scan(session: OrmSession, context: JobContext) -> MonitoringRun | None:
+    """Revalidate a dispatched run before any fetch/provider work."""
     if context.reference_type != SCAN_JOB_REFERENCE_TYPE or context.reference_id is None:
-        raise ValueError("daily scan jobs must reference a monitoring run")
+        raise ValueError("scan jobs must reference a monitoring run")
     run = session.scalar(
         select(MonitoringRun)
         .where(
@@ -83,34 +89,90 @@ def _daily_scan(session: OrmSession, context: JobContext) -> None:
         .with_for_update()
     )
     if run is None or run.state != "QUEUED":
-        return
+        return None
     source = session.scalar(
         select(MonitoredSource).where(
             MonitoredSource.id == run.source_id,
             MonitoredSource.user_id == context.owner_id,
         )
     )
-    still_scheduled = (
-        source is not None
-        and source.state == "ACTIVE"
-        and source.schedule == "DAILY"
-        and source.scheduled_check_consented_at is not None
-        and source.consent_revision is not None
-        and source.revision == run.schedule_revision
-    )
-    run.started_at = now
-    run.ended_at = now
-    if not still_scheduled:
+    if run.run_kind == "MANUAL":
+        still_valid = (
+            source is not None
+            and source.state in {"ACTIVE", "PAUSED"}
+            and source.revision == run.schedule_revision
+        )
+    else:
+        still_valid = (
+            source is not None
+            and source.state == "ACTIVE"
+            and source.schedule == "DAILY"
+            and source.scheduled_check_consented_at is not None
+            and source.consent_revision is not None
+            and source.revision == run.schedule_revision
+        )
+    if not still_valid:
         run.state = "CANCELED"
+        run.started_at = run.ended_at = datetime.now(UTC)
         run.redacted_error = SOURCE_STALE_REASON
         logger.info(
-            "daily scan canceled before dispatch: run=%s source stale or unconsented", run.id
+            "scan canceled before dispatch: run=%s source stale or unconsented", run.id
         )
-        return
-    run.state = "FAILED"
-    run.completeness = "UNKNOWN"
-    run.redacted_error = PIPELINE_PENDING_REASON
-    logger.info("daily scan run %s recorded pending pipeline implementation", run.id)
+        return None
+    begin_run(run)
+    return run
+
+
+async def handle_daily_scan(context: JobContext, _stopped: asyncio.Event) -> None:
+    """Claim the run, fetch outside the transaction, then apply the diff."""
+
+    def execute() -> None:
+        fetcher = Fetcher()
+        outcome: FetchOutcome | None = None
+        failure: Exception | None = None
+        with tenant_session(_runtime_engine(), context.owner_id) as session:
+            run = _claim_scan(session, context)
+            if run is None:
+                return
+            source = session.get(MonitoredSource, run.source_id)
+            if source is None:
+                return
+            public_url, etag = source.public_url, source.last_etag
+            run_id = run.id
+        try:
+            outcome = fetcher.fetch(public_url, etag=etag)
+        except (FetchDenied, FetchFailed, FetchUnsupported) as exc:
+            failure = exc
+        with tenant_session(_runtime_engine(), context.owner_id) as session:
+            run = session.scalar(
+                select(MonitoringRun)
+                .where(
+                    MonitoringRun.id == run_id,
+                    MonitoringRun.user_id == context.owner_id,
+                )
+                .with_for_update()
+            )
+            if run is None:
+                return
+            source = session.scalar(
+                select(MonitoredSource).where(
+                    MonitoredSource.id == run.source_id,
+                    MonitoredSource.user_id == context.owner_id,
+                )
+            )
+            if run.state != "RUNNING" or source is None:
+                return
+            if source.state == "DELETED" or source.revision != run.schedule_revision:
+                run.state = "CANCELED"
+                run.ended_at = datetime.now(UTC)
+                run.redacted_error = SOURCE_STALE_REASON
+                return
+            if failure is not None:
+                record_fetch_failure(session, run, failure)
+            elif outcome is not None:
+                apply_scan_outcome(session, run, source, outcome)
+
+    await asyncio.to_thread(execute)
 
 
 def _owner_cleanup(session: OrmSession, context: JobContext) -> None:
@@ -218,10 +280,6 @@ async def _run_owner_scoped(context: JobContext, work: OwnerWork) -> None:
             work(session, context)
 
     await asyncio.to_thread(execute)
-
-
-async def handle_daily_scan(context: JobContext, _stopped: asyncio.Event) -> None:
-    await _run_owner_scoped(context, _daily_scan)
 
 
 async def handle_owner_cleanup(context: JobContext, _stopped: asyncio.Event) -> None:

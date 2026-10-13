@@ -41,9 +41,13 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 
 Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
 
+## M5 progress
+
+**M5 is IN_PROGRESS with the monitoring pipeline implemented and locally verified.** Monitored-source CRUD with ≤five cap, consent-revision scheduling, pause/resume/remove and 3/day check-now; the bounded public fetch boundary (SSRF/DNS-pinning/redirect/robots/byte/time guards); JSON-LD/RSS/Atom/anchor extraction; the claim→fetch→apply scan pipeline with canonical-URL dedupe, meaningful-revision diffs and two-complete-scan closure; and the Job alerts UI with notifications badge/list and run history all pass: 48 monitoring unit tests, 17 PostgreSQL API/pipeline tests, 214 total API tests, contracts regenerated. **No live career page, ATS endpoint, DNS/TLS fetch, or AI matching call was performed; deterministic matching only.** See [M5 evidence](evidence/M5.md).
+
 ## Next implementation action
 
-Proceed to M5 — Job monitoring — following the dependency order in [`TASKS.md`](TASKS.md). M4 implementation does not mean the product is ready to deploy.
+Proceed to M6 — Privacy, reliability and quality — following the dependency order in [`TASKS.md`](TASKS.md). M5 implementation does not mean the product is ready to deploy.
 
 ## Evidence ledger
 
@@ -57,6 +61,7 @@ Proceed to M5 — Job monitoring — following the dependency order in [`TASKS.m
 | DB-001 | DONE | [DB-001 evidence](evidence/DB-001.md): fresh and idempotent PostgreSQL migration, seed, drift check, nine schema checks, API suite, Ruff, and mypy | Codex, independent review passed October 12, 2026 |
 | DB-002 | DONE | [DB-002 evidence](evidence/DB-002.md): fresh isolated migration, no drift, nine DB-001 schema checks and eight tenant RLS/role checks passed | Codex, October 13, 2026 |
 | DB-003 | DONE | [DB-003 evidence](evidence/DB-003.md): concurrent idempotency reuse, altered-input conflict, stale revision rejection, and quota race passed; owner-child constraints passed | Codex, October 13, 2026 |
+| M5 implementation | IN_PROGRESS | [M5 evidence](evidence/M5.md): sources/schedule/consent API+UI, safe fetch/extract boundary, scan dedupe/closure/match pipeline, notifications; 65 new tests, 214 API tests; no live fetch or AI matching | pending review |
 | M1 implementation | IN_PROGRESS | [M1 evidence](evidence/M1.md): full API suite 90 passed plus opt-in lifecycle checks; Authlib/Joserfc local auth checks, scheduler dispatch + registered handlers, provider-settings UI, worker shutdown checks, frontend, extension, contracts, and static checks pass; independent review and tenant/Chrome/Key Vault smoke remain | Codex, October 14, 2026 |
 | DGN-001 | DONE | [DGN-001 evidence](evidence/DGN-001.md): design/contract reconciliation, proposed defaults and explicit unresolved owner decisions | Codex, independent review passed October 12, 2026 |
 | DGN-002 | DONE | [DGN-002 evidence](evidence/DGN-002.md): proposed tokens/components, all 16 rendered contrast pairs, and small-size/full-lockup SVG review | Codex, independent review passed October 12, 2026 |

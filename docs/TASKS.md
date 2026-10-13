@@ -74,10 +74,10 @@ Every task starts NOT_STARTED. Statuses: NOT_STARTED, IN_PROGRESS, BLOCKED, IN_R
 
 | ID | Depends | Planned files | Acceptance / verification |
 | --- | --- | --- | --- |
-| MON-001 | KEY-002, JOB-001, PROF-001 | sources/preferences/schedule UI/API | ≤five public URLs, 09:00/timezone/next-run/consent/support/pause/check-now; private prefs only relevant. V-M, V-E |
-| MON-002 | MON-001 | safe fetch/DNS/robots/HTML/feed/ATS extraction | pinned public TLS destinations/redirect/private/DNS/byte/page/time bounds, no login/JS/CAPTCHA bypass; source completeness/evidence. V-M, V-S |
-| MON-003 | MON-002, AI-003 | due scheduler/run/dedupe/match pipeline | clients closed, one daily run/local date, DST/timezone/restart/catch-up; changed-text AI/circuit/deadline; stable postings/no false closure. V-M |
-| MON-004 | MON-003, APP-003 | notifications/badge/job links/run UI | first summary/new-match digest, exact dedupe/read states, failed/partial/paused/no-key visible; discovered jobs not applications. V-M, V-E |
+| MON-001 | KEY-002, JOB-001, PROF-001 | sources/preferences/schedule UI/API | **Status: DONE for M5 local.** `/monitored-sources` CRUD caps five sources, validates https/443/no-userinfo/no-IP URLs and IANA timezones, stamps consent by revision (edits re-require consent), supports pause/resume/remove and 3/day check-now; Job alerts UI exposes state/next-run/last-error/setup-required. Live fetch remains V-M pending. [Evidence](evidence/M5.md) |
+| MON-002 | MON-001 | safe fetch/DNS/robots/HTML/feed/ATS extraction | **Status: DONE for M5 local.** `app/monitoring/fetch.py` pins validated public IPs with TLS SNI, revalidates ≤3 redirects incl. cross-host robots, bounds 2 MiB/30 s/2 s throttle, and fails closed on private DNS answers; `extract.py` reads JobPosting JSON-LD, RSS/Atom, and bounded job-shaped anchors (≤200). ATS-specific adapters remain unimplemented (recorded limit). V-M, V-S. [Evidence](evidence/M5.md) |
+| MON-003 | MON-002, AI-003 | due scheduler/run/dedupe/match pipeline | **Status: DONE for M5 local (deterministic matching).** Claim-time consent/stale revalidation, fetch outside the transaction, canonical-URL dedupe, meaningful-revision diffs, and closure only after absence from two complete scans are verified. Changed-text AI matching is deferred — deterministic match_reason only. V-M. [Evidence](evidence/M5.md) |
+| MON-004 | MON-003, APP-003 | notifications/badge/job links/run UI | **Status: DONE for M5 local.** Exact `{job}:{event}:r{rev}` dedupe keys, read/read-all states, live unread bell badge, job save/dismiss/reopen with external links, and run history showing failed/partial/paused honestly; discovered jobs are never applications. V-E. [Evidence](evidence/M5.md) |
 
 ## M6 — Privacy, reliability and quality
 

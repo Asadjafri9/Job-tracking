@@ -944,3 +944,36 @@ h3 {
     min-height: 44px;
   }
 }
+
+.key-card.unread {
+  border-color: var(--accent, #4f6bed);
+  box-shadow: 0 0 0 1px var(--accent, #4f6bed);
+}
+
+.key-card-head .masked-key {
+  margin: 0;
+}
+
+.icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent, #4f6bed);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}

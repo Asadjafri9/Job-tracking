@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { AlertsPage } from "./alerts";
 import { ApplicationsPage } from "./applications";
 import { DocumentsPage } from "./documents";
 import { EmailPage } from "./email";
@@ -83,6 +84,7 @@ export function App() {
   } | null>(null);
   const [authStatus, setAuthStatus] = useState("Checking account…");
   const [authChecked, setAuthChecked] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   async function refreshAccount() {
     try {
@@ -118,6 +120,29 @@ export function App() {
   useEffect(() => {
     void refreshAccount();
   }, []);
+
+  useEffect(() => {
+    if (!account) return;
+    let stopped = false;
+    async function pollUnread() {
+      try {
+        const response = await fetch("/api/v1/notifications?limit=1", {
+          credentials: "include",
+        });
+        if (!response.ok || stopped) return;
+        const body = (await response.json()) as { unread_count?: number };
+        setUnreadCount(body.unread_count ?? 0);
+      } catch {
+        // Offline or API unreachable: keep the last known count.
+      }
+    }
+    void pollUnread();
+    const timer = window.setInterval(() => void pollUnread(), 60_000);
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
+  }, [account, page]);
 
   const pageTitle =
     navigation.find((item) => item.key === page)?.label ?? "Home";
@@ -210,14 +235,22 @@ export function App() {
           >
             Sign out
           </button>
-          <button
+          <a
             className="icon-button"
-            type="button"
-            aria-label="Notifications are not connected"
-            disabled
+            href="#job-alerts"
+            aria-label={
+              unreadCount > 0
+                ? `${unreadCount} unread notifications`
+                : "Notifications"
+            }
           >
             <Icon name="bell" />
-          </button>
+            {unreadCount > 0 ? (
+              <span className="bell-badge" aria-hidden="true">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            ) : null}
+          </a>
         </header>
 
         <div className="content">
@@ -227,6 +260,8 @@ export function App() {
             <ApplicationsPage csrf={account.csrf} signedIn />
           ) : page === "email" ? (
             <EmailPage csrf={account.csrf} signedIn />
+          ) : page === "job-alerts" ? (
+            <AlertsPage csrf={account.csrf} signedIn />
           ) : page === "providers" ? (
             <ProvidersPage csrf={account.csrf} signedIn />
           ) : page === "profile" ? (

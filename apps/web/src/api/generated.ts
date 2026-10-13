@@ -160,6 +160,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/discovered-jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Discovered Jobs */
+        get: operations["list_discovered_jobs_api_v1_discovered_jobs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovered-jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Discovered Job */
+        patch: operations["update_discovered_job_api_v1_discovered_jobs__job_id__patch"];
+        trace?: never;
+    };
     "/api/v1/documents": {
         parameters: {
             query?: never;
@@ -385,6 +419,128 @@ export interface paths {
         get: operations["api_meta_api_v1_meta_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/monitored-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sources */
+        get: operations["list_sources_api_v1_monitored_sources_get"];
+        put?: never;
+        /** Create Source */
+        post: operations["create_source_api_v1_monitored_sources_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/monitored-sources/{source_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Source */
+        get: operations["get_source_api_v1_monitored_sources__source_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Source */
+        delete: operations["delete_source_api_v1_monitored_sources__source_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Source */
+        patch: operations["update_source_api_v1_monitored_sources__source_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/monitored-sources/{source_id}/check-now": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check Now */
+        post: operations["check_now_api_v1_monitored_sources__source_id__check_now_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/monitoring-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Runs */
+        get: operations["list_runs_api_v1_monitoring_runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Notifications */
+        get: operations["list_notifications_api_v1_notifications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark All Read */
+        post: operations["mark_all_read_api_v1_notifications_read_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/{notification_id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Notification Read */
+        post: operations["mark_notification_read_api_v1_notifications__notification_id__read_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1406,6 +1562,88 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** JobList */
+        JobList: {
+            /** Jobs */
+            jobs: components["schemas"]["JobView"][];
+        };
+        /** JobUpdate */
+        JobUpdate: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "save" | "dismiss" | "reopen";
+        };
+        /** JobView */
+        JobView: {
+            /** Canonical Job Url */
+            canonical_job_url: string | null;
+            /** Employer */
+            employer: string | null;
+            /**
+             * First Seen At
+             * Format: date-time
+             */
+            first_seen_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Remote */
+            is_remote: boolean | null;
+            /**
+             * Last Seen At
+             * Format: date-time
+             */
+            last_seen_at: string;
+            /** Location */
+            location: string | null;
+            /** Match Reason */
+            match_reason: string | null;
+            /** Meaningful Revision */
+            meaningful_revision: number;
+            /**
+             * Source Id
+             * Format: uuid
+             */
+            source_id: string;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+        };
+        /** NotificationList */
+        NotificationList: {
+            /** Notifications */
+            notifications: components["schemas"]["NotificationView"][];
+            /** Unread Count */
+            unread_count: number;
+        };
+        /** NotificationView */
+        NotificationView: {
+            /** Content */
+            content: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Discovered Job Id */
+            discovered_job_id: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Monitoring Run Id */
+            monitoring_run_id: string | null;
+            /** Read At */
+            read_at: string | null;
+        };
         /** ProfileResponse */
         ProfileResponse: {
             /** Facts */
@@ -1476,6 +1714,42 @@ export interface components {
             interactive_enabled: boolean;
             /** Model Id */
             model_id: string;
+        };
+        /** RunList */
+        RunList: {
+            /** Runs */
+            runs: components["schemas"]["RunView"][];
+        };
+        /** RunView */
+        RunView: {
+            /** Completed Count */
+            completed_count: number;
+            /** Completeness */
+            completeness: string;
+            /** Discovered Count */
+            discovered_count: number;
+            /** Ended At */
+            ended_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Redacted Error */
+            redacted_error: string | null;
+            /** Run Kind */
+            run_kind: string;
+            /** Scheduled Local Date */
+            scheduled_local_date: string | null;
+            /**
+             * Source Id
+             * Format: uuid
+             */
+            source_id: string;
+            /** Started At */
+            started_at: string | null;
+            /** State */
+            state: string;
         };
         /** SessionCreate */
         SessionCreate: {
@@ -1601,6 +1875,93 @@ export interface components {
             role: string | null;
             /** State */
             state: string;
+        };
+        /** SourceCreate */
+        SourceCreate: {
+            /** Public Url */
+            public_url: string;
+            /** Region Selector */
+            region_selector?: string | null;
+            /**
+             * Saved Key Consent
+             * @default false
+             */
+            saved_key_consent: boolean;
+            /**
+             * Schedule
+             * @default DAILY
+             * @enum {string}
+             */
+            schedule: "DAILY" | "MANUAL";
+            /**
+             * Scheduled Check Consent
+             * @default false
+             */
+            scheduled_check_consent: boolean;
+            /**
+             * Source Kind
+             * @default HTML
+             * @enum {string}
+             */
+            source_kind: "HTML" | "RSS" | "ATS";
+            /** Timezone */
+            timezone: string;
+        };
+        /** SourceList */
+        SourceList: {
+            /** Sources */
+            sources: components["schemas"]["SourceView"][];
+        };
+        /** SourceUpdate */
+        SourceUpdate: {
+            /** Action */
+            action?: ("pause" | "resume") | null;
+            /** Expected Revision */
+            expected_revision: number;
+            /** Region Selector */
+            region_selector?: string | null;
+            /** Saved Key Consent */
+            saved_key_consent?: boolean | null;
+            /** Schedule */
+            schedule?: ("DAILY" | "MANUAL") | null;
+            /** Scheduled Check Consent */
+            scheduled_check_consent?: boolean | null;
+            /** Timezone */
+            timezone?: string | null;
+        };
+        /** SourceView */
+        SourceView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Error */
+            last_error: string | null;
+            /** Last Success At */
+            last_success_at: string | null;
+            /** Next Run At */
+            next_run_at: string | null;
+            /** Public Url */
+            public_url: string;
+            /** Region Selector */
+            region_selector: string | null;
+            /** Revision */
+            revision: number;
+            /** Saved Key Consented At */
+            saved_key_consented_at: string | null;
+            /** Schedule */
+            schedule: string;
+            /** Scheduled Check Consented At */
+            scheduled_check_consented_at: string | null;
+            /** Setup Required */
+            setup_required: boolean;
+            /** Source Kind */
+            source_kind: string;
+            /** State */
+            state: string;
+            /** Timezone */
+            timezone: string;
         };
         /** StatusEventView */
         StatusEventView: {
@@ -2085,6 +2446,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DashboardView"];
+                };
+            };
+        };
+    };
+    list_discovered_jobs_api_v1_discovered_jobs_get: {
+        parameters: {
+            query?: {
+                source_id?: string | null;
+                status?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_discovered_job_api_v1_discovered_jobs__job_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2719,6 +3148,298 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_sources_api_v1_monitored_sources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceList"];
+                };
+            };
+        };
+    };
+    create_source_api_v1_monitored_sources_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourceCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_source_api_v1_monitored_sources__source_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_source_api_v1_monitored_sources__source_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_source_api_v1_monitored_sources__source_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_now_api_v1_monitored_sources__source_id__check_now_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_runs_api_v1_monitoring_runs_get: {
+        parameters: {
+            query?: {
+                source_id?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_notifications_api_v1_notifications_get: {
+        parameters: {
+            query?: {
+                unread?: boolean;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_all_read_api_v1_notifications_read_all_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    mark_notification_read_api_v1_notifications__notification_id__read_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -30,6 +30,7 @@ from app.modules.credentials import router as credentials_router
 from app.modules.documents import router as documents_router
 from app.modules.emails import router as emails_router
 from app.modules.extractions import router as extractions_router
+from app.modules.monitoring import router as monitoring_router
 from app.modules.profile import router as profile_router
 
 _LOCAL_AZURITE_ACCOUNT_KEY = (
@@ -71,6 +72,7 @@ app.include_router(documents_router)
 app.include_router(extractions_router)
 app.include_router(applications_router)
 app.include_router(emails_router)
+app.include_router(monitoring_router)
 
 
 def _request_id(request: Request) -> str:

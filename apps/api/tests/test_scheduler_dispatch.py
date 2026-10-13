@@ -264,7 +264,8 @@ def test_daily_scan_handler_cancels_when_source_no_longer_scheduled(
         assert stored.redacted_error == handlers.SOURCE_STALE_REASON
 
 
-def test_daily_scan_handler_records_pending_pipeline(owner_id: UUID) -> None:
+def test_daily_scan_handler_records_fetch_failure(owner_id: UUID) -> None:
+    """An unresolvable source is recorded FAILED, never fabricated."""
     source_id = _add_source(owner_id, next_run_at=NOW - timedelta(minutes=1))
     assert scheduler.dispatch_due_sources(NOW, engine=scheduler_engine) == 1
     run = _runs(source_id)[0]
@@ -277,7 +278,7 @@ def test_daily_scan_handler_records_pending_pipeline(owner_id: UUID) -> None:
         stored = session.get(MonitoringRun, run.id)
         assert stored is not None
         assert stored.state == "FAILED"
-        assert stored.redacted_error == handlers.PIPELINE_PENDING_REASON
+        assert (stored.redacted_error or "").startswith("fetch_error")
 
 
 def test_owner_cleanup_handler_purges_only_expired_owner_rows(owner_id: UUID) -> None:

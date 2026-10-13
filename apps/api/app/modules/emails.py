@@ -241,6 +241,10 @@ def create_draft(
                     Document.user_id == auth.user_id, Document.id == document_id
                 )
             )
+            if document is None:
+                raise HTTPException(
+                    status_code=422, detail="style document not found"
+                )
             session.add(
                 EmailDraftDocument(
                     user_id=auth.user_id,
