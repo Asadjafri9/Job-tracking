@@ -28,6 +28,10 @@ class Settings(BaseModel):
         default="postgresql://copilot_worker:worker-local-only@127.0.0.1:55432/jobtracking",
         alias="WORKER_DATABASE_URL",
     )
+    scheduler_database_url: str = Field(
+        default=("postgresql://copilot_scheduler:scheduler-local-only@127.0.0.1:55432/jobtracking"),
+        alias="SCHEDULER_DATABASE_URL",
+    )
     migration_database_url: str = Field(
         default="postgresql://copilot_migrator:migrator-local-only@127.0.0.1:55432/jobtracking",
         alias="MIGRATION_DATABASE_URL",
@@ -96,6 +100,7 @@ class Settings(BaseModel):
             ("DATABASE_URL", self.database_url),
             ("AUTH_DATABASE_URL", self.auth_database_url),
             ("WORKER_DATABASE_URL", self.worker_database_url),
+            ("SCHEDULER_DATABASE_URL", self.scheduler_database_url),
             ("MIGRATION_DATABASE_URL", self.migration_database_url),
             ("BLOB_ENDPOINT_URL", self.blob_endpoint_url),
             ("OIDC_ISSUER", self.oidc_issuer),
@@ -113,6 +118,7 @@ class Settings(BaseModel):
             "DATABASE_URL": self.database_url,
             "AUTH_DATABASE_URL": self.auth_database_url,
             "WORKER_DATABASE_URL": self.worker_database_url,
+            "SCHEDULER_DATABASE_URL": self.scheduler_database_url,
             "MIGRATION_DATABASE_URL": self.migration_database_url,
             "BLOB_ENDPOINT_URL": self.blob_endpoint_url,
             "OIDC_ISSUER": self.oidc_issuer,
@@ -150,6 +156,7 @@ class Settings(BaseModel):
             ("DATABASE_URL", self.database_url),
             ("AUTH_DATABASE_URL", self.auth_database_url),
             ("WORKER_DATABASE_URL", self.worker_database_url),
+            ("SCHEDULER_DATABASE_URL", self.scheduler_database_url),
             ("MIGRATION_DATABASE_URL", self.migration_database_url),
             ("BLOB_ENDPOINT_URL", self.blob_endpoint_url),
             ("OIDC_ISSUER", self.oidc_issuer),

@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { LandingPage } from "./Landing";
 import { navigation, resolvePage, type Page } from "./navigation";
+import { ProvidersPage } from "./providers";
 
 function pageFromHash(): Page {
   return resolvePage(window.location.hash);
@@ -48,6 +50,12 @@ function Icon({ name }: { name: string }) {
         <path d="M5 12h14M13 6l6 6-6 6" />
       </>
     ),
+    key: (
+      <>
+        <circle cx="8" cy="15" r="4" />
+        <path d="m10.8 12.2 8.7-8.7M17 6l2 2M14.5 8.5l2 2" />
+      </>
+    ),
   };
 
   return (
@@ -64,6 +72,7 @@ export function App() {
     csrf: string;
   } | null>(null);
   const [authStatus, setAuthStatus] = useState("Checking account…");
+  const [authChecked, setAuthChecked] = useState(false);
 
   async function refreshAccount() {
     try {
@@ -75,6 +84,8 @@ export function App() {
     } catch {
       setAccount(null);
       setAuthStatus("Sign in to your workspace");
+    } finally {
+      setAuthChecked(true);
     }
   }
 
@@ -100,6 +111,18 @@ export function App() {
 
   const pageTitle =
     navigation.find((item) => item.key === page)?.label ?? "Home";
+
+  if (!authChecked) {
+    return (
+      <div className="app-loading" role="status">
+        Checking your account…
+      </div>
+    );
+  }
+
+  if (!account) {
+    return <LandingPage />;
+  }
 
   return (
     <div className="app-frame">
@@ -149,22 +172,16 @@ export function App() {
               <Icon name="profile" />
             </span>
             <span>
-              <strong>{account?.email ?? "Workspace shell"}</strong>
+              <strong>{account.email}</strong>
               <small>{authStatus}</small>
             </span>
-            {account ? (
-              <button
-                className="preview-pill"
-                type="button"
-                onClick={() => void signOut()}
-              >
-                Sign out
-              </button>
-            ) : (
-              <a className="preview-pill" href="/auth/login">
-                Sign in
-              </a>
-            )}
+            <button
+              className="preview-pill"
+              type="button"
+              onClick={() => void signOut()}
+            >
+              Sign out
+            </button>
           </div>
         </div>
       </aside>
@@ -176,19 +193,13 @@ export function App() {
             <span aria-hidden="true">/</span>
             <strong>{pageTitle}</strong>
           </p>
-          {account ? (
-            <button
-              className="preview-pill account-action"
-              type="button"
-              onClick={() => void signOut()}
-            >
-              Sign out
-            </button>
-          ) : (
-            <a className="preview-pill account-action" href="/auth/login">
-              Sign in
-            </a>
-          )}
+          <button
+            className="preview-pill account-action"
+            type="button"
+            onClick={() => void signOut()}
+          >
+            Sign out
+          </button>
           <button
             className="icon-button"
             type="button"
@@ -202,6 +213,8 @@ export function App() {
         <div className="content">
           {page === "home" ? (
             <Home />
+          ) : page === "providers" ? (
+            <ProvidersPage csrf={account.csrf} signedIn />
           ) : (
             <section
               className="placeholder"

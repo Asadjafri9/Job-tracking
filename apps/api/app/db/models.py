@@ -1143,7 +1143,14 @@ class MonitoringRun(Base):
     scheduled_local_date: Mapped[date | None] = mapped_column(sa.Date)
     state: Mapped[str] = mapped_column(
         enum_type(
-            "monitor_run_state", "QUEUED", "RUNNING", "PARTIAL", "SUCCEEDED", "FAILED", "CANCELED"
+            "monitor_run_state",
+            "QUEUED",
+            "RUNNING",
+            "PARTIAL",
+            "SUCCEEDED",
+            "FAILED",
+            "SKIPPED",
+            "CANCELED",
         ),
         nullable=False,
     )
@@ -1294,6 +1301,14 @@ class Job(Base):
         sa.Index("ix_jobs_claim", "state", "next_run_at", "created_at"),
         sa.Index("ix_jobs_user_state", "user_id", "state", "created_at"),
         sa.Index("ix_jobs_lease", "state", "lease_until"),
+        sa.Index(
+            "uq_jobs_active_reference",
+            "user_id",
+            "kind",
+            "reference_id",
+            unique=True,
+            postgresql_where=sa.text("state IN ('QUEUED','RUNNING') AND reference_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
