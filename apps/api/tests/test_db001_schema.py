@@ -200,7 +200,9 @@ def test_provider_credentials_routes_are_owner_scoped_and_capped() -> None:
             )
         with pytest.raises(IntegrityError), connection.begin_nested():
             connection.execute(
-                text("UPDATE provider_settings SET fallback_consent_revision=0 WHERE user_id=:owner"),
+                text(
+                    "UPDATE provider_settings SET fallback_consent_revision=0 WHERE user_id=:owner"
+                ),
                 {"owner": owner_a},
             )
 
@@ -344,7 +346,9 @@ def test_provider_credentials_routes_are_owner_scoped_and_capped() -> None:
             text("UPDATE provider_routes SET position=2 WHERE id=:id"), {"id": route_b}
         )
         connection.execute(
-            text("UPDATE provider_settings SET fallback_consent_revision=NULL WHERE user_id=:owner"),
+            text(
+                "UPDATE provider_settings SET fallback_consent_revision=NULL WHERE user_id=:owner"
+            ),
             {"owner": owner_b},
         )
         assert (

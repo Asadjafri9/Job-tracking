@@ -89,6 +89,64 @@ async function sendToActivePage(message, { inject = false, startContext = false,
   }
 }
 
+function apiOrigin() {
+  return chrome.runtime.getManifest().host_permissions[0].replace(/\*\/$/, "");
+}
+
+function randomToken(bytes = 32) {
+  const value = new Uint8Array(bytes);
+  crypto.getRandomValues(value);
+  return btoa(String.fromCharCode(...value)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+async function signInExtension() {
+  const extensionId = chrome.runtime.id;
+  const state = randomToken(32);
+  const verifier = randomToken(48);
+  const challengeBytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+  const challenge = btoa(String.fromCharCode(...new Uint8Array(challengeBytes)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  await chrome.storage.session.set({ authPending: { state, verifier } });
+  const login = new URL(`${apiOrigin()}/auth/login`);
+  login.searchParams.set("extension_id", extensionId);
+  login.searchParams.set("extension_state", state);
+  login.searchParams.set("extension_challenge", challenge);
+  const callback = await chrome.identity.launchWebAuthFlow({ url: login.href, interactive: true });
+  if (!callback) throw new Error("Sign-in was canceled.");
+  const result = new URL(callback);
+  const pending = (await chrome.storage.session.get("authPending")).authPending;
+  await chrome.storage.session.remove("authPending");
+  if (!pending || result.searchParams.get("state") !== pending.state) {
+    throw new Error("Sign-in response could not be verified.");
+  }
+  const grant = result.searchParams.get("grant");
+  if (!grant) throw new Error("Sign-in did not return an extension grant.");
+  const response = await fetch(`${apiOrigin()}/auth/extension/exchange`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ grant, state: pending.state, code_verifier: pending.verifier }),
+  });
+  if (!response.ok) throw new Error("Sign-in could not be completed.");
+  const session = await response.json();
+  await chrome.storage.session.set({ authSession: session });
+  return { ok: true, expires_at: session.expires_at };
+}
+
+async function signOutExtension() {
+  const { authSession } = await chrome.storage.session.get("authSession");
+  if (authSession?.access_token) {
+    const response = await fetch(`${apiOrigin()}/auth/extension/logout`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${authSession.access_token}` },
+    });
+    if (!response.ok && response.status !== 401) {
+      throw new Error("Sign-out could not reach the account service. Try again.");
+    }
+  }
+  await chrome.storage.session.remove(["authSession", "authPending"]);
+  return { ok: true };
+}
+
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if (message?.type === "submit-observation") {
     const contextHandles = globalThis.ExtensionExtraction.normalizeContextHandles(message.context_handles, { requireForm: true });
@@ -101,6 +159,22 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
     return false;
   }
   if (!trustedPanel(sender)) return false;
+
+  if (message?.type === "panel-auth-sign-in") {
+    signInExtension().then(respond).catch((error) => respond({ error: error.message }));
+    return true;
+  }
+  if (message?.type === "panel-auth-sign-out") {
+    signOutExtension().then(respond).catch(() => respond({ error: "Sign-out failed." }));
+    return true;
+  }
+  if (message?.type === "panel-auth-status") {
+    chrome.storage.session.get("authSession").then(({ authSession }) => {
+      const valid = authSession?.access_token && Date.parse(authSession.expires_at) > Date.now();
+      respond({ signed_in: Boolean(valid), expires_at: valid ? authSession.expires_at : null });
+    }).catch(() => respond({ signed_in: false }));
+    return true;
+  }
 
   let operation;
   switch (message?.type) {

@@ -52,9 +52,7 @@ def test_local_configuration_rejects_remote_mock_endpoints() -> None:
         ("OIDC_REDIRECT_URI", "https://app.example.test/auth/callback"),
     ],
 )
-def test_local_configuration_rejects_non_loopback_service_urls(
-    setting: str, value: str
-) -> None:
+def test_local_configuration_rejects_non_loopback_service_urls(setting: str, value: str) -> None:
     with pytest.raises(ValidationError, match="loopback"):
         Settings.model_validate(local_values(**{setting: value}))
 
@@ -66,12 +64,17 @@ def test_nonlocal_configuration_rejects_missing_and_local_test_settings() -> Non
     values = {
         "APP_ENV": "staging",
         "DATABASE_URL": "postgresql://runtime:secret@db.contoso.com:5432/jobtracking",
+        "AUTH_DATABASE_URL": "postgresql://auth:secret@db.contoso.com:5432/jobtracking",
+        "WORKER_DATABASE_URL": "postgresql://worker:secret@db.contoso.com:5432/jobtracking",
         "MIGRATION_DATABASE_URL": "postgresql://migrator:secret@db.contoso.com:5432/jobtracking",
         "BLOB_ENDPOINT_URL": "https://storage.contoso.com/account",
         "OIDC_ISSUER": "https://identity.contoso.com/tenant/v2.0",
         "OIDC_CLIENT_ID": "app-client",
         "OIDC_CLIENT_SECRET": "real-secret",
         "OIDC_REDIRECT_URI": "https://app.contoso.com/auth/callback",
+        "WEB_APP_ORIGIN": "https://app.contoso.com",
+        "BETA_ALLOWED_EMAILS": "beta@contoso.com",
+        "CHROME_EXTENSION_IDS": "a" * 32,
         "APP_HASH_KEY": "hash-key-with-enough-entropy-from-secret-store",
         "AUTH_TRANSACTION_ENCRYPTION_KEY": "transaction-key-from-secret-store",
         "KEY_VAULT_CREDENTIAL_KEK_ID": "https://vault.contoso.com/keys/wrapping/abc",
@@ -191,12 +194,17 @@ def test_local_mock_service_refuses_production_environment(
     values = {
         "APP_ENV": "production",
         "DATABASE_URL": "postgresql://runtime:secret@db.contoso.com:5432/jobtracking",
+        "AUTH_DATABASE_URL": "postgresql://auth:secret@db.contoso.com:5432/jobtracking",
+        "WORKER_DATABASE_URL": "postgresql://worker:secret@db.contoso.com:5432/jobtracking",
         "MIGRATION_DATABASE_URL": "postgresql://migrator:secret@db.contoso.com:5432/jobtracking",
         "BLOB_ENDPOINT_URL": "https://storage.contoso.com/account",
         "OIDC_ISSUER": "https://identity.contoso.com/tenant/v2.0",
         "OIDC_CLIENT_ID": "app-client",
         "OIDC_CLIENT_SECRET": "real-secret",
         "OIDC_REDIRECT_URI": "https://app.contoso.com/auth/callback",
+        "WEB_APP_ORIGIN": "https://app.contoso.com",
+        "BETA_ALLOWED_EMAILS": "beta@contoso.com",
+        "CHROME_EXTENSION_IDS": "a" * 32,
         "APP_HASH_KEY": "hash-key-with-enough-entropy-from-secret-store",
         "AUTH_TRANSACTION_ENCRYPTION_KEY": "transaction-key-from-secret-store",
         "KEY_VAULT_CREDENTIAL_KEK_ID": "https://vault.contoso.com/keys/wrapping/abc",

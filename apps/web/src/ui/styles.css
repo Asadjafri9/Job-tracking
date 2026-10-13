@@ -208,6 +208,12 @@ svg {
   background: #f0f2ef;
   color: #59655d;
   font-size: 11px;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.account-action {
+  margin: 0 8px 0 auto;
 }
 .main-panel {
   min-width: 0;

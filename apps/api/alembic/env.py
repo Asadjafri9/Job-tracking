@@ -16,9 +16,10 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 migration_url = os.environ.get("MIGRATION_DATABASE_URL")
-if migration_url:
-    normalized_url = sqlalchemy_url(migration_url).render_as_string(hide_password=False)
-    config.set_main_option("sqlalchemy.url", normalized_url.replace("%", "%%"))
+if not migration_url:
+    raise RuntimeError("MIGRATION_DATABASE_URL must be set before running Alembic")
+normalized_url = sqlalchemy_url(migration_url).render_as_string(hide_password=False)
+config.set_main_option("sqlalchemy.url", normalized_url.replace("%", "%%"))
 
 target_metadata = Base.metadata
 

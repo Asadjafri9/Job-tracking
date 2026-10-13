@@ -1,6 +1,6 @@
 # Project progress
 
-Updated October 12, 2026 · planning version 2.0.
+Updated October 13, 2026 · planning version 2.0.
 
 | Area | Status |
 | --- | --- |
@@ -19,6 +19,8 @@ The planning work used no connected Azure services, live provider calls or outgo
 
 **M0 is not complete.** SET-001–004 and DGN-001–003 are done; EXT-001–003 have passed independent code/synthetic review, and the owner confirmed local Chrome fixture inspection/fill, but accessibility and broader compatibility checks remain open. DGN-004 is **BLOCKED** awaiting five consenting representative job seekers; DGN-005 is blocked on that study; DGN-006 awaits the owner's brand/clearance decision. See the evidence below. No user study, accessibility sign-off, owner brand approval, provider call, or cloud provisioning is claimed.
 
+M1 implementation is underway in this checkout. DB-001 through DB-003 have observed migration, schema, tenant-isolation, idempotency, revision, and quota-race evidence on an isolated local PostgreSQL database. The full API suite passes (72 tests), as do Ruff and mypy; OpenAPI/client drift checks, web checks, and extension tests also pass from the earlier run. Authlib authorization-code/PKCE and Joserfc JWT validation now back the OIDC flow; local fake OIDC web/extension lifecycle and provider-key consent/revocation checks pass. `JOB-001` worker idle and graceful shutdown checks pass; scheduler ticks and registered workload handlers remain unimplemented pending dependent feature contracts. Independent review, real tenant/Chrome/Key Vault smoke, and the DGN-005-gated production settings UI remain open. Keep M1 **IN_PROGRESS**. See [M1 evidence](evidence/M1.md), [DB-002 evidence](evidence/DB-002.md), and [DB-003 evidence](evidence/DB-003.md). Do not treat code presence or synthetic checks as live tenant completion.
+
 Local foundation has no known external prerequisite. Later tasks need actual External ID configuration, extension IDs, opted-in provider keys/live evaluation, permitted source/form checks and future Azure subscription/region/SKU/quota/cost review. Those prerequisites remain unverified; record a blocker when it affects a task.
 
 Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
@@ -33,6 +35,9 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 | SET-003 | DONE | [SET-003 evidence](evidence/SET-003.md): V-C OpenAPI/client generation and drift; shared error response, compatibility and no-HTML-fallback checks; V-F/V-B passed | Codex, independent review passed October 12, 2026 |
 | SET-004 | DONE | [SET-004 evidence](evidence/SET-004.md): frozen workspace setup, synthetic foundation CI, real V-F/V-B/V-C aggregate, and evidence templates | Codex, independent review passed October 12, 2026 |
 | DB-001 | DONE | [DB-001 evidence](evidence/DB-001.md): fresh and idempotent PostgreSQL migration, seed, drift check, nine schema checks, API suite, Ruff, and mypy | Codex, independent review passed October 12, 2026 |
+| DB-002 | DONE | [DB-002 evidence](evidence/DB-002.md): fresh isolated migration, no drift, nine DB-001 schema checks and eight tenant RLS/role checks passed | Codex, October 13, 2026 |
+| DB-003 | DONE | [DB-003 evidence](evidence/DB-003.md): concurrent idempotency reuse, altered-input conflict, stale revision rejection, and quota race passed; owner-child constraints passed | Codex, October 13, 2026 |
+| M1 implementation | IN_PROGRESS | [M1 evidence](evidence/M1.md): full API suite 72 passed; Authlib/Joserfc local auth checks, worker shutdown checks, frontend, extension, contracts, and static checks pass; scheduler/handlers, independent review, and tenant/UI gates remain | Codex, October 13, 2026 |
 | DGN-001 | DONE | [DGN-001 evidence](evidence/DGN-001.md): design/contract reconciliation, proposed defaults and explicit unresolved owner decisions | Codex, independent review passed October 12, 2026 |
 | DGN-002 | DONE | [DGN-002 evidence](evidence/DGN-002.md): proposed tokens/components, all 16 rendered contrast pairs, and small-size/full-lockup SVG review | Codex, independent review passed October 12, 2026 |
 | DGN-003 | DONE | [DGN-003 evidence](evidence/DGN-003.md): browser-only prototype and 42 rendered screens across 1440/1280/390 and 360/420px targets; user study and accessibility review remain outstanding | Codex, independent review passed October 12, 2026 |

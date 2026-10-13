@@ -59,11 +59,43 @@ function Icon({ name }: { name: string }) {
 
 export function App() {
   const [page, setPage] = useState<Page>(pageFromHash);
+  const [account, setAccount] = useState<{
+    email: string;
+    csrf: string;
+  } | null>(null);
+  const [authStatus, setAuthStatus] = useState("Checking account…");
+
+  async function refreshAccount() {
+    try {
+      const response = await fetch("/auth/session", { credentials: "include" });
+      if (!response.ok) throw new Error("signed out");
+      const session = await response.json();
+      setAccount({ email: session.login_email, csrf: session.csrf_token });
+      setAuthStatus("Signed in");
+    } catch {
+      setAccount(null);
+      setAuthStatus("Sign in to your workspace");
+    }
+  }
+
+  async function signOut() {
+    if (!account) return;
+    const response = await fetch("/auth/logout", {
+      method: "POST",
+      credentials: "include",
+      headers: { "X-CSRF-Token": account.csrf },
+    });
+    if (response.ok) await refreshAccount();
+  }
 
   useEffect(() => {
     const syncPage = () => setPage(pageFromHash());
     window.addEventListener("hashchange", syncPage);
     return () => window.removeEventListener("hashchange", syncPage);
+  }, []);
+
+  useEffect(() => {
+    void refreshAccount();
   }, []);
 
   const pageTitle =
@@ -117,10 +149,22 @@ export function App() {
               <Icon name="profile" />
             </span>
             <span>
-              <strong>Workspace shell</strong>
-              <small>Local preview</small>
+              <strong>{account?.email ?? "Workspace shell"}</strong>
+              <small>{authStatus}</small>
             </span>
-            <span className="preview-pill">Preview</span>
+            {account ? (
+              <button
+                className="preview-pill"
+                type="button"
+                onClick={() => void signOut()}
+              >
+                Sign out
+              </button>
+            ) : (
+              <a className="preview-pill" href="/auth/login">
+                Sign in
+              </a>
+            )}
           </div>
         </div>
       </aside>
@@ -132,6 +176,19 @@ export function App() {
             <span aria-hidden="true">/</span>
             <strong>{pageTitle}</strong>
           </p>
+          {account ? (
+            <button
+              className="preview-pill account-action"
+              type="button"
+              onClick={() => void signOut()}
+            >
+              Sign out
+            </button>
+          ) : (
+            <a className="preview-pill account-action" href="/auth/login">
+              Sign in
+            </a>
+          )}
           <button
             className="icon-button"
             type="button"

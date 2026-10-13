@@ -1,7 +1,8 @@
 """Version 2 persistence entities.
 
-This module defines schema and relationships only. Tenant enforcement, RLS,
-role grants, write APIs, and concurrency protocols belong to later tasks.
+This module defines schema and relationships only. Tenant enforcement and role
+grants are applied by versioned migrations; write APIs and concurrency protocols
+belong to later tasks.
 """
 
 from __future__ import annotations
@@ -86,15 +87,22 @@ class AuthTransaction(Base):
         sa.CheckConstraint("expires_at > created_at", name="expiry_after_creation"),
         sa.CheckConstraint("length(state_hash) = 64", name="state_hash_length"),
         sa.CheckConstraint("length(nonce_hash) = 64", name="nonce_hash_length"),
+        sa.CheckConstraint("length(browser_binding_hash) = 64", name="browser_binding_hash_length"),
     )
 
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
     state_hash: Mapped[str] = mapped_column(sa.String(64), nullable=False)
     nonce_hash: Mapped[str] = mapped_column(sa.String(64), nullable=False)
+    browser_binding_hash: Mapped[str] = mapped_column(sa.String(64), nullable=False)
     verifier_ciphertext: Mapped[bytes] = mapped_column(BYTEA, nullable=False)
     callback_uri: Mapped[str] = mapped_column(sa.String(2048), nullable=False)
     client_id: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     extension_id: Mapped[str | None] = mapped_column(sa.String(128))
+    extension_pkce_challenge: Mapped[str | None] = mapped_column(sa.String(128))
+    extension_state: Mapped[str | None] = mapped_column(sa.String(128))
+    require_fresh_auth: Mapped[bool] = mapped_column(
+        sa.Boolean, nullable=False, server_default=sa.false()
+    )
     pkce_challenge: Mapped[str] = mapped_column(sa.String(128), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(INSTANT, nullable=False)
     consumed_at: Mapped[datetime | None] = mapped_column(INSTANT)
@@ -112,11 +120,13 @@ class Session(Base):
         sa.CheckConstraint("expires_at > auth_time", name="expiry_after_auth"),
         sa.CheckConstraint("last_seen_at >= auth_time", name="last_seen_after_auth"),
         sa.CheckConstraint("length(token_hash) = 64", name="token_hash_length"),
+        sa.CheckConstraint("client_type IN ('WEB', 'EXTENSION')", name="client_type_valid"),
     )
 
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
     user_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
     token_hash: Mapped[str] = mapped_column(sa.String(64), nullable=False)
+    client_type: Mapped[str] = mapped_column(sa.String(16), nullable=False, server_default="WEB")
     auth_time: Mapped[datetime] = mapped_column(INSTANT, nullable=False)
     last_seen_at: Mapped[datetime] = mapped_column(INSTANT, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(INSTANT, nullable=False)
@@ -136,6 +146,7 @@ class ExtensionGrant(Base):
         sa.UniqueConstraint("grant_hash", name="uq_extension_grants_hash"),
         sa.CheckConstraint("expires_at > created_at", name="expiry_after_creation"),
         sa.CheckConstraint("length(grant_hash) = 64", name="grant_hash_length"),
+        sa.CheckConstraint("length(state_hash) = 64", name="state_hash_length"),
     )
 
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
@@ -145,6 +156,7 @@ class ExtensionGrant(Base):
     client_id: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     extension_id: Mapped[str] = mapped_column(sa.String(128), nullable=False)
     pkce_challenge: Mapped[str] = mapped_column(sa.String(128), nullable=False)
+    state_hash: Mapped[str] = mapped_column(sa.String(64), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         INSTANT, nullable=False, server_default=NOW_DEFAULT
     )
@@ -485,9 +497,7 @@ class ProviderRoute(Base):
 
     __tablename__ = "provider_routes"
     __table_args__ = (
-        sa.ForeignKeyConstraint(
-            ["user_id"], ["provider_settings.user_id"], ondelete="CASCADE"
-        ),
+        sa.ForeignKeyConstraint(["user_id"], ["provider_settings.user_id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
             ["user_id", "credential_id"],
             ["provider_credentials.user_id", "provider_credentials.id"],
@@ -1337,6 +1347,29 @@ class IdempotencyRecord(Base):
     entity_type: Mapped[str | None] = mapped_column(sa.String(64))
     entity_id: Mapped[UUID | None] = mapped_column(UUID_TYPE)
     response_status: Mapped[int] = mapped_column(sa.SmallInteger, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(INSTANT, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        INSTANT, nullable=False, server_default=NOW_DEFAULT
+    )
+
+
+class QuotaReservation(Base):
+    """Temporary capacity held atomically while a bounded operation completes."""
+
+    __tablename__ = "quota_reservations"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        sa.UniqueConstraint("user_id", "kind", "reservation_key", name="uq_quota_reservation_key"),
+        sa.CheckConstraint("amount BETWEEN 1 AND 52428800", name="quota_amount_bounds"),
+        sa.CheckConstraint("length(kind) BETWEEN 1 AND 64", name="quota_kind_length"),
+        sa.Index("ix_quota_reservations_expiry", "user_id", "kind", "expires_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
+    user_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+    kind: Mapped[str] = mapped_column(sa.String(64), nullable=False)
+    reservation_key: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+    amount: Mapped[int] = mapped_column(sa.BigInteger, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(INSTANT, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         INSTANT, nullable=False, server_default=NOW_DEFAULT

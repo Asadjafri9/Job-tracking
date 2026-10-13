@@ -20,6 +20,14 @@ class Settings(BaseModel):
         default="postgresql://copilot_runtime:runtime-local-only@127.0.0.1:55432/jobtracking",
         alias="DATABASE_URL",
     )
+    auth_database_url: str = Field(
+        default="postgresql://copilot_auth:auth-local-only@127.0.0.1:55432/jobtracking",
+        alias="AUTH_DATABASE_URL",
+    )
+    worker_database_url: str = Field(
+        default="postgresql://copilot_worker:worker-local-only@127.0.0.1:55432/jobtracking",
+        alias="WORKER_DATABASE_URL",
+    )
     migration_database_url: str = Field(
         default="postgresql://copilot_migrator:migrator-local-only@127.0.0.1:55432/jobtracking",
         alias="MIGRATION_DATABASE_URL",
@@ -32,6 +40,11 @@ class Settings(BaseModel):
     oidc_client_secret: str | None = Field(default="mock-client-secret", alias="OIDC_CLIENT_SECRET")
     oidc_redirect_uri: str | None = Field(
         default="http://127.0.0.1:18000/auth/callback", alias="OIDC_REDIRECT_URI"
+    )
+    web_app_origin: str = Field(default="http://127.0.0.1:5173", alias="WEB_APP_ORIGIN")
+    beta_allowed_emails: str = Field(default="local.user@example.test", alias="BETA_ALLOWED_EMAILS")
+    chrome_extension_ids: str = Field(
+        default="digpnmcecpkodggeieillcjpfgpokgnk", alias="CHROME_EXTENSION_IDS"
     )
     local_mocks_enabled: bool = Field(default=True, alias="LOCAL_MOCKS_ENABLED")
     credential_kek_provider: Literal["local", "key_vault"] = Field(
@@ -48,6 +61,19 @@ class Settings(BaseModel):
 
     @model_validator(mode="after")
     def validate_environment(self) -> "Settings":
+        web_origin = urlparse(self.web_app_origin)
+        if (
+            web_origin.scheme not in {"http", "https"}
+            or not web_origin.hostname
+            or web_origin.username is not None
+            or web_origin.password is not None
+            or web_origin.path not in {"", "/"}
+            or web_origin.query
+            or web_origin.fragment
+        ):
+            raise ValueError(
+                "WEB_APP_ORIGIN must be an HTTP(S) origin without a path or credentials"
+            )
         if self.app_env in {"local", "test"}:
             self._validate_local_kek()
             self._validate_local_endpoints()
@@ -68,10 +94,13 @@ class Settings(BaseModel):
     def _validate_local_endpoints(self) -> None:
         for name, value in (
             ("DATABASE_URL", self.database_url),
+            ("AUTH_DATABASE_URL", self.auth_database_url),
+            ("WORKER_DATABASE_URL", self.worker_database_url),
             ("MIGRATION_DATABASE_URL", self.migration_database_url),
             ("BLOB_ENDPOINT_URL", self.blob_endpoint_url),
             ("OIDC_ISSUER", self.oidc_issuer),
             ("OIDC_REDIRECT_URI", self.oidc_redirect_uri),
+            ("WEB_APP_ORIGIN", self.web_app_origin),
         ):
             parsed = urlparse(value or "")
             if parsed.hostname not in {"localhost", "127.0.0.1", "::1"}:
@@ -82,12 +111,17 @@ class Settings(BaseModel):
     def _validate_nonlocal_environment(self) -> None:
         required = {
             "DATABASE_URL": self.database_url,
+            "AUTH_DATABASE_URL": self.auth_database_url,
+            "WORKER_DATABASE_URL": self.worker_database_url,
             "MIGRATION_DATABASE_URL": self.migration_database_url,
             "BLOB_ENDPOINT_URL": self.blob_endpoint_url,
             "OIDC_ISSUER": self.oidc_issuer,
             "OIDC_CLIENT_ID": self.oidc_client_id,
             "OIDC_CLIENT_SECRET": self.oidc_client_secret,
             "OIDC_REDIRECT_URI": self.oidc_redirect_uri,
+            "WEB_APP_ORIGIN": self.web_app_origin,
+            "BETA_ALLOWED_EMAILS": self.beta_allowed_emails,
+            "CHROME_EXTENSION_IDS": self.chrome_extension_ids,
             "APP_HASH_KEY": self.app_hash_key,
             "AUTH_TRANSACTION_ENCRYPTION_KEY": self.auth_transaction_encryption_key,
             "KEY_VAULT_CREDENTIAL_KEK_ID": self.key_vault_credential_kek_id,
@@ -114,17 +148,20 @@ class Settings(BaseModel):
 
         for name, value in (
             ("DATABASE_URL", self.database_url),
+            ("AUTH_DATABASE_URL", self.auth_database_url),
+            ("WORKER_DATABASE_URL", self.worker_database_url),
             ("MIGRATION_DATABASE_URL", self.migration_database_url),
             ("BLOB_ENDPOINT_URL", self.blob_endpoint_url),
             ("OIDC_ISSUER", self.oidc_issuer),
             ("OIDC_REDIRECT_URI", self.oidc_redirect_uri),
+            ("WEB_APP_ORIGIN", self.web_app_origin),
         ):
             parsed = urlparse(value or "")
             host = parsed.hostname
             if not host or host in {"localhost", "127.0.0.1", "::1", "mock-oidc", "wiremock"}:
                 raise ValueError(f"{name} must use a configured nonlocal host outside local/test")
             if (
-                name in {"BLOB_ENDPOINT_URL", "OIDC_ISSUER", "OIDC_REDIRECT_URI"}
+                name in {"BLOB_ENDPOINT_URL", "OIDC_ISSUER", "OIDC_REDIRECT_URI", "WEB_APP_ORIGIN"}
                 and parsed.scheme != "https"
             ):
                 raise ValueError(f"{name} must use HTTPS outside local/test")

@@ -307,7 +307,7 @@ test("extension UI includes keyboard/live status and explicit unsupported/manual
   assert.match(panel, /aria-live="polite"/);
   assert.match(panel, /role="status"/);
   assert.match(panel, /You submit, always/);
-  assert.match(panel, /Sign-in is not connected yet/);
+  assert.match(panel, /id="sign-in"/);
   assert.match(scripts, /No submission was made/);
   for (const source of ["content.js", "worker.js", "panel.js", "filling.js"])
     assert.doesNotMatch(await readFile(new URL(`../src/${source}`, import.meta.url), "utf8"), /\.requestSubmit\s*\(|\.submit\s*\(/);
@@ -320,4 +320,8 @@ test("extension UI includes keyboard/live status and explicit unsupported/manual
   assert.match(content, /sender\.url !== chrome\.runtime\.getURL\("worker\.js"\)/);
   assert.match(worker, /sender\.url === chrome\.runtime\.getURL\("panel\.html"\)/);
   assert.match(worker, /contextHandles\.tab_handle !== tabHandle/);
+  assert.match(worker, /chrome\.identity\.launchWebAuthFlow/);
+  assert.match(worker, /chrome\.storage\.session\.set\(\{ authSession: session \}\)/);
+  assert.match(worker, /if \(!response\.ok && response\.status !== 401\)/);
+  assert.match(scripts, /if \(result\.error\) \{[\s\S]*?return;/);
 });
