@@ -1,0 +1,102 @@
+{
+  "kind": "AUTOFILL",
+  "cases": [
+    {
+      "name": "answers reference only provided fields and options",
+      "input": {
+        "questions": [
+          {
+            "field_id": "q1",
+            "label": "Are you authorized to work in Canada?",
+            "field_type": "RADIO",
+            "options": ["Yes", "No"],
+            "required": true
+          },
+          {
+            "field_id": "q2",
+            "label": "Tell us about your experience",
+            "field_type": "TEXTAREA",
+            "options": []
+          }
+        ],
+        "facts": [
+          {"fact_key": "work_authorization.canada", "value_type": "TEXT", "value": "citizen"},
+          {"fact_key": "skills.primary", "value_type": "TEXT", "value": "backend systems"}
+        ],
+        "context_excerpt": "Acme is hiring a backend engineer."
+      },
+      "expect_valid": {
+        "answers": [
+          {
+            "field_id": "q1",
+            "answer": null,
+            "option_ids": ["Yes"],
+            "used_fact_keys": ["work_authorization.canada"],
+            "missing_fact": null
+          },
+          {
+            "field_id": "q2",
+            "answer": "Built backend systems at Example Corp for three years.",
+            "option_ids": [],
+            "used_fact_keys": ["skills.primary"],
+            "missing_fact": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "answer to an unknown field is rejected",
+      "input": {
+        "questions": [
+          {
+            "field_id": "q1",
+            "label": "Salary expectation?",
+            "field_type": "TEXT",
+            "options": []
+          }
+        ],
+        "facts": [],
+        "context_excerpt": ""
+      },
+      "expect_reference_violation": {
+        "answers": [
+          {
+            "field_id": "q99",
+            "answer": "100000",
+            "option_ids": [],
+            "used_fact_keys": [],
+            "missing_fact": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "answer citing an unprovided fact is rejected",
+      "input": {
+        "questions": [
+          {
+            "field_id": "q1",
+            "label": "Notice period?",
+            "field_type": "TEXT",
+            "options": []
+          }
+        ],
+        "facts": [
+          {"fact_key": "availability.notice", "value_type": "TEXT", "value": "2 weeks"}
+        ],
+        "context_excerpt": ""
+      },
+      "expect_reference_violation": {
+        "answers": [
+          {
+            "field_id": "q1",
+            "answer": "Immediate",
+            "option_ids": [],
+            "used_fact_keys": ["availability.notice", "visa.status"],
+            "missing_fact": null
+          }
+        ]
+      }
+    }
+  ]
+}

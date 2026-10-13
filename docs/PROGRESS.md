@@ -23,11 +23,15 @@ M1 implementation is underway in this checkout. DB-001 through DB-003 have obser
 
 Local foundation has no known external prerequisite. Later tasks need actual External ID configuration, extension IDs, opted-in provider keys/live evaluation, permitted source/form checks and future Azure subscription/region/SKU/quota/cost review. Those prerequisites remain unverified; record a blocker when it affects a task.
 
+## M2 progress
+
+**M2 is IN_PROGRESS with all eight tasks implemented and locally verified.** The profile editor (versioned fact CRUD, confirmations, purpose tags, `If-Match` concurrency), private document upload/download (Azurite, 10-file/5 MiB/50 MiB quotas, signature checks, idempotent upload, parse-job enqueue), the bounded subprocess parser (PDF/DOCX, page/block anchors, 15 s CPU, ≤50 pages, ≤100k chars, ≤25 MiB ZIP expansion; `RLIMIT_AS` 256 MiB on POSIX with documented macOS fallback), the typed provider contract and capability catalog, the three stub-verified adapters, the consent-gated fallback router (outcome state machine, daily quotas, idempotent replay), the durable `document.extract_candidates` job with one-shot confirm/reject review UI, and the nine-case offline corpus all pass on the loopback stack (145 API tests, plus web lint/typecheck/tests/build and `alembic check` clean). **No live provider call, real Key Vault operation, or Chrome/tenant validation was performed** — provider checks are `httpx.MockTransport`-only and extraction candidates require explicit background consent. Keep M2 **IN_PROGRESS** pending live provider evaluation (V-L), manual UI review, and independent review. See [M2 evidence](evidence/M2.md).
+
 Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
 
 ## Next implementation action
 
-Proceed to M1 — Identity, persistence and durable work — following the dependency order in [`TASKS.md`](TASKS.md). M0 completion does not mean the full application is implemented or ready to deploy.
+Proceed to M3 — Autofill, tracking and dashboard — following the dependency order in [`TASKS.md`](TASKS.md). M2 implementation does not mean the product is ready to deploy.
 
 ## Evidence ledger
 

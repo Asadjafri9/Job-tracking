@@ -26,6 +26,9 @@ from app.contracts import (
     error_response,
 )
 from app.modules.credentials import router as credentials_router
+from app.modules.documents import router as documents_router
+from app.modules.extractions import router as extractions_router
+from app.modules.profile import router as profile_router
 
 _LOCAL_AZURITE_ACCOUNT_KEY = (
     "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
@@ -61,6 +64,9 @@ app = FastAPI(
 )
 app.include_router(auth_router)
 app.include_router(credentials_router)
+app.include_router(profile_router)
+app.include_router(documents_router)
+app.include_router(extractions_router)
 
 
 def _request_id(request: Request) -> str:

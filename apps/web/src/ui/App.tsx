@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { DocumentsPage } from "./documents";
 import { LandingPage } from "./Landing";
 import { navigation, resolvePage, type Page } from "./navigation";
+import { ProfilePage } from "./profile";
 import { ProvidersPage } from "./providers";
 
 function pageFromHash(): Page {
@@ -54,6 +56,12 @@ function Icon({ name }: { name: string }) {
       <>
         <circle cx="8" cy="15" r="4" />
         <path d="m10.8 12.2 8.7-8.7M17 6l2 2M14.5 8.5l2 2" />
+      </>
+    ),
+    documents: (
+      <>
+        <path d="M7 3h7l5 5v13H7z" />
+        <path d="M14 3v5h5M10 13h6M10 17h6" />
       </>
     ),
   };
@@ -215,6 +223,10 @@ export function App() {
             <Home />
           ) : page === "providers" ? (
             <ProvidersPage csrf={account.csrf} signedIn />
+          ) : page === "profile" ? (
+            <ProfilePage csrf={account.csrf} signedIn />
+          ) : page === "documents" ? (
+            <DocumentsPage csrf={account.csrf} signedIn />
           ) : (
             <section
               className="placeholder"

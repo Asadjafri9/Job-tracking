@@ -1,0 +1,55 @@
+{
+  "kind": "JOB_MATCH",
+  "cases": [
+    {
+      "name": "employer role and detected fields from page context",
+      "input": {
+        "page_excerpt": "Example Corp is hiring a Backend Engineer to maintain payment services in Python. Apply with resume and cover letter.",
+        "page_url_domain": "jobs.example.test"
+      },
+      "expect_valid": {
+        "employer": "Example Corp",
+        "role": "Backend Engineer",
+        "fields": [
+          {
+            "field_id": "resume",
+            "label": "Resume",
+            "field_type": "TEXT",
+            "options": [],
+            "required": true,
+            "sensitive": false
+          },
+          {
+            "field_id": "cover",
+            "label": "Cover letter",
+            "field_type": "TEXTAREA",
+            "options": [],
+            "required": false,
+            "sensitive": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "field with an unsupported type fails schema",
+      "input": {
+        "page_excerpt": "Apply now.",
+        "page_url_domain": null
+      },
+      "expect_schema_violation": {
+        "employer": "Example Corp",
+        "role": "Backend Engineer",
+        "fields": [
+          {
+            "field_id": "f1",
+            "label": "Odd",
+            "field_type": "MAGIC",
+            "options": [],
+            "required": false,
+            "sensitive": false
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "kind": "CLASSIFY",
+  "cases": [
+    {
+      "name": "verdicts cover only provided postings",
+      "input": {
+        "postings": [
+          {
+            "native_id": "p1",
+            "title": "Backend Engineer",
+            "employer": "Acme",
+            "location": "Toronto",
+            "text": "Python services."
+          },
+          {
+            "native_id": "p2",
+            "title": "Carpenter",
+            "employer": "BuildCo",
+            "location": "Onsite",
+            "text": "Wood framing."
+          }
+        ],
+        "desired_roles": ["backend engineer"],
+        "desired_locations": ["toronto", "remote"]
+      },
+      "expect_valid": {
+        "results": [
+          {"native_id": "p1", "status": "MATCHED", "reason": "role and location match"},
+          {"native_id": "p2", "status": "UNCHANGED", "reason": "unrelated trade"}
+        ]
+      }
+    },
+    {
+      "name": "verdict for an absent posting is rejected",
+      "input": {
+        "postings": [
+          {
+            "native_id": "p1",
+            "title": "Backend Engineer",
+            "employer": "Acme",
+            "location": "Toronto",
+            "text": "Python services."
+          }
+        ],
+        "desired_roles": [],
+        "desired_locations": []
+      },
+      "expect_reference_violation": {
+        "results": [
+          {"native_id": "ghost", "status": "MATCHED", "reason": "invented posting"}
+        ]
+      }
+    }
+  ]
+}

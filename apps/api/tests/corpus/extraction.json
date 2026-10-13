@@ -1,0 +1,87 @@
+{
+  "kind": "EXTRACTION",
+  "cases": [
+    {
+      "name": "anchored candidates from resume sections",
+      "input": {
+        "document_type": "RESUME",
+        "sections": [
+          {
+            "section_id": 0,
+            "heading": "Experience",
+            "anchor": {"page": 1, "block": 0, "excerpt": "Example Corp"},
+            "text": "Senior Engineer at Example Corp 2021-2024. Led reliability work."
+          },
+          {
+            "section_id": 1,
+            "heading": "Education",
+            "anchor": {"page": 1, "block": 4, "excerpt": "B.Sc."},
+            "text": "B.Sc. Computer Science, State University, 2020"
+          }
+        ]
+      },
+      "expect_valid": {
+        "candidates": [
+          {
+            "fact_key": "employers.recent",
+            "value_type": "TEXT",
+            "value": "Example Corp",
+            "section_id": 0,
+            "anchor": {"page": 1, "block": 0, "excerpt": "Example Corp"}
+          },
+          {
+            "fact_key": "education.degree",
+            "value_type": "TEXT",
+            "value": "B.Sc. Computer Science",
+            "section_id": 1,
+            "anchor": {"page": 1, "block": 4, "excerpt": "B.Sc."}
+          }
+        ]
+      }
+    },
+    {
+      "name": "candidate referencing an absent section is rejected",
+      "input": {
+        "document_type": "RESUME",
+        "sections": [
+          {
+            "section_id": 0,
+            "heading": "",
+            "anchor": {"page": 1, "block": 0, "excerpt": ""},
+            "text": "Contact details."
+          }
+        ]
+      },
+      "expect_reference_violation": {
+        "candidates": [
+          {
+            "fact_key": "employers.recent",
+            "value_type": "TEXT",
+            "value": "Invented Corp",
+            "section_id": 7,
+            "anchor": {"page": 9, "block": 0, "excerpt": ""}
+          }
+        ]
+      }
+    },
+    {
+      "name": "candidate with invented fact key over limit fails schema",
+      "input": {
+        "document_type": "RESUME",
+        "sections": [
+          {
+            "section_id": 0,
+            "heading": "",
+            "anchor": {"page": 1, "block": 0, "excerpt": ""},
+            "text": "Anything."
+          }
+        ]
+      },
+      "expect_schema_violation": {
+        "candidates": [
+          {"fact_key": "", "value_type": "TEXT", "value": "x", "section_id": 0}
+        ]
+      }
+    }
+  ]
+}

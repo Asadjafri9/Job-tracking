@@ -213,7 +213,14 @@ class Document(Base):
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
     user_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
     document_type: Mapped[str] = mapped_column(
-        enum_type("document_type", "RESUME", "LINKEDIN_PDF", "COVER_LETTER", "OTHER"),
+        enum_type(
+            "document_type",
+            "RESUME",
+            "LINKEDIN_PDF",
+            "COVER_LETTER",
+            "SUPPORTING_DOCUMENT",
+            "OTHER",
+        ),
         nullable=False,
     )
     revision: Mapped[int] = mapped_column(sa.Integer, nullable=False, server_default="1")
@@ -549,7 +556,10 @@ class AiOperation(Base):
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
     user_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
     kind: Mapped[str] = mapped_column(
-        enum_type("ai_operation_kind", "AUTOFILL", "EMAIL", "JOB_MATCH"), nullable=False
+        enum_type(
+            "ai_operation_kind", "AUTOFILL", "EMAIL", "JOB_MATCH", "EXTRACTION", "CLASSIFY"
+        ),
+        nullable=False,
     )
     input_hmac: Mapped[str] = mapped_column(sa.String(64), nullable=False)
     idempotency_key: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)

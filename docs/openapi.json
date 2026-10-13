@@ -27,6 +27,134 @@
         "title": "ApiMetaResponse",
         "type": "object"
       },
+      "Body_upload_document_api_v1_documents_post": {
+        "properties": {
+          "document_type": {
+            "enum": [
+              "RESUME",
+              "LINKEDIN_PDF",
+              "COVER_LETTER",
+              "SUPPORTING_DOCUMENT",
+              "OTHER"
+            ],
+            "title": "Document Type",
+            "type": "string"
+          },
+          "file": {
+            "format": "binary",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "document_type"
+        ],
+        "title": "Body_upload_document_api_v1_documents_post",
+        "type": "object"
+      },
+      "CandidateDecision": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "CONFIRM",
+              "REJECT"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "fact_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fact Key"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "value_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "TEXT",
+                  "NUMBER",
+                  "DATE",
+                  "BOOLEAN",
+                  "URL",
+                  "JSON"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Type"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "CandidateDecision",
+        "type": "object"
+      },
+      "CandidateView": {
+        "properties": {
+          "anchor": {
+            "additionalProperties": true,
+            "title": "Anchor",
+            "type": "object"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          },
+          "fact_key": {
+            "title": "Fact Key",
+            "type": "string"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "integer"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "value_type": {
+            "title": "Value Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "fact_key",
+          "value_type",
+          "value",
+          "section_id",
+          "anchor",
+          "decision"
+        ],
+        "title": "CandidateView",
+        "type": "object"
+      },
       "CredentialList": {
         "properties": {
           "credentials": {
@@ -118,6 +246,164 @@
           "allow_interactive"
         ],
         "title": "CredentialWrite",
+        "type": "object"
+      },
+      "DefaultWrite": {
+        "additionalProperties": false,
+        "properties": {
+          "is_default": {
+            "default": true,
+            "title": "Is Default",
+            "type": "boolean"
+          }
+        },
+        "title": "DefaultWrite",
+        "type": "object"
+      },
+      "DocumentList": {
+        "properties": {
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentSummary"
+            },
+            "title": "Documents",
+            "type": "array"
+          }
+        },
+        "required": [
+          "documents"
+        ],
+        "title": "DocumentList",
+        "type": "object"
+      },
+      "DocumentSummary": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "document_type": {
+            "title": "Document Type",
+            "type": "string"
+          },
+          "file_name": {
+            "title": "File Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_default": {
+            "title": "Is Default",
+            "type": "boolean"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "original_state": {
+            "title": "Original State",
+            "type": "string"
+          },
+          "parse_state": {
+            "title": "Parse State",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "document_type",
+          "file_name",
+          "media_type",
+          "size_bytes",
+          "sha256",
+          "original_state",
+          "parse_state",
+          "is_default",
+          "revision",
+          "created_at"
+        ],
+        "title": "DocumentSummary",
+        "type": "object"
+      },
+      "DocumentUploadResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "document_type": {
+            "title": "Document Type",
+            "type": "string"
+          },
+          "file_name": {
+            "title": "File Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_default": {
+            "title": "Is Default",
+            "type": "boolean"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "original_state": {
+            "title": "Original State",
+            "type": "string"
+          },
+          "parse_state": {
+            "title": "Parse State",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "document_type",
+          "file_name",
+          "media_type",
+          "size_bytes",
+          "sha256",
+          "original_state",
+          "parse_state",
+          "is_default",
+          "revision",
+          "created_at"
+        ],
+        "title": "DocumentUploadResponse",
         "type": "object"
       },
       "ErrorDetail": {
@@ -244,6 +530,279 @@
         "title": "ExtensionTokenResponse",
         "type": "object"
       },
+      "ExtractionView": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CandidateView"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "document_id": {
+            "format": "uuid",
+            "title": "Document Id",
+            "type": "string"
+          },
+          "extracted_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extracted Text"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "parse_version": {
+            "title": "Parse Version",
+            "type": "string"
+          },
+          "prompt_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Version"
+          },
+          "redacted_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Redacted Error"
+          },
+          "review_state": {
+            "title": "Review State",
+            "type": "string"
+          },
+          "source_anchors": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Source Anchors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "document_id",
+          "parse_version",
+          "prompt_version",
+          "model_version",
+          "review_state",
+          "extracted_text",
+          "source_anchors",
+          "candidates",
+          "redacted_error"
+        ],
+        "title": "ExtractionView",
+        "type": "object"
+      },
+      "FactSummary": {
+        "properties": {
+          "allowed_purposes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Purposes",
+            "type": "array"
+          },
+          "confirmation_state": {
+            "title": "Confirmation State",
+            "type": "string"
+          },
+          "current_revision": {
+            "title": "Current Revision",
+            "type": "integer"
+          },
+          "fact_key": {
+            "title": "Fact Key",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "sensitivity": {
+            "title": "Sensitivity",
+            "type": "string"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "value_type": {
+            "title": "Value Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fact_key",
+          "value_type",
+          "value",
+          "sensitivity",
+          "allowed_purposes",
+          "current_revision",
+          "confirmation_state",
+          "source_type",
+          "updated_at"
+        ],
+        "title": "FactSummary",
+        "type": "object"
+      },
+      "FactUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_purposes": {
+            "items": {
+              "enum": [
+                "AUTOFILL",
+                "EMAIL",
+                "MONITORING"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Allowed Purposes",
+            "type": "array"
+          },
+          "expected_revision": {
+            "minimum": 1.0,
+            "title": "Expected Revision",
+            "type": "integer"
+          },
+          "fact_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Fact Key",
+            "type": "string"
+          },
+          "sensitivity": {
+            "default": "NORMAL",
+            "enum": [
+              "NORMAL",
+              "SENSITIVE",
+              "SPECIAL_CATEGORY"
+            ],
+            "title": "Sensitivity",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "value_type": {
+            "enum": [
+              "TEXT",
+              "NUMBER",
+              "DATE",
+              "BOOLEAN",
+              "URL",
+              "JSON"
+            ],
+            "title": "Value Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fact_key",
+          "value_type",
+          "expected_revision"
+        ],
+        "title": "FactUpdate",
+        "type": "object"
+      },
+      "FactWrite": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_purposes": {
+            "items": {
+              "enum": [
+                "AUTOFILL",
+                "EMAIL",
+                "MONITORING"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Allowed Purposes",
+            "type": "array"
+          },
+          "fact_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Fact Key",
+            "type": "string"
+          },
+          "sensitivity": {
+            "default": "NORMAL",
+            "enum": [
+              "NORMAL",
+              "SENSITIVE",
+              "SPECIAL_CATEGORY"
+            ],
+            "title": "Sensitivity",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "value_type": {
+            "enum": [
+              "TEXT",
+              "NUMBER",
+              "DATE",
+              "BOOLEAN",
+              "URL",
+              "JSON"
+            ],
+            "title": "Value Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fact_key",
+          "value_type"
+        ],
+        "title": "FactWrite",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -273,6 +832,27 @@
           "service"
         ],
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "ProfileResponse": {
+        "properties": {
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/FactSummary"
+            },
+            "title": "Facts",
+            "type": "array"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "revision",
+          "facts"
+        ],
+        "title": "ProfileResponse",
         "type": "object"
       },
       "ProviderSettingsResponse": {
@@ -493,6 +1073,400 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/documents": {
+      "get": {
+        "operationId": "list_documents_api_v1_documents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Documents",
+        "tags": [
+          "documents"
+        ]
+      },
+      "post": {
+        "operationId": "upload_document_api_v1_documents_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_document_api_v1_documents_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentUploadResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}": {
+      "delete": {
+        "operationId": "delete_document_api_v1_documents__document_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Document",
+        "tags": [
+          "documents"
+        ]
+      },
+      "get": {
+        "operationId": "get_document_api_v1_documents__document_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/default": {
+      "post": {
+        "operationId": "set_default_document_api_v1_documents__document_id__default_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefaultWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Default Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/download": {
+      "get": {
+        "operationId": "download_document_api_v1_documents__document_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/extractions": {
+      "get": {
+        "operationId": "list_extractions_api_v1_documents__document_id__extractions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExtractionView"
+                  },
+                  "title": "Response List Extractions Api V1 Documents  Document Id  Extractions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Extractions",
+        "tags": [
+          "extractions"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/extractions/{extraction_id}/extract": {
+      "post": {
+        "description": "Run the consented provider extraction over stored bounded text.",
+        "operationId": "run_extraction_api_v1_documents__document_id__extractions__extraction_id__extract_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "extraction_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Extraction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Extraction",
+        "tags": [
+          "extractions"
+        ]
+      }
+    },
+    "/api/v1/extractions/{extraction_id}/candidates/{index}/decision": {
+      "post": {
+        "operationId": "decide_candidate_api_v1_extractions__extraction_id__candidates__index__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "extraction_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Extraction Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "title": "Index",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Candidate",
+        "tags": [
+          "extractions"
+        ]
+      }
+    },
     "/api/v1/meta": {
       "get": {
         "description": "Expose compatibility metadata without exposing environment or secret values.",
@@ -632,6 +1606,164 @@
         "summary": "Api Meta",
         "tags": [
           "meta"
+        ]
+      }
+    },
+    "/api/v1/profile": {
+      "get": {
+        "operationId": "get_profile_api_v1_profile_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Profile",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/v1/profile/facts": {
+      "put": {
+        "operationId": "put_fact_api_v1_profile_facts_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FactWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FactSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Fact",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/v1/profile/facts/{fact_id}": {
+      "delete": {
+        "operationId": "delete_fact_api_v1_profile_facts__fact_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fact_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Fact Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Fact",
+        "tags": [
+          "profile"
+        ]
+      },
+      "post": {
+        "operationId": "update_fact_api_v1_profile_facts__fact_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fact_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Fact Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": true,
+            "schema": {
+              "title": "If-Match",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FactUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FactSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Fact",
+        "tags": [
+          "profile"
         ]
       }
     },

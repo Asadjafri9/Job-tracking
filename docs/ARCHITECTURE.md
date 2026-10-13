@@ -25,8 +25,11 @@ apps/web/                   React routes/UI; no service credentials
 apps/extension/             MV3 panel, worker, isolated content scripts and event outbox
 apps/api/app/modules/       auth, profile, documents, credentials, applications,
                             autofill, email, sources, jobs, notifications, privacy
-apps/api/app/providers/     normalized provider contracts/router/adapters
-apps/api/app/worker/        document parse, daily scan, export, deletion, cleanup
+apps/api/app/ai/            typed operation contracts, capability catalog,
+                            three provider adapters, consented fallback router
+apps/api/app/storage/       private document blob adapter (Azurite locally)
+apps/api/app/worker/        bounded subprocess parsing, candidate extraction,
+                            daily scan, export, deletion, cleanup
 apps/api/alembic/versions/  Alembic tables/grants/RLS
 apps/api/tests/             unit/API/database security
 packages/browser-shared/   field/error/message schemas
