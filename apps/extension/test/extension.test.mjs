@@ -350,3 +350,87 @@ test("extension UI includes keyboard/live status and explicit unsupported/manual
   assert.match(worker, /if \(!response\.ok && response\.status !== 401\)/);
   assert.match(scripts, /if \(result\.error\) \{[\s\S]*?return;/);
 });
+
+await import("../src/outbox.js");
+const Outbox = globalThis.ExtensionOutbox;
+
+function fakeStorage() {
+  const data = new Map();
+  return {
+    data,
+    get: async (key) => ({ [key]: data.get(key) }),
+    set: async (items) => { for (const [key, value] of Object.entries(items)) data.set(key, value); },
+  };
+}
+
+function validEvent(overrides = {}) {
+  return {
+    event_idempotency_key: "3f8b6f9e-aaaa-4bbb-8ccc-0123456789ab",
+    application_session_id: "11111111-2222-3333-4444-555555555555",
+    evidence_type: "SUBMIT_CLICK",
+    evidence_source: "USER_GESTURE",
+    observed_at: "2026-10-14T12:00:00Z",
+    gesture_ref_hash: "a".repeat(64),
+    evidence: { outcome_code: "unknown" },
+    ...overrides,
+  };
+}
+
+test("outbox sanitize keeps only bounded metadata and rejects secrets/dom", () => {
+  const dirty = validEvent({
+    access_token: "secret",
+    dom: "<html>",
+    evidence: { outcome_code: "unknown", profile_fact: "email", page_changed: true },
+  });
+  const clean = Outbox.sanitize(dirty);
+  assert.equal("access_token" in clean, false);
+  assert.equal("dom" in clean, false);
+  assert.deepEqual(Object.keys(clean.evidence).sort(), ["outcome_code", "page_changed"]);
+  assert.equal(Outbox.sanitize({ evidence_type: "SUBMIT_CLICK" }), null);
+  assert.equal(Outbox.sanitize(validEvent({ observed_at: "not-a-date" })), null);
+});
+
+test("outbox enqueues once per idempotency key, bounds size, and flushes account-bound", async () => {
+  const sent = [];
+  const storage = fakeStorage();
+  let clock = 0;
+  const box = Outbox.createOutbox({ storage, send: async (event) => sent.push(event), now: () => clock });
+  assert.deepEqual(await box.enqueue(validEvent(), "acct-1"), { queued: true, dropped_oldest: 0 });
+  assert.equal((await box.enqueue(validEvent(), "acct-1")).reason, "duplicate");
+  assert.equal(await box.pendingCount(), 1);
+  for (let index = 0; index < Outbox.MAX_ENTRIES + 5; index += 1) {
+    await box.enqueue(validEvent({ event_idempotency_key: `3f8b6f9e-aaaa-4bbb-8ccc-${String(index).padStart(12, "0")}` }), "acct-1");
+  }
+  assert.equal(await box.pendingCount(), Outbox.MAX_ENTRIES);
+  await box.enqueue(validEvent({ event_idempotency_key: "3f8b6f9e-aaaa-4bbb-8ccc-ffffffffffff" }), "acct-2");
+  const result = await box.flush("acct-1");
+  assert.equal(result.sent, Outbox.MAX_ENTRIES - 1); // the foreign entry evicted one
+  assert.equal(result.pending, 0); // foreign entry dropped, never sent
+  assert.equal(sent.length, Outbox.MAX_ENTRIES - 1);
+  assert.equal(await box.pendingCount(), 0);
+});
+
+test("outbox expires stale events and retries transient failures only", async () => {
+  const storage = fakeStorage();
+  let clock = 0;
+  let calls = 0;
+  const box = Outbox.createOutbox({
+    storage,
+    send: async () => { calls += 1; throw new Error("offline"); },
+    now: () => clock,
+  });
+  await box.enqueue(validEvent(), "acct-1");
+  let result = await box.flush("acct-1");
+  assert.equal(result.pending, 1);
+  clock += Outbox.TTL_MS + 1;
+  result = await box.flush("acct-1");
+  assert.equal(result.pending, 0); // expired entries are dropped, not sent
+  assert.equal(calls, 1);
+
+  const terminal = Outbox.createOutbox({
+    storage: fakeStorage(),
+    send: async () => { throw Object.assign(new Error("gone"), { terminal: true }); },
+  });
+  await terminal.enqueue(validEvent(), "acct-1");
+  assert.equal((await terminal.flush("acct-1")).pending, 0); // 4xx is not retried
+});

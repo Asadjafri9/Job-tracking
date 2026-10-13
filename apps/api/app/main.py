@@ -25,6 +25,7 @@ from app.contracts import (
     ErrorField,
     error_response,
 )
+from app.modules.applications import router as applications_router
 from app.modules.credentials import router as credentials_router
 from app.modules.documents import router as documents_router
 from app.modules.extractions import router as extractions_router
@@ -67,6 +68,7 @@ app.include_router(credentials_router)
 app.include_router(profile_router)
 app.include_router(documents_router)
 app.include_router(extractions_router)
+app.include_router(applications_router)
 
 
 def _request_id(request: Request) -> str:

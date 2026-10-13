@@ -11,6 +11,9 @@ const suggestions = new Map();
 let selectedForm = null;
 let pageContextHandles = null;
 let selectedFormHandles = null;
+let capturedJobText = "";
+let signedIn = false;
+let trackingReady = false;
 
 function setStatus(message) { statusEl.textContent = message; }
 function make(tag, className, text) {
@@ -74,6 +77,7 @@ inspectFormButton.addEventListener("click", async () => {
   selectedFormHandles = result.context_handles;
   suggestions.clear();
   renderFields(result.form);
+  byId("draft-answers").classList.toggle("hidden", !(trackingReady && result.form.fields.length));
   fillButton.classList.toggle("hidden", result.form.fields.length === 0);
   fillButton.disabled = result.form.fields.length === 0;
   byId("page-state").textContent = `${result.form.fields.length} safe fields`;
@@ -166,14 +170,94 @@ byId("capture-job").addEventListener("click", async () => {
   announceUnsupported(result);
   if (result?.error) return;
   const context = result.context;
+  capturedJobText = context.selected_text;
   byId("job-summary").textContent = `${context.page_title || "Selected page"}: ${context.selected_text.slice(0, 280)}${context.selected_text.length > 280 ? "…" : ""}`;
   setStatus("Selected job text is held in this page only.");
+});
+
+const prepareButton = byId("prepare-tracking");
+const employerInput = byId("track-employer");
+const roleInput = byId("track-role");
+
+function refreshPrepare() {
+  prepareButton.disabled = !(
+    signedIn && pageContextHandles && employerInput.value.trim() && roleInput.value.trim()
+  );
+}
+for (const input of [employerInput, roleInput]) input.addEventListener("input", refreshPrepare);
+
+prepareButton.addEventListener("click", async () => {
+  prepareButton.disabled = true;
+  const result = await request({
+    type: "panel-prepare-tracking",
+    employer: employerInput.value.trim(),
+    role: roleInput.value.trim(),
+    excerpt: capturedJobText,
+    form_handle: selectedFormHandles?.form_handle ?? null,
+  });
+  announceUnsupported(result);
+  if (result?.error) { refreshPrepare(); return; }
+  trackingReady = true;
+  byId("tracking-state").textContent = "Session prepared";
+  byId("observation").textContent = "Tracking is on for this page. Your submit actions will be recorded as attempts only.";
+  if (selectedForm?.fields?.length) byId("draft-answers").classList.remove("hidden");
+  setStatus(`Session prepared. ${result.session.state}. Nothing is tracked as applied automatically.`);
+});
+
+byId("draft-answers").addEventListener("click", async () => {
+  const draftButton = byId("draft-answers");
+  draftButton.disabled = true;
+  setStatus("Drafting answers from your confirmed facts…");
+  const result = await request({
+    type: "panel-draft-answers",
+    fields: selectedForm?.fields ?? [],
+    context_excerpt: capturedJobText,
+  });
+  draftButton.disabled = false;
+  announceUnsupported(result);
+  if (result?.error) return;
+  let drafted = 0;
+  for (const answer of result.answers ?? []) {
+    const field = selectedForm.fields.find((item) => item.id === answer.field_id);
+    const control = byId(`value-${answer.field_id}`);
+    if (!field || !control) continue;
+    if (answer.option_ids?.length) {
+      const values = answer.option_ids
+        .map((id) => field.options.find((option) => option.id === id)?.value)
+        .filter(Boolean);
+      if (!values.length) continue; // never guess an unverified option
+      if (control.tagName === "SELECT" && control.multiple) {
+        for (const option of control.options) option.selected = values.includes(option.value);
+      } else if (control.tagName === "SELECT") {
+        control.value = values[0];
+      } else if (control.type === "checkbox") {
+        control.checked = true;
+      }
+      suggestions.set(field.id, values.length === 1 && !control.multiple ? values[0] : values);
+    } else if (typeof answer.answer === "string" && answer.answer) {
+      control.value = answer.answer;
+      suggestions.set(field.id, answer.answer);
+    } else {
+      continue;
+    }
+    const source = answer.missing_fact
+      ? `Missing information: ${answer.missing_fact}`
+      : `Drafted from: ${(answer.used_fact_keys ?? []).join(", ") || "job context"}`;
+    control.closest(".field-card")?.append(make("p", "field-meta", source));
+    drafted += 1;
+    fillButton.disabled = false;
+  }
+  setStatus(drafted
+    ? `${drafted} drafted answer${drafted === 1 ? "" : "s"} for review (provider: ${result.provider ?? "unknown"}). Edit anything before filling. Nothing is submitted.`
+    : "No answers could be drafted. Missing facts are listed per field.");
 });
 
 byId("demo").addEventListener("click", () => chrome.tabs.create({ url: chrome.runtime.getURL("demo.html") }));
 
 async function refreshAccount() {
   const result = await request({ type: "panel-auth-status" });
+  signedIn = Boolean(result.signed_in);
+  refreshPrepare();
   byId("account-status").textContent = result.signed_in
     ? `Signed in until ${new Date(result.expires_at).toLocaleTimeString()}.`
     : "Sign in to connect your account.";

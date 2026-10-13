@@ -29,9 +29,15 @@ Local foundation has no known external prerequisite. Later tasks need actual Ext
 
 Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
 
+## M3 progress
+
+**M3 is IN_PROGRESS with the application/tracking spine implemented and locally verified.** Prepared application sessions (canonical HTTPS URL identity, fact/document revision snapshots, open-session bounds) stay strictly separate from applications; a trusted submit event idempotently creates exactly one `SUBMISSION_ATTEMPTED` record and never counts as Applied; status history is append-only with site-vs-user evidence; applied-answer snapshots record what was actually filled under context-revision binding; the Applications page renders dashboard counts, filters, history, and the confirm-applied flow; the extension gained a durable 24 h account-bound metadata-only outbox with idempotent replay and sign-out purge, plus panel wiring for prepare-tracking, AI draft answers, and passive submit observation. Verified: 12 PostgreSQL-backed API tests, 22 extension tests, 141 total API tests, web lint/typecheck/12 tests/build, `alembic check` clean. **No real Chrome lifecycle, live hiring site, or provider call was performed** — keep M3 **IN_PROGRESS** pending live-form gates (V-X), manual UI review, and independent review. See [M3 evidence](evidence/M3.md).
+
+Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
+
 ## Next implementation action
 
-Proceed to M3 — Autofill, tracking and dashboard — following the dependency order in [`TASKS.md`](TASKS.md). M2 implementation does not mean the product is ready to deploy.
+Proceed to M4 — Email applications — following the dependency order in [`TASKS.md`](TASKS.md). M3 implementation does not mean the product is ready to deploy.
 
 ## Evidence ledger
 

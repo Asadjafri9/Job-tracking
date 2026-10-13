@@ -4,6 +4,162 @@
  */
 
 export interface paths {
+    "/api/v1/application-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sessions */
+        get: operations["list_sessions_api_v1_application_sessions_get"];
+        put?: never;
+        /** Create Session */
+        post: operations["create_session_api_v1_application_sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/application-sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Session Detail */
+        get: operations["get_session_detail_api_v1_application_sessions__session_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/application-sessions/{session_id}/abandon": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Abandon Session */
+        post: operations["abandon_session_api_v1_application_sessions__session_id__abandon_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/application-sessions/{session_id}/applied-answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Applied Answers */
+        post: operations["record_applied_answers_api_v1_application_sessions__session_id__applied_answers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/application-sessions/{session_id}/draft-answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Draft Answers */
+        post: operations["draft_answers_api_v1_application_sessions__session_id__draft_answers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Applications */
+        get: operations["list_applications_api_v1_applications_get"];
+        put?: never;
+        /** Create Application */
+        post: operations["create_application_api_v1_applications_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/applications/{application_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Application */
+        get: operations["get_application_api_v1_applications__application_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Patch Application */
+        patch: operations["patch_application_api_v1_applications__application_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/applications/{application_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Applied */
+        post: operations["confirm_applied_api_v1_applications__application_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dashboard */
+        get: operations["dashboard_api_v1_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/documents": {
         parameters: {
             query?: never;
@@ -269,6 +425,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/submission-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Submission Event */
+        post: operations["record_submission_event_api_v1_submission_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/callback": {
         parameters: {
             query?: never;
@@ -450,6 +623,174 @@ export interface components {
             /** Minimum Compatible Client Version */
             minimum_compatible_client_version: string;
         };
+        /** ApplicationCreate */
+        ApplicationCreate: {
+            /** Applied Date */
+            applied_date?: string | null;
+            /** Context Snapshot */
+            context_snapshot?: {
+                [key: string]: unknown;
+            };
+            /** Employer */
+            employer: string;
+            /** Follow Up Date */
+            follow_up_date?: string | null;
+            /** Raw Job Url */
+            raw_job_url?: string | null;
+            /** Role */
+            role: string;
+            /**
+             * Status
+             * @default SUBMISSION_ATTEMPTED
+             * @enum {string}
+             */
+            status: "SUBMISSION_ATTEMPTED" | "APPLIED" | "NEEDS_FOLLOW_UP" | "CLOSED";
+        };
+        /** ApplicationDetail */
+        ApplicationDetail: {
+            /** Answers */
+            answers: {
+                [key: string]: unknown;
+            }[];
+            /** Application Session Id */
+            application_session_id: string | null;
+            /** Applied At */
+            applied_at: string | null;
+            /** Applied Date */
+            applied_date: string | null;
+            /** Attempt At */
+            attempt_at: string | null;
+            /** Attempt Number */
+            attempt_number: number;
+            /** Canonical Job Url */
+            canonical_job_url: string | null;
+            /** Channel */
+            channel: string;
+            /** Context Snapshot */
+            context_snapshot: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Document Metadata Snapshot */
+            document_metadata_snapshot: {
+                [key: string]: unknown;
+            }[];
+            /** Employer */
+            employer: string;
+            /** Follow Up Date */
+            follow_up_date: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Raw Job Url */
+            raw_job_url: string | null;
+            /** Revision */
+            revision: number;
+            /** Role */
+            role: string;
+            /** Status */
+            status: string;
+            /** Status Events */
+            status_events: components["schemas"]["StatusEventView"][];
+            /** Submission Events */
+            submission_events: components["schemas"]["SubmissionEventView"][];
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ApplicationList */
+        ApplicationList: {
+            /** Applications */
+            applications: components["schemas"]["ApplicationView"][];
+        };
+        /** ApplicationPatch */
+        ApplicationPatch: {
+            /** Applied Date */
+            applied_date?: string | null;
+            /** Employer */
+            employer?: string | null;
+            /** Follow Up Date */
+            follow_up_date?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Role */
+            role?: string | null;
+            /** Status */
+            status?: ("SUBMISSION_ATTEMPTED" | "APPLIED" | "NEEDS_FOLLOW_UP" | "CLOSED") | null;
+        };
+        /** ApplicationView */
+        ApplicationView: {
+            /** Application Session Id */
+            application_session_id: string | null;
+            /** Applied At */
+            applied_at: string | null;
+            /** Applied Date */
+            applied_date: string | null;
+            /** Attempt At */
+            attempt_at: string | null;
+            /** Attempt Number */
+            attempt_number: number;
+            /** Canonical Job Url */
+            canonical_job_url: string | null;
+            /** Channel */
+            channel: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Employer */
+            employer: string;
+            /** Follow Up Date */
+            follow_up_date: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Raw Job Url */
+            raw_job_url: string | null;
+            /** Revision */
+            revision: number;
+            /** Role */
+            role: string;
+            /** Status */
+            status: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** AppliedAnswerEntry */
+        AppliedAnswerEntry: {
+            /** Expected Option Ids */
+            expected_option_ids?: string[];
+            /** Field Id */
+            field_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "filled" | "skipped" | "filled_invalid" | "unknown";
+            /** Value */
+            value?: string | string[] | boolean | null;
+        };
+        /** AppliedAnswersRequest */
+        AppliedAnswersRequest: {
+            /** Entries */
+            entries: components["schemas"]["AppliedAnswerEntry"][];
+            /** Expected Context Revision */
+            expected_context_revision: number;
+        };
         /** Body_upload_document_api_v1_documents_post */
         Body_upload_document_api_v1_documents_post: {
             /**
@@ -496,6 +837,16 @@ export interface components {
             /** Value Type */
             value_type: string;
         };
+        /** ConfirmAppliedRequest */
+        ConfirmAppliedRequest: {
+            /**
+             * Applied Date
+             * Format: date
+             */
+            applied_date: string;
+            /** Note */
+            note?: string | null;
+        };
         /** CredentialList */
         CredentialList: {
             /** Credentials */
@@ -537,6 +888,19 @@ export interface components {
              * Format: password
              */
             api_key: string;
+        };
+        /** DashboardView */
+        DashboardView: {
+            /** Applications By Status */
+            applications_by_status: {
+                [key: string]: number;
+            };
+            /** Prepared Sessions */
+            prepared_sessions: number;
+            /** Recent Status Events */
+            recent_status_events: components["schemas"]["StatusEventView"][];
+            /** Upcoming Follow Ups */
+            upcoming_follow_ups: components["schemas"]["ApplicationView"][];
         };
         /** DefaultWrite */
         DefaultWrite: {
@@ -612,6 +976,43 @@ export interface components {
             sha256: string;
             /** Size Bytes */
             size_bytes: number;
+        };
+        /** DocumentVersionRef */
+        DocumentVersionRef: {
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Revision */
+            revision: number;
+        };
+        /** DraftAnswersRequest */
+        DraftAnswersRequest: {
+            /**
+             * Context Excerpt
+             * @default
+             */
+            context_excerpt: string;
+            /** Expected Profile Revision */
+            expected_profile_revision: number;
+            /** Questions */
+            questions: components["schemas"]["FormFieldSpec"][];
+        };
+        /** DraftAnswersView */
+        DraftAnswersView: {
+            /** Answers */
+            answers: {
+                [key: string]: unknown;
+            }[];
+            /** Model */
+            model: string | null;
+            /** Provider */
+            provider: string | null;
+            /** Replayed */
+            replayed: boolean;
+            /** Revision */
+            revision: number;
         };
         /** ErrorDetail */
         ErrorDetail: {
@@ -746,6 +1147,16 @@ export interface components {
              */
             value_type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "URL" | "JSON";
         };
+        /** FactVersionRef */
+        FactVersionRef: {
+            /**
+             * Fact Id
+             * Format: uuid
+             */
+            fact_id: string;
+            /** Revision */
+            revision: number;
+        };
         /** FactWrite */
         FactWrite: {
             /** Allowed Purposes */
@@ -765,6 +1176,30 @@ export interface components {
              * @enum {string}
              */
             value_type: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "URL" | "JSON";
+        };
+        /** FormFieldSpec */
+        FormFieldSpec: {
+            /** Field Id */
+            field_id: string;
+            /**
+             * Field Type
+             * @enum {string}
+             */
+            field_type: "TEXT" | "TEXTAREA" | "SELECT" | "RADIO" | "CHECKBOX" | "DATE" | "EMAIL" | "TEL";
+            /** Label */
+            label: string;
+            /** Options */
+            options?: string[];
+            /**
+             * Required
+             * @default false
+             */
+            required: boolean;
+            /**
+             * Sensitive
+             * @default false
+             */
+            sensitive: boolean;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -849,6 +1284,79 @@ export interface components {
             /** Model Id */
             model_id: string;
         };
+        /** SessionCreate */
+        SessionCreate: {
+            /** Employer */
+            employer?: string | null;
+            /** Form Reference */
+            form_reference?: string | null;
+            /** Job Context */
+            job_context?: {
+                [key: string]: unknown;
+            };
+            /** Raw Job Url */
+            raw_job_url?: string | null;
+            /** Role */
+            role?: string | null;
+            /** Selected Document Versions */
+            selected_document_versions?: components["schemas"]["DocumentVersionRef"][];
+            /** Selected Fact Versions */
+            selected_fact_versions?: components["schemas"]["FactVersionRef"][];
+        };
+        /** SessionDetail */
+        SessionDetail: {
+            /** Application Id */
+            application_id: string | null;
+            /** Canonical Job Url */
+            canonical_job_url: string | null;
+            /** Context Revision */
+            context_revision: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Draft Answers */
+            draft_answers: {
+                [key: string]: unknown;
+            } | null;
+            /** Employer */
+            employer: string | null;
+            /** Expires At */
+            expires_at: string | null;
+            /** Form Reference */
+            form_reference: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Job Context */
+            job_context: {
+                [key: string]: unknown;
+            };
+            /** Profile Revision */
+            profile_revision: number;
+            /** Raw Job Url */
+            raw_job_url: string | null;
+            /** Role */
+            role: string | null;
+            /** Selected Document Versions */
+            selected_document_versions: {
+                [key: string]: unknown;
+            }[];
+            /** Selected Fact Versions */
+            selected_fact_versions: {
+                [key: string]: unknown;
+            }[];
+            /** State */
+            state: string;
+        };
+        /** SessionList */
+        SessionList: {
+            /** Sessions */
+            sessions: components["schemas"]["SessionView"][];
+        };
         /** SessionResponse */
         SessionResponse: {
             /**
@@ -865,6 +1373,123 @@ export interface components {
              * Format: uuid
              */
             user_id: string;
+        };
+        /** SessionView */
+        SessionView: {
+            /** Canonical Job Url */
+            canonical_job_url: string | null;
+            /** Context Revision */
+            context_revision: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Draft Answers */
+            draft_answers: {
+                [key: string]: unknown;
+            } | null;
+            /** Employer */
+            employer: string | null;
+            /** Expires At */
+            expires_at: string | null;
+            /** Form Reference */
+            form_reference: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Profile Revision */
+            profile_revision: number;
+            /** Raw Job Url */
+            raw_job_url: string | null;
+            /** Role */
+            role: string | null;
+            /** State */
+            state: string;
+        };
+        /** StatusEventView */
+        StatusEventView: {
+            /** Evidence Snapshot */
+            evidence_snapshot: {
+                [key: string]: unknown;
+            };
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** New Status */
+            new_status: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Old Status */
+            old_status: string | null;
+            /** Source */
+            source: string;
+        };
+        /** SubmissionEventCreate */
+        SubmissionEventCreate: {
+            /**
+             * Application Session Id
+             * Format: uuid
+             */
+            application_session_id: string;
+            /**
+             * Event Idempotency Key
+             * Format: uuid
+             */
+            event_idempotency_key: string;
+            /** Evidence */
+            evidence?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Evidence Source
+             * @enum {string}
+             */
+            evidence_source: "USER_GESTURE" | "CONTENT_OBSERVER";
+            /**
+             * Evidence Type
+             * @enum {string}
+             */
+            evidence_type: "SUBMIT_CLICK" | "VALIDATION_BLOCKED" | "SITE_SIGNAL" | "UNKNOWN";
+            /** Gesture Ref Hash */
+            gesture_ref_hash: string;
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /** Signal Code */
+            signal_code?: string | null;
+        };
+        /** SubmissionEventView */
+        SubmissionEventView: {
+            /** Application Id */
+            application_id: string | null;
+            /** Evidence Source */
+            evidence_source: string;
+            /** Evidence Type */
+            evidence_type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /** Replayed */
+            replayed: boolean;
+            /** Signal Code */
+            signal_code: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -884,6 +1509,393 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_sessions_api_v1_application_sessions_get: {
+        parameters: {
+            query?: {
+                state?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_session_api_v1_application_sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_session_detail_api_v1_application_sessions__session_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    abandon_session_api_v1_application_sessions__session_id__abandon_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_applied_answers_api_v1_application_sessions__session_id__applied_answers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppliedAnswersRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    draft_answers_api_v1_application_sessions__session_id__draft_answers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftAnswersRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftAnswersView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_applications_api_v1_applications_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                q?: string | null;
+                follow_up_before?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_application_api_v1_applications_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_application_api_v1_applications__application_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_application_api_v1_applications__application_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                "if-match"?: string | null;
+            };
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_applied_api_v1_applications__application_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "if-match"?: string | null;
+            };
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmAppliedRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dashboard_api_v1_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardView"];
+                };
+            };
+        };
+    };
     list_documents_api_v1_documents_get: {
         parameters: {
             query?: never;
@@ -1535,6 +2547,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProviderSettingsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_submission_event_api_v1_submission_events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmissionEventCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionEventView"];
                 };
             };
             /** @description Validation Error */
