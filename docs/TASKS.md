@@ -66,9 +66,9 @@ Every task starts NOT_STARTED. Statuses: NOT_STARTED, IN_PROGRESS, BLOCKED, IN_R
 
 | ID | Depends | Planned files | Acceptance / verification |
 | --- | --- | --- | --- |
-| MAIL-001 | DOC-003, AI-003, APP-002 | email draft routes/UI/generation | recipient/job/start message → editable source-based subject/body, current style/doc hints, version/race/header/claim validation. V-A, V-E |
-| MAIL-002 | MAIL-001 | compose encoding/copy/mailto/download UI | no connect/OAuth prompt; exact reviewed revision encoded; long/failed prefill fallback no truncation; manual attachments/Send. V-F, V-E |
-| MAIL-003 | MAIL-002, TRACK-003 | compose/sent events/email tracking | open isn't Applied; explicit sent/date idempotently tracks USER_CONFIRMED_EMAIL and immutable snapshot. V-E |
+| MAIL-001 | DOC-003, AI-003, APP-002 | email draft routes/UI/generation | **Status: DONE for M4 local.** Owner-scoped `/email-drafts` create/list/patch/cancel with recipient/header injection validation (no CR/LF), subject ≤200/body ≤10k bounds, confirmed EMAIL-purpose fact snapshots, style document refs, and `If-Match` revisions; `/generate` runs the consent-gated EMAIL operation and preserves edits on failure/unknown outcomes. V-A, V-E. [Evidence](evidence/M4.md) |
+| MAIL-002 | MAIL-001 | compose encoding/copy/mailto/download UI | **Status: DONE for M4 local.** The Email page builds the fixed-origin Gmail compose URL with `URLSearchParams` (verified Unicode/`&`/`+`/`#`/newline round-trips), refuses silent truncation above 6,000 chars, and always offers copy recipient/subject/message, mailto, and no-prefill fallbacks; no OAuth/connect prompt exists. V-F, V-E. [Evidence](evidence/M4.md) |
+| MAIL-003 | MAIL-002, TRACK-003 | compose/sent events/email tracking | **Status: DONE for M4 local.** `compose-opened` only flips draft state — no application is created; explicit "I sent this email" with a date idempotently creates one EMAIL `APPLIED` application (repeat confirms replay, newer revisions update the same record) with an immutable subject/body/fact snapshot and `USER_CONFIRMED_EMAIL` evidence. V-E. [Evidence](evidence/M4.md) |
 
 ## M5 — Daily source monitoring and notifications
 

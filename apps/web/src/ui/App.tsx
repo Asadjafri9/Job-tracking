@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ApplicationsPage } from "./applications";
 import { DocumentsPage } from "./documents";
+import { EmailPage } from "./email";
 import { LandingPage } from "./Landing";
 import { navigation, resolvePage, type Page } from "./navigation";
 import { ProfilePage } from "./profile";
@@ -224,6 +225,8 @@ export function App() {
             <Home />
           ) : page === "applications" ? (
             <ApplicationsPage csrf={account.csrf} signedIn />
+          ) : page === "email" ? (
+            <EmailPage csrf={account.csrf} signedIn />
           ) : page === "providers" ? (
             <ProvidersPage csrf={account.csrf} signedIn />
           ) : page === "profile" ? (

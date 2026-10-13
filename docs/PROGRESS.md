@@ -35,9 +35,15 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 
 Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
 
+## M4 progress
+
+**M4 is IN_PROGRESS with the email application workflow implemented and locally verified.** Owner-scoped versioned email drafts (recipient/header validation, confirmed EMAIL-purpose fact snapshots, consent-gated generation, `If-Match` edits), the Gmail compose handoff (fixed origin, verified encoding, 6,000-char copy fallback, no OAuth/send), and honest send tracking (compose-opened is never Applied; explicit dated confirmation idempotently creates one EMAIL application with an immutable snapshot) all pass: 7 new API tests, 149 total API tests, 15 web tests, contracts regenerated. **No Gmail OAuth, real sending, or live provider call was performed.** See [M4 evidence](evidence/M4.md).
+
+Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
+
 ## Next implementation action
 
-Proceed to M4 — Email applications — following the dependency order in [`TASKS.md`](TASKS.md). M3 implementation does not mean the product is ready to deploy.
+Proceed to M5 — Job monitoring — following the dependency order in [`TASKS.md`](TASKS.md). M4 implementation does not mean the product is ready to deploy.
 
 ## Evidence ledger
 

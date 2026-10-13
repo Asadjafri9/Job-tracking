@@ -267,6 +267,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/email-drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Drafts */
+        get: operations["list_drafts_api_v1_email_drafts_get"];
+        put?: never;
+        /** Create Draft */
+        post: operations["create_draft_api_v1_email_drafts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/email-drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Draft */
+        get: operations["get_draft_api_v1_email_drafts__draft_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Patch Draft */
+        patch: operations["patch_draft_api_v1_email_drafts__draft_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/email-drafts/{draft_id}/compose-opened": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Compose Opened */
+        post: operations["compose_opened_api_v1_email_drafts__draft_id__compose_opened_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/email-drafts/{draft_id}/confirm-sent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Sent */
+        post: operations["confirm_sent_api_v1_email_drafts__draft_id__confirm_sent_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/email-drafts/{draft_id}/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate Draft */
+        post: operations["generate_draft_api_v1_email_drafts__draft_id__generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/extractions/{extraction_id}/candidates/{index}/decision": {
         parameters: {
             query?: never;
@@ -847,6 +934,21 @@ export interface components {
             /** Note */
             note?: string | null;
         };
+        /** ConfirmSentRequest */
+        ConfirmSentRequest: {
+            /**
+             * Event Idempotency Key
+             * Format: uuid
+             */
+            event_idempotency_key: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Sent Date
+             * Format: date
+             */
+            sent_date: string;
+        };
         /** CredentialList */
         CredentialList: {
             /** Credentials */
@@ -1014,6 +1116,69 @@ export interface components {
             /** Revision */
             revision: number;
         };
+        /** EmailDraftCreate */
+        EmailDraftCreate: {
+            /** Employer */
+            employer: string;
+            /** Job Description */
+            job_description?: string | null;
+            /** Recipient Email */
+            recipient_email: string;
+            /** Role */
+            role: string;
+            /** Start Message */
+            start_message?: string | null;
+            /** Style Document Ids */
+            style_document_ids?: string[];
+        };
+        /** EmailDraftList */
+        EmailDraftList: {
+            /** Drafts */
+            drafts: components["schemas"]["EmailDraftView"][];
+        };
+        /** EmailDraftPatch */
+        EmailDraftPatch: {
+            /** Body */
+            body?: string | null;
+            /** State */
+            state?: "CANCELED" | null;
+            /** Subject */
+            subject?: string | null;
+        };
+        /** EmailDraftView */
+        EmailDraftView: {
+            /** Application Id */
+            application_id: string | null;
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Employer */
+            employer: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Recipient Email */
+            recipient_email: string;
+            /** Revision */
+            revision: number;
+            /** Role */
+            role: string;
+            /** State */
+            state: string;
+            /** Subject */
+            subject: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** ErrorDetail */
         ErrorDetail: {
             /** Code */
@@ -1040,6 +1205,14 @@ export interface components {
         /** ErrorResponse */
         ErrorResponse: {
             error: components["schemas"]["ErrorDetail"];
+        };
+        /** EventRequest */
+        EventRequest: {
+            /**
+             * Event Idempotency Key
+             * Format: uuid
+             */
+            event_idempotency_key: string;
         };
         /** ExtensionExchange */
         ExtensionExchange: {
@@ -1200,6 +1373,26 @@ export interface components {
              * @default false
              */
             sensitive: boolean;
+        };
+        /** GenerateRequest */
+        GenerateRequest: {
+            /** Expected Revision */
+            expected_revision: number;
+        };
+        /** GenerateView */
+        GenerateView: {
+            /** Body */
+            body: string;
+            /** Model */
+            model: string | null;
+            /** Provider */
+            provider: string | null;
+            /** Replayed */
+            replayed: boolean;
+            /** Revision */
+            revision: number;
+            /** Subject */
+            subject: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -2125,6 +2318,234 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExtractionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_drafts_api_v1_email_drafts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraftList"];
+                };
+            };
+        };
+    };
+    create_draft_api_v1_email_drafts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailDraftCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_draft_api_v1_email_drafts__draft_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_draft_api_v1_email_drafts__draft_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                "if-match"?: string | null;
+            };
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailDraftPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    compose_opened_api_v1_email_drafts__draft_id__compose_opened_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_sent_api_v1_email_drafts__draft_id__confirm_sent_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmSentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_draft_api_v1_email_drafts__draft_id__generate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateView"];
                 };
             };
             /** @description Validation Error */
