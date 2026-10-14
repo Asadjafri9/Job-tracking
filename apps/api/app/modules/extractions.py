@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any, Literal, cast
-from uuid import UUID, uuid4
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
@@ -120,10 +120,12 @@ def _load_extraction(
     row = cast(
         DocumentExtraction | None,
         session.scalar(
-            select(DocumentExtraction).where(
+            select(DocumentExtraction)
+            .where(
                 DocumentExtraction.user_id == owner_id,
                 DocumentExtraction.id == extraction_id,
             )
+            .with_for_update()
         ),
     )
     if row is None:
@@ -172,6 +174,14 @@ def run_extraction(
         extraction = _load_extraction(session, auth.user_id, extraction_id)
         if extraction.document_id != document_id or extraction.review_state != "REVIEW_REQUIRED":
             raise HTTPException(status_code=409, detail="Extraction is not awaiting review")
+        if extraction.candidates or any(
+            candidate.get("decision") is not None
+            for candidate in extraction.candidates or []
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail="extraction already produced candidates; review cannot be overwritten",
+            )
         if not extraction.extracted_text:
             raise HTTPException(status_code=422, detail="No extracted text to analyze")
         sections = split_sections(
@@ -200,7 +210,9 @@ def run_extraction(
                 kind="EXTRACTION",
                 request_payload=payload,
                 purpose="INTERACTIVE",
-                idempotency_key=uuid4(),
+                idempotency_key=uuid5(
+                    NAMESPACE_URL, f"extract:{extraction.id}:interactive"
+                ),
                 key_encryption=_key_encryption_provider(),
             )
         except RoutingError as error:

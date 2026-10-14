@@ -9,6 +9,7 @@ from app.monitoring.fetch import (
     Fetcher,
     FetchUnsupported,
     _is_public_ip,
+    _netloc,
     _robots_allows,
     resolve_public_addresses,
     validate_public_url,
@@ -78,7 +79,30 @@ def test_resolve_accepts_all_public() -> None:
     addresses = resolve_public_addresses(
         "ok.test", resolver=lambda _h: ["8.8.8.8", "1.1.1.1"]
     )
-    assert addresses == ["8.8.8.8", "1.1.1.1"]
+    assert addresses == ["1.1.1.1", "8.8.8.8"]
+
+
+def test_resolve_prefers_ipv4_over_ipv6() -> None:
+    """IPv6 answers sort after IPv4 so the pinned address has IPv4 egress."""
+    answers = ["2600:1f18::1", "8.8.8.8", "1.1.1.1"]
+    addresses = resolve_public_addresses("dual.test", resolver=lambda _h: list(answers))
+    assert addresses == ["1.1.1.1", "8.8.8.8", "2600:1f18::1"]
+    # Resolver output order cannot influence the pinned address.
+    reversed_resolver = lambda _h: list(reversed(answers))  # noqa: E731
+    assert (
+        resolve_public_addresses("dual.test", resolver=reversed_resolver) == addresses
+    )
+
+
+def test_resolve_rejects_unparseable_answer() -> None:
+    """A non-IP resolver answer fails closed instead of reaching urlunsplit."""
+    with pytest.raises(FetchUnsupported):
+        resolve_public_addresses("bad.test", resolver=lambda _h: ["not-an-ip"])
+
+
+def test_netloc_brackets_ipv6() -> None:
+    assert _netloc("2600:1f18::1") == "[2600:1f18::1]"
+    assert _netloc("8.8.8.8") == "8.8.8.8"
 
 
 def test_robots_respects_disallow_and_allow() -> None:
@@ -275,3 +299,41 @@ def test_fetch_pins_connection_to_validated_ip(monkeypatch: pytest.MonkeyPatch) 
     outcome = fetcher.fetch("https://jobs.example.com/careers")
     assert outcome.status == "OK"
     assert all(url.startswith("https://8.8.8.8/") for url in clients[0].requests)
+
+
+def test_fetch_brackets_ipv6_pinned_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    """IPv6-only hosts must produce https://[v6]/... URLs, not a broken port."""
+    import httpx
+
+    client = _FakeClient([_FakeResponse(200, b""), _FakeResponse(200, b"ok")])
+    monkeypatch.setattr(httpx, "Client", lambda **kwargs: client)
+    fetcher = Fetcher(resolver=lambda _h: ["2600:1f18::1"])
+    outcome = fetcher.fetch("https://jobs.example.com/careers")
+    assert outcome.status == "OK"
+    assert all(url.startswith("https://[2600:1f18::1]/") for url in client.requests)
+
+
+def test_robots_cache_obeys_injected_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Robots TTL expiry follows the fetcher's clock, not wall time."""
+    import time
+
+    import httpx
+
+    from app.monitoring.fetch import ROBOTS_TTL_SECONDS
+
+    now = [0.0]
+    # The throttle sleeps via time.sleep; advance the fake clock so it exits.
+    monkeypatch.setattr(time, "sleep", lambda delay: now.__setitem__(0, now[0] + delay))
+    client = _FakeClient([_FakeResponse(200, b"")] * 3 + [_FakeResponse(200, b"ok")] * 3)
+    monkeypatch.setattr(httpx, "Client", lambda **kwargs: client)
+    fetcher = Fetcher(resolver=lambda _h: ["8.8.8.8"], clock=lambda: now[0])
+
+    fetcher.fetch("https://jobs.example.com/careers")
+    assert len(client.requests) == 2  # robots + content
+
+    fetcher.fetch("https://jobs.example.com/careers")
+    assert len(client.requests) == 3  # cached robots, content only
+
+    now[0] += ROBOTS_TTL_SECONDS + 1
+    fetcher.fetch("https://jobs.example.com/careers")
+    assert len(client.requests) == 5  # robots refetched after TTL expiry

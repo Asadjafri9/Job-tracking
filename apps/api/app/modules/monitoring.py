@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import create_engine, func, select, update
+from sqlalchemy import create_engine, func, select, text, update
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
@@ -243,8 +243,19 @@ def create_source(
         raise HTTPException(
             status_code=422, detail="saved-key consent requires scheduled-check consent"
         )
+    if body.scheduled_check_consent and body.schedule != "DAILY":
+        raise HTTPException(
+            status_code=422,
+            detail="scheduled-check consent requires a DAILY schedule",
+        )
     now = datetime.now(UTC)
     with tenant_session(_runtime_engine(), auth.user_id) as session:
+        # Serialize per owner so concurrent creates cannot both pass the
+        # MAX_SOURCES count check and exceed the limit.
+        session.execute(
+            text("SELECT pg_advisory_xact_lock(hashtext(:lock_key))"),
+            {"lock_key": f"monitored-source:{auth.user_id}"},
+        )
         active_count = session.scalar(
             select(func.count())
             .select_from(MonitoredSource)
@@ -315,6 +326,12 @@ def update_source(
             source.timezone = body.timezone
         if body.schedule is not None:
             source.schedule = body.schedule
+            if body.schedule == "MANUAL":
+                # The consent constraint only allows scheduled consent on
+                # DAILY sources; switching to MANUAL revokes it.
+                source.scheduled_check_consented_at = None
+                source.saved_key_consented_at = None
+                source.consent_revision = None
         if body.region_selector is not None:
             source.region_selector = body.region_selector or None
         touched = (
@@ -324,6 +341,11 @@ def update_source(
         )
         if touched:
             source.revision += 1
+        if body.scheduled_check_consent is True and source.schedule != "DAILY":
+            raise HTTPException(
+                status_code=422,
+                detail="scheduled-check consent requires a DAILY schedule",
+            )
         if body.scheduled_check_consent is True and (
             source.scheduled_check_consented_at is None
             or source.consent_revision != source.revision

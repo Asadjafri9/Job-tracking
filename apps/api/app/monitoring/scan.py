@@ -200,6 +200,9 @@ def _upsert_candidates(
                 native_id_namespace="source-external-id" if cand.external_id else None,
                 native_id=cand.external_id,
                 canonical_job_url=url,
+                # Client clock like run.started_at — keeps closure comparisons
+                # in one clock domain (server now() can skew ahead of us).
+                last_seen_at=now,
                 title=cand.title,
                 employer=cand.employer,
                 location=cand.location,
@@ -297,7 +300,7 @@ def record_fetch_failure(session: Session, run: MonitoringRun, exc: Exception) -
         None,
         run.id,
         "SOURCE_STATUS",
-        "FAILED",
+        f"FAILED:{run.source_id}:{run.id}",
         1,
         f"Monitored source check failed: {type(exc).__name__}",
     )
@@ -338,9 +341,12 @@ def apply_scan_outcome(
     run.discovered_count = changed
     run.state = "SUCCEEDED"
     run.completeness = "COMPLETE" if candidates or method == "feed" else "PARTIAL"
-    previous = _previous_complete_run(session, run.source_id, run.id)
-    if previous is not None:
-        _close_absent_jobs(session, run, previous)
+    # Closure evidence only comes from COMPLETE scans — a PARTIAL run
+    # (e.g. a JS-only page yielding zero candidates) must never close jobs.
+    if run.completeness == "COMPLETE":
+        previous = _previous_complete_run(session, run.source_id, run.id)
+        if previous is not None:
+            _close_absent_jobs(session, run, previous)
     source.last_success_at = now
     if outcome.etag:
         source.last_etag = outcome.etag[:512]
@@ -362,5 +368,11 @@ def execute_monitoring_run(
         outcome = fetcher.fetch(source.public_url, etag=source.last_etag)
     except (FetchDenied, FetchFailed, FetchUnsupported) as exc:
         record_fetch_failure(session, run, exc)
+        return
+    except Exception as exc:  # never leave the run RUNNING
+        logger.exception("unexpected fetch error for run %s", run.id)
+        record_fetch_failure(
+            session, run, FetchFailed(f"unexpected fetch error: {type(exc).__name__}")
+        )
         return
     apply_scan_outcome(session, run, source, outcome)

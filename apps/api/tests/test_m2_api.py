@@ -286,6 +286,23 @@ def test_candidate_confirm_writes_document_sourced_fact(
     assert decided_again.status_code == 409
 
 
+def test_extraction_rerun_is_rejected_before_provider_call(
+    client: TestClient, owner_id: UUID, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Re-running a populated extraction must not overwrite owner review or
+    issue another provider call."""
+    document_id, extraction_id = _seed_extraction(owner_id)  # has candidates
+    calls: list[object] = []
+    monkeypatch.setattr(
+        extractions_module, "run_operation", lambda *a, **k: calls.append(1)
+    )
+    response = client.post(
+        f"/api/v1/documents/{document_id}/extractions/{extraction_id}/extract"
+    )
+    assert response.status_code == 409
+    assert calls == []
+
+
 def test_candidate_reject_marks_decision(client: TestClient, owner_id: UUID) -> None:
     _, extraction_id = _seed_extraction(owner_id)
     decided = client.post(

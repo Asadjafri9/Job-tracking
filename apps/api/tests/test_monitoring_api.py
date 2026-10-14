@@ -167,6 +167,47 @@ def test_saved_key_consent_requires_schedule_consent(client: TestClient) -> None
     assert response.status_code == 422
 
 
+def test_manual_source_rejects_scheduled_consent(client: TestClient) -> None:
+    """Scheduled consent on a MANUAL source would violate the DB constraint."""
+    response = client.post(
+        "/api/v1/monitored-sources",
+        json={
+            "public_url": "https://jobs.example.com/x",
+            "timezone": "UTC",
+            "schedule": "MANUAL",
+            "scheduled_check_consent": True,
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_switch_to_manual_clears_scheduled_consent(client: TestClient) -> None:
+    source = _create_source(client)
+    manual = client.patch(
+        f"/api/v1/monitored-sources/{source['id']}",
+        json={"expected_revision": source["revision"], "schedule": "MANUAL"},
+    )
+    assert manual.status_code == 200, manual.text
+    assert manual.json()["schedule"] == "MANUAL"
+    assert manual.json()["scheduled_check_consented_at"] is None
+    assert manual.json()["saved_key_consented_at"] is None
+    assert manual.json()["next_run_at"] is None
+
+
+def test_scheduled_consent_on_manual_source_rejected(client: TestClient) -> None:
+    source = _create_source(
+        client, schedule="MANUAL", scheduled_check_consent=False
+    )
+    response = client.patch(
+        f"/api/v1/monitored-sources/{source['id']}",
+        json={
+            "expected_revision": source["revision"],
+            "scheduled_check_consent": True,
+        },
+    )
+    assert response.status_code == 422
+
+
 def test_source_limit_of_five(client: TestClient) -> None:
     for index in range(5):
         _create_source(client, public_url=f"https://jobs{index}.example.com/c")
@@ -470,6 +511,82 @@ def test_scan_fetch_failure_records_honest_error(owner_id: UUID) -> None:
             )
         ).all()
     assert len(notes) == 1
+
+
+def test_each_failed_run_creates_a_notification(owner_id: UUID) -> None:
+    """Failure notifications are keyed per run — a second failure alerts too."""
+    from app.monitoring.fetch import FetchDenied
+
+    class _Denying:
+        def fetch(self, url: str, etag: str | None = None) -> FetchOutcome:
+            raise FetchDenied("robots.txt disallows /careers")
+
+    source_id = _seeded_source(owner_id)
+    for _ in range(2):
+        run_id = _queued_run(owner_id, source_id)
+        with tenant_session(runtime_engine, owner_id) as session:
+            run = session.get(MonitoringRun, run_id)
+            source = session.get(MonitoredSource, source_id)
+            assert run is not None and source is not None
+            execute_monitoring_run(session, run, source, _Denying())  # type: ignore[arg-type]
+    with tenant_session(runtime_engine, owner_id) as session:
+        notes = session.scalars(
+            select(Notification).where(
+                Notification.user_id == owner_id,
+                Notification.kind == "SOURCE_STATUS",
+            )
+        ).all()
+    assert len(notes) == 2
+
+
+OPS_ONLY_HTML = b"""
+<html><body>
+  <a href="/careers/ops-2">Operations Analyst - apply</a>
+</body></html>"""
+
+EMPTY_HTML = b"<html><body><p>No jobs right now</p></body></html>"
+
+
+def _job_status(owner_id: UUID, source_id: UUID, url_part: str) -> str:
+    with tenant_session(runtime_engine, owner_id) as session:
+        status = session.scalar(
+            select(DiscoveredJob.status).where(
+                DiscoveredJob.source_id == source_id,
+                DiscoveredJob.canonical_job_url.contains(url_part),
+            )
+        )
+        assert status is not None
+        return status
+
+
+def _run_scan(owner_id: UUID, source_id: UUID, html: bytes) -> UUID:
+    run_id = _queued_run(owner_id, source_id)
+    with tenant_session(runtime_engine, owner_id) as session:
+        run = session.get(MonitoringRun, run_id)
+        source = session.get(MonitoredSource, source_id)
+        assert run is not None and source is not None
+        fetcher = _FakeFetcher(
+            [FetchOutcome(status="OK", url=source.public_url, content=html)]
+        )
+        execute_monitoring_run(session, run, source, fetcher)  # type: ignore[arg-type]
+    return run_id
+
+
+def test_partial_scan_never_closes_absent_jobs(owner_id: UUID) -> None:
+    """Closure needs absence in two consecutive COMPLETE scans; PARTIAL never closes."""
+    source_id = _seeded_source(owner_id)
+    _run_scan(owner_id, source_id, LISTING_HTML)  # complete: sees swe-1 + ops-2
+    _run_scan(owner_id, source_id, OPS_ONLY_HTML)  # complete: swe-1 absent once
+    assert _job_status(owner_id, source_id, "swe-1") == "NEW"
+
+    partial_id = _run_scan(owner_id, source_id, EMPTY_HTML)  # PARTIAL, zero candidates
+    with tenant_session(runtime_engine, owner_id) as session:
+        run = session.get(MonitoringRun, partial_id)
+        assert run is not None and run.completeness == "PARTIAL"
+    assert _job_status(owner_id, source_id, "swe-1") == "NEW"
+
+    _run_scan(owner_id, source_id, OPS_ONLY_HTML)  # complete: swe-1 absent twice
+    assert _job_status(owner_id, source_id, "swe-1") == "CLOSED"
 
 
 def test_job_status_actions(client: TestClient, owner_id: UUID) -> None:

@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.routes import AuthContext, require_auth
 from app.db.connection import sqlalchemy_url
-from app.db.models import Profile, User
+from app.db.models import EmailDraft, Profile, User
 from app.main import app
 from app.modules import emails as emails_module
 
@@ -194,6 +194,37 @@ def test_sent_draft_is_locked_and_stays_one_application(
     applications = client.get("/api/v1/applications").json()["applications"]
     assert len(applications) == 1
     assert applications[0]["id"] == first["application_id"]
+
+
+def test_confirm_with_stale_revision_never_overwrites_snapshot(
+    client: TestClient,
+) -> None:
+    """A sent confirmation records an immutable snapshot; a revision mismatch
+    is rejected instead of silently rewriting the tracked application."""
+    draft = _reviewed(client, _draft(client))
+    confirmed = client.post(
+        f"/api/v1/email-drafts/{draft['id']}/confirm-sent",
+        json={"sent_date": "2026-10-14", "event_idempotency_key": str(uuid4())},
+    )
+    assert confirmed.status_code == 200, confirmed.text
+    application_id = confirmed.json()["application_id"]
+    original = client.get(f"/api/v1/applications/{application_id}").json()
+    assert original["context_snapshot"]["draft_revision"] == draft["revision"]
+
+    # Simulate the draft content changing after the send was recorded.
+    with Session(migration_engine) as session, session.begin():
+        row = session.get(EmailDraft, UUID(draft["id"]))
+        assert row is not None
+        row.revision += 1
+
+    mismatched = client.post(
+        f"/api/v1/email-drafts/{draft['id']}/confirm-sent",
+        json={"sent_date": "2026-10-15", "event_idempotency_key": str(uuid4())},
+    )
+    assert mismatched.status_code == 409
+    unchanged = client.get(f"/api/v1/applications/{application_id}").json()
+    assert unchanged["context_snapshot"] == original["context_snapshot"]
+    assert unchanged["applied_date"] == original["applied_date"]
 
 
 def test_cancel_blocks_further_use(client: TestClient) -> None:

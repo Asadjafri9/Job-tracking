@@ -122,7 +122,12 @@ def _claim_scan(session: OrmSession, context: JobContext) -> MonitoringRun | Non
         )
         .with_for_update()
     )
-    if run is None or run.state != "QUEUED":
+    if run is None or not (
+        run.state == "QUEUED"
+        # A retried attempt reclaims a run left RUNNING by a crashed
+        # previous attempt or an unexpected exception mid-fetch.
+        or (run.state == "RUNNING" and context.attempt > 1)
+    ):
         return None
     source = session.scalar(
         select(MonitoredSource).where(
@@ -177,6 +182,9 @@ async def handle_daily_scan(context: JobContext, _stopped: asyncio.Event) -> Non
             outcome = fetcher.fetch(public_url, etag=etag)
         except (FetchDenied, FetchFailed, FetchUnsupported) as exc:
             failure = exc
+        except Exception as exc:  # never leave the run RUNNING
+            logger.exception("unexpected fetch error for run %s", run_id)
+            failure = FetchFailed(f"unexpected fetch error: {type(exc).__name__}")
         with tenant_session(_runtime_engine(), context.owner_id) as session:
             run = session.scalar(
                 select(MonitoringRun)
@@ -668,11 +676,19 @@ async def handle_account_delete(context: JobContext, _stopped: asyncio.Event) ->
 
     keys = await asyncio.to_thread(collect_keys)
     storage = _document_storage()
+    failed = 0
     for key in keys:
         try:
             storage.delete(key)
         except StorageError:
-            logger.warning("account deletion blob cleanup failed: %s", key)
+            # Never log storage keys — they embed the owner UUID.
+            failed += 1
+    if failed:
+        logger.warning(
+            "account deletion blob cleanup failed for %d blob(s); job will retry",
+            failed,
+        )
+        raise StorageError("account deletion blob cleanup incomplete")
 
     def delete_data() -> None:
         with tenant_session(_runtime_engine(), context.owner_id) as session:

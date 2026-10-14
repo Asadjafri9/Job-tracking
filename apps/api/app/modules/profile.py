@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from functools import lru_cache
 from typing import Any, Literal, cast
 from uuid import UUID
 
@@ -27,6 +28,7 @@ ValueType = Literal["TEXT", "NUMBER", "DATE", "BOOLEAN", "URL", "JSON"]
 Sensitivity = Literal["NORMAL", "SENSITIVE", "SPECIAL_CATEGORY"]
 
 
+@lru_cache(maxsize=1)
 def _runtime_engine() -> Engine:
     settings = get_settings()
     return create_engine(sqlalchemy_url(settings.database_url), pool_pre_ping=True)

@@ -206,12 +206,36 @@ export function EmailPage({
 
   async function openInGmail() {
     if (!selected) return;
+    // Open the tab synchronously inside the click gesture so popup blockers
+    // allow it; it stays on about:blank until persistence and checks pass.
+    const win = window.open("about:blank", "_blank");
+    let navigated = false;
     setBusy(true);
     setError("");
     try {
       // Persist first so the tracked revision always matches what is sent.
       const current = await persistEdits();
-      if (!current) return;
+      if (!current) {
+        win?.close();
+        return;
+      }
+      const url = gmailComposeUrl(current);
+      if (url.length > MAX_PREFILL_URL) {
+        win?.close();
+        setError(
+          "This message is too long to prefill in Gmail. Use the copy buttons instead — nothing was truncated.",
+        );
+        return;
+      }
+      if (!win) {
+        setError(
+          "The compose tab was blocked. Allow popups for this site and try again, or use the copy buttons.",
+        );
+        return;
+      }
+      win.opener = null;
+      win.location.href = url;
+      navigated = true;
       await api<Draft>(
         `/api/v1/email-drafts/${current.id}/compose-opened`,
         csrf,
@@ -222,20 +246,13 @@ export function EmailPage({
           }),
         },
       );
-      const url = gmailComposeUrl(current);
-      if (url.length > MAX_PREFILL_URL) {
-        setError(
-          "This message is too long to prefill in Gmail. Use the copy buttons instead — nothing was truncated.",
-        );
-      } else {
-        window.open(url, "_blank", "noopener,noreferrer");
-        setNotice(
-          "Compose opened in Gmail with the reviewed revision. Come back to confirm only after you actually send.",
-        );
-      }
       setSelected({ ...current, state: "COMPOSE_OPENED" });
+      setNotice(
+        "Compose opened in Gmail with the reviewed revision. Come back to confirm only after you actually send.",
+      );
       await load();
     } catch (err) {
+      if (!navigated) win?.close();
       setError((err as Error).message);
     } finally {
       setBusy(false);

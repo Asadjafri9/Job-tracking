@@ -489,6 +489,11 @@ def confirm_sent(
                 "status": existing.status,
                 "replayed": True,
             }
+        if existing is not None:
+            raise HTTPException(
+                status_code=409,
+                detail="a different draft revision was already recorded as sent",
+            )
         document_rows = session.scalars(
             select(EmailDraftDocument).where(
                 EmailDraftDocument.user_id == auth.user_id,
@@ -509,54 +514,38 @@ def confirm_sent(
             "draft_revision": row.revision,
             "note": body.note,
         }
-        if existing is None:
-            application = Application(
+        application = Application(
+            user_id=auth.user_id,
+            channel="EMAIL",
+            email_draft_id=row.id,
+            employer=row.employer,
+            role=row.role,
+            attempt_number=1,
+            status="APPLIED",
+            attempt_at=datetime.now(UTC),
+            applied_at=datetime.now(UTC),
+            applied_date=body.sent_date,
+            context_snapshot=snapshot,
+            document_metadata_snapshot=[
+                {
+                    "document_id": str(link.document_id),
+                    "revision": link.document_revision,
+                }
+                for link in document_rows
+            ],
+        )
+        session.add(application)
+        session.flush()
+        session.add(
+            ApplicationStatusEvent(
                 user_id=auth.user_id,
-                channel="EMAIL",
-                employer=row.employer,
-                role=row.role,
-                attempt_number=1,
-                status="APPLIED",
-                attempt_at=datetime.now(UTC),
-                applied_at=datetime.now(UTC),
-                applied_date=body.sent_date,
-                context_snapshot=snapshot,
-                document_metadata_snapshot=[
-                    {
-                        "document_id": str(link.document_id),
-                        "revision": link.document_revision,
-                    }
-                    for link in document_rows
-                ],
+                application_id=application.id,
+                old_status=None,
+                new_status="APPLIED",
+                source="USER_CONFIRMATION",
+                evidence_snapshot=evidence,
             )
-            session.add(application)
-            session.flush()
-            session.add(
-                ApplicationStatusEvent(
-                    user_id=auth.user_id,
-                    application_id=application.id,
-                    old_status=None,
-                    new_status="APPLIED",
-                    source="USER_CONFIRMATION",
-                    evidence_snapshot=evidence,
-                )
-            )
-        else:
-            existing.context_snapshot = snapshot
-            existing.revision += 1
-            session.add(
-                ApplicationStatusEvent(
-                    user_id=auth.user_id,
-                    application_id=existing.id,
-                    old_status=existing.status,
-                    new_status="APPLIED",
-                    source="USER_CONFIRMATION",
-                    evidence_snapshot=evidence,
-                )
-            )
-            existing.status = "APPLIED"
-            existing.applied_date = body.sent_date
-            application = existing
+        )
         session.add(
             EmailDraftEvent(
                 user_id=auth.user_id,

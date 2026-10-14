@@ -120,14 +120,16 @@ def _owner_jobs(owner: UUID) -> list[Job]:
         return list(session.scalars(select(Job).where(Job.user_id == owner)).all())
 
 
-def _context(owner: UUID, run_id: UUID | None, kind: str) -> JobContext:
+def _context(
+    owner: UUID, run_id: UUID | None, kind: str, attempt: int = 1
+) -> JobContext:
     return JobContext(
         id=uuid4(),
         owner_id=owner,
         kind=kind,
         reference_type=scheduler.SCAN_JOB_REFERENCE_TYPE if run_id else None,
         reference_id=run_id,
-        attempt=1,
+        attempt=attempt,
     )
 
 
@@ -272,6 +274,73 @@ def test_daily_scan_handler_records_fetch_failure(owner_id: UUID) -> None:
     asyncio.run(
         handlers.handle_daily_scan(
             _context(owner_id, run.id, scheduler.SCAN_JOB_KIND), asyncio.Event()
+        )
+    )
+    with Session(migration_engine) as session:
+        stored = session.get(MonitoringRun, run.id)
+        assert stored is not None
+        assert stored.state == "FAILED"
+        assert (stored.redacted_error or "").startswith("fetch_error")
+
+
+def test_daily_scan_unexpected_fetch_error_marks_run_failed(
+    owner_id: UUID, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An exception outside the Fetch* family must still end the run honestly."""
+
+    class _Boom:
+        def fetch(self, url: str, etag: str | None = None) -> object:
+            raise ValueError("resolver exploded")
+
+    monkeypatch.setattr(handlers, "Fetcher", _Boom)
+    source_id = _add_source(owner_id, next_run_at=NOW - timedelta(minutes=1))
+    assert scheduler.dispatch_due_sources(NOW, engine=scheduler_engine) == 1
+    run = _runs(source_id)[0]
+    asyncio.run(
+        handlers.handle_daily_scan(
+            _context(owner_id, run.id, scheduler.SCAN_JOB_KIND), asyncio.Event()
+        )
+    )
+    with Session(migration_engine) as session:
+        stored = session.get(MonitoringRun, run.id)
+        assert stored is not None
+        assert stored.state == "FAILED"
+        assert (stored.redacted_error or "").startswith("fetch_error")
+
+
+def test_daily_scan_retry_reclaims_stuck_running_run(
+    owner_id: UUID, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A run left RUNNING by a crashed attempt is claimable only on retry."""
+
+    class _Boom:
+        def fetch(self, url: str, etag: str | None = None) -> object:
+            raise ValueError("boom")
+
+    monkeypatch.setattr(handlers, "Fetcher", _Boom)
+    source_id = _add_source(owner_id, next_run_at=NOW - timedelta(minutes=1))
+    assert scheduler.dispatch_due_sources(NOW, engine=scheduler_engine) == 1
+    run = _runs(source_id)[0]
+    with Session(migration_engine) as session, session.begin():
+        stored = session.get(MonitoringRun, run.id)
+        assert stored is not None
+        stored.state = "RUNNING"
+
+    # attempt=1 must not claim a RUNNING run.
+    asyncio.run(
+        handlers.handle_daily_scan(
+            _context(owner_id, run.id, scheduler.SCAN_JOB_KIND), asyncio.Event()
+        )
+    )
+    with Session(migration_engine) as session:
+        stored = session.get(MonitoringRun, run.id)
+        assert stored is not None and stored.state == "RUNNING"
+
+    # The retried attempt reclaims it and records an honest failure.
+    asyncio.run(
+        handlers.handle_daily_scan(
+            _context(owner_id, run.id, scheduler.SCAN_JOB_KIND, attempt=2),
+            asyncio.Event(),
         )
     )
     with Session(migration_engine) as session:

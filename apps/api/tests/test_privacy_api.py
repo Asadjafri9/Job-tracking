@@ -437,3 +437,54 @@ def test_account_delete_handler_erases_owned_data(
         assert row.state == "DELETED"
         assert row.login_email.startswith("deleted-")
         assert "@example.test" not in row.login_email
+
+
+class _FailingDeleteStorage(_MemoryStorage):
+    def delete(self, key: str) -> None:
+        raise worker_handlers.StorageError("backend unavailable")
+
+
+def test_account_delete_retries_when_blob_delete_fails(
+    client: TestClient, owner_id: UUID, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A blob-delete failure must retry the job and leave rows for the retry,
+    never delete DB rows while blobs remain orphaned."""
+    monkeypatch.setattr(worker_handlers, "_runtime_engine", lambda: runtime_engine)
+    monkeypatch.setattr(
+        worker_handlers, "_document_storage", lambda: _FailingDeleteStorage({})
+    )
+    with tenant_session(runtime_engine, owner_id) as session:
+        session.add(
+            Document(
+                user_id=owner_id,
+                document_type="RESUME",
+                storage_key=f"m6/{owner_id}/resume.pdf",
+                file_name="resume.pdf",
+                media_type="application/pdf",
+                sha256="c" * 64,
+                size_bytes=100,
+                original_state="READY",
+            )
+        )
+    client.post("/api/v1/account/deletion", json={"confirmation": "DELETE"})
+
+    with pytest.raises(worker_handlers.StorageError):
+        asyncio.run(
+            worker_handlers.handle_account_delete(
+                JobContext(
+                    id=uuid4(),
+                    owner_id=owner_id,
+                    kind="privacy.account_delete",
+                    reference_type=None,
+                    reference_id=None,
+                    attempt=1,
+                ),
+                asyncio.Event(),
+            )
+        )
+    # delete_data never ran: owned rows survive for the retried attempt.
+    with tenant_session(runtime_engine, owner_id) as session:
+        assert (
+            session.scalar(select(Document).where(Document.user_id == owner_id))
+            is not None
+        )

@@ -97,12 +97,21 @@ def resolve_public_addresses(
     host: str, resolver: Callable[[str], list[str]] | None = None
 ) -> list[str]:
     resolve = resolver or (
-        lambda name: sorted(
-            {str(item[4][0]) for item in socket.getaddrinfo(name, 443, proto=socket.IPPROTO_TCP)}
-        )
+        lambda name: [
+            str(item[4][0])
+            for item in socket.getaddrinfo(name, 443, proto=socket.IPPROTO_TCP)
+        ]
     )
+
+    def sort_key(address: str) -> tuple[int, str]:
+        try:
+            return (ipaddress.ip_address(address).version, address)
+        except ValueError:
+            return (99, address)
+
     try:
-        addresses = resolve(host)
+        # IPv4 first: the worker may lack IPv6 egress.
+        addresses = sorted(set(resolve(host)), key=sort_key)
     except (OSError, socket.gaierror) as exc:
         raise FetchFailed(f"DNS resolution failed for {host}") from exc
     if not addresses:
@@ -113,6 +122,10 @@ def resolve_public_addresses(
             f"DNS for {host} resolves to non-public addresses"
         )
     return addresses
+
+
+def _netloc(ip: str) -> str:
+    return f"[{ip}]" if ipaddress.ip_address(ip).version == 6 else ip
 
 
 def _robots_allows(robots_text: str, path: str) -> bool:
@@ -196,13 +209,13 @@ class Fetcher:
 
     def _robots(self, host: str, client: httpx.Client, ip: str) -> str:
         cached = self.robots_cache.get(host)
-        if cached is not None and time.time() - cached[0] < ROBOTS_TTL_SECONDS:
+        if cached is not None and self.clock() - cached[0] < ROBOTS_TTL_SECONDS:
             return cached[1]
         self._throttle(host)
         try:
             with client.stream(
                 "GET",
-                f"https://{ip}/robots.txt",
+                f"https://{_netloc(ip)}/robots.txt",
                 headers={"Host": host, "User-Agent": USER_AGENT},
                 extensions={"sni_hostname": host},
                 timeout=self.timeout,
@@ -216,7 +229,7 @@ class Fetcher:
             raise
         except httpx.HTTPError as exc:
             raise FetchFailed(f"robots fetch failed for {host}") from exc
-        self.robots_cache[host] = (time.time(), text)
+        self.robots_cache[host] = (self.clock(), text)
         return text
 
     def fetch(self, raw_url: str, etag: str | None = None) -> FetchOutcome:
@@ -244,7 +257,7 @@ class Fetcher:
                 for _hop in range(MAX_REDIRECTS + 1):
                     parts = urlsplit(url)
                     pinned = urlunsplit(
-                        ("https", ip_address, parts.path or "/", parts.query, "")
+                        ("https", _netloc(ip_address), parts.path or "/", parts.query, "")
                     )
                     try:
                         with client.stream(
