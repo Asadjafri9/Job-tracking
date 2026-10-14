@@ -49,9 +49,13 @@ Task owner: implementing maintainer. Release/scope/budget owner: project owner. 
 
 Task owner: implementing maintainer. Release/scope/budget owner: project owner. Operator owns identity cleanup and deployment/recovery coverage.
 
+## M7 progress
+
+**M7 is IN_PROGRESS with the planning artifacts verified locally only.** AZ-001: `infra/azure/main.bicep` compiles with zero diagnostics (17 resources — VNet/private DNS, private PostgreSQL 17, ACR, Key Vault + versioned KEK, LRS storage, App Service B1, App Insights, least-privilege RBAC incl. `AcrPull`), `parameters.staging.json` holds placeholders only, and `docs/AZURE_PLAN.md` records the resource/quote/identity/network/KEK/rollback review table (USD 150/mo envelope, not a quote). AZ-002: the locked multi-stage image builds and runs non-root (uid 10001) under supervisord — smoke-verified: all three processes RUNNING, container `healthy`, `/health/ready` 200, SPA served at `/`; the deploy workflow uses pinned SHAs, federated OIDC, a protected `staging` environment gated to manual dispatch, and SBOM/provenance attestations; blob storage now selects a managed-identity credential outside local/test via a shared IMDS helper. **No Azure CLI, what-if, provisioning, credentials, or live IMDS/ACR/Key Vault endpoint was used** — AZ-003/AZ-004/BETA-001 remain open blockers requiring real staging evidence and owner/operator decisions. See [M7 evidence](evidence/M7.md).
+
 ## Next implementation action
 
-Proceed to M7 — future Azure private beta — following the dependency order in [`TASKS.md`](TASKS.md). M6 implementation does not mean the product is ready to deploy.
+AZ-003 requires the owner to provision staging (real what-if/quote first); AZ-004 and BETA-001 follow only after staging evidence exists. No further milestone work is executable locally.
 
 ## Evidence ledger
 
@@ -66,6 +70,7 @@ Proceed to M7 — future Azure private beta — following the dependency order i
 | DB-002 | DONE | [DB-002 evidence](evidence/DB-002.md): fresh isolated migration, no drift, nine DB-001 schema checks and eight tenant RLS/role checks passed | Codex, October 13, 2026 |
 | DB-003 | DONE | [DB-003 evidence](evidence/DB-003.md): concurrent idempotency reuse, altered-input conflict, stale revision rejection, and quota race passed; owner-child constraints passed | Codex, October 13, 2026 |
 | M5 implementation | IN_PROGRESS | [M5 evidence](evidence/M5.md): sources/schedule/consent API+UI, safe fetch/extract boundary, scan dedupe/closure/match pipeline, notifications; 65 new tests, 214 API tests; no live fetch or AI matching | pending review |
+| M7 planning | IN_PROGRESS (local only) | [M7 evidence](evidence/M7.md): Bicep compiles 17 resources, non-root image smoke-passed (supervisord 3 procs, healthcheck, static origin), OIDC CI gated to protected env; no Azure calls; AZ-003/004/BETA-001 blocked | pending review |
 | M1 implementation | IN_PROGRESS | [M1 evidence](evidence/M1.md): full API suite 90 passed plus opt-in lifecycle checks; Authlib/Joserfc local auth checks, scheduler dispatch + registered handlers, provider-settings UI, worker shutdown checks, frontend, extension, contracts, and static checks pass; independent review and tenant/Chrome/Key Vault smoke remain | Codex, October 14, 2026 |
 | DGN-001 | DONE | [DGN-001 evidence](evidence/DGN-001.md): design/contract reconciliation, proposed defaults and explicit unresolved owner decisions | Codex, independent review passed October 12, 2026 |
 | DGN-002 | DONE | [DGN-002 evidence](evidence/DGN-002.md): proposed tokens/components, all 16 rendered contrast pairs, and small-size/full-lockup SVG review | Codex, independent review passed October 12, 2026 |

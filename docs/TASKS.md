@@ -96,8 +96,8 @@ These tasks are specifications only. The owner requested no connected Azure use 
 
 | ID | Depends | Planned files | Acceptance / verification |
 | --- | --- | --- | --- |
-| AZ-001 | SET-004, AUTH-004, DATA-003 | Bicep/config/quote/identity/network/KEK plan | later reviewable resources/cost/quota/roles/region/tenant/IDs and actual quote before provisioning. Future Bicep/what-if/quote |
-| AZ-002 | AZ-001, QA-001 | Docker/supervision/OIDC CI/immutable artifacts | locked non-root web/API/worker/scheduler image, scoped roles/KEK/private DB, migration separate, prior rollback image. Future V-AZ |
+| AZ-001 | SET-004, AUTH-004, DATA-003 | Bicep/config/quote/identity/network/KEK plan | **Status: IN_PROGRESS (planning verified).** `infra/azure/main.bicep` compiles clean (17 resources, `@secure()` admin password, private DB/DNS, KV KEK, scoped RBAC); `parameters.staging.json` placeholders; quote envelope + preflight in `docs/AZURE_PLAN.md`. Real what-if/quote/quota checks still required before provisioning. [Evidence](evidence/M7.md) |
+| AZ-002 | AZ-001, QA-001 | Docker/supervision/OIDC CI/immutable artifacts | **Status: IN_PROGRESS (planning verified).** Locked non-root image (uid 10001) builds and smoke-passes locally — supervisord runs API/worker/scheduler, healthcheck green, static bundle served; OIDC CI workflow with protected environment + SBOM/provenance attestations; managed-identity blob auth wired. Real ACR/registry/IMDS verification pending. [Evidence](evidence/M7.md) |
 | AZ-003 | AZ-002, QA-003 | isolated staging/beta evidence | later real identity/providers/source smoke/encryption/schedule/E2E; no fake prod config/secrets, redacted monitoring/budget. Future V-AZ/V-L/V-E/V-M |
 | AZ-004 | AZ-003 | recovery/rollback/runbook evidence | later image rollback/new DB restore/journal replay/revoked keys/sessions/original-file checks and measured RPO/RTO. Future recovery drill |
 | BETA-001 (owner/operator) | AZ-004, QA-003, AI-004 | checklist/artifacts/invitations/feedback | actual blocker evidence, two controlled form environments, three pillars, ten-user cap, identity/deletion coverage; owner release decision. RELEASE_CHECKLIST |

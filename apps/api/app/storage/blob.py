@@ -1,8 +1,9 @@
-"""Private blob storage for uploaded documents.
+"""Private blob storage for uploaded documents and export artifacts.
 
 Local/test environments use the Azurite emulator with its public development
-account. The protocol keeps the production managed-identity wiring (M7) a
-drop-in replacement and lets tests inject an in-memory backend.
+account; deployed environments authenticate with the App Service managed
+identity (the Storage Blob Data Contributor role in the deployment plan).
+Tests can inject the in-memory backend.
 """
 
 from __future__ import annotations
@@ -10,10 +11,12 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Protocol
 
+from azure.core.credentials import AccessToken, TokenCredential
 from azure.core.exceptions import AzureError, ResourceNotFoundError
 from azure.storage.blob import BlobServiceClient, ContentSettings
 
 from app.config import get_settings
+from app.security.managed_identity import ManagedIdentityError, managed_identity_token
 
 CONTAINER = "user-documents"
 _LOCAL_AZURITE_ACCOUNT_KEY = (
@@ -29,16 +32,37 @@ class StorageNotFound(StorageError):
     pass
 
 
+class _ManagedIdentityCredential:
+    """TokenCredential adapter backed by the App Service IMDS endpoint."""
+
+    def __init__(self, timeout: float = 5.0) -> None:
+        self._timeout = timeout
+
+    def get_token(self, *scopes: str, **_: object) -> AccessToken:
+        scope = scopes[0] if scopes else "https://storage.azure.net/.default"
+        try:
+            token, expires_on = managed_identity_token(
+                scope.removesuffix("/.default"), self._timeout
+            )
+        except ManagedIdentityError as error:
+            raise StorageError("managed identity token unavailable") from error
+        return AccessToken(token, expires_on)
+
+
 class DocumentStorage(Protocol):
     def put(self, key: str, data: bytes, content_type: str) -> None: ...
     def get(self, key: str) -> bytes: ...
     def delete(self, key: str) -> None: ...
 
 
-class AzuriteDocumentStorage:
-    """Documents container on the configured blob endpoint (Azurite locally)."""
+class BlobDocumentStorage:
+    """Documents container on the configured blob endpoint.
 
-    def __init__(self, account_url: str, credential: str) -> None:
+    *credential* is the Azurite development key locally or a managed-identity
+    token credential in deployed environments.
+    """
+
+    def __init__(self, account_url: str, credential: str | TokenCredential) -> None:
         self._client = BlobServiceClient(
             account_url=account_url,
             credential=credential,
@@ -106,4 +130,9 @@ class InMemoryDocumentStorage:
 @lru_cache(maxsize=1)
 def document_storage() -> DocumentStorage:
     settings = get_settings()
-    return AzuriteDocumentStorage(settings.blob_endpoint_url, _LOCAL_AZURITE_ACCOUNT_KEY)
+    credential: str | TokenCredential = (
+        _LOCAL_AZURITE_ACCOUNT_KEY
+        if settings.app_env in {"local", "test"}
+        else _ManagedIdentityCredential()
+    )
+    return BlobDocumentStorage(settings.blob_endpoint_url, credential)

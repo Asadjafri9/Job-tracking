@@ -158,7 +158,7 @@ def test_export_handler_publishes_artifact(
 
 
 class _MemoryStorage:
-    """Matches AzuriteDocumentStorage: put fails when the key exists."""
+    """Matches BlobDocumentStorage: put fails when the key exists."""
 
     def __init__(self, blobs: dict[str, bytes]) -> None:
         self._blobs = blobs

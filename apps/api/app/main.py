@@ -53,7 +53,15 @@ class ReadinessResponse(HealthResponse):
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     """Reject invalid production and local-test configuration before serving traffic."""
-    get_settings()
+    settings = get_settings()
+    if settings.web_dist_dir and not any(
+        getattr(route, "name", None) == "web" for route in app.routes
+    ):
+        from fastapi.staticfiles import StaticFiles
+
+        # Single-origin deployment: the API serves the prebuilt web bundle for
+        # non-/api paths. Hash-based routes need no history fallback.
+        app.mount("/", StaticFiles(directory=settings.web_dist_dir, html=True), name="web")
     yield
 
 
@@ -392,3 +400,5 @@ async def api_meta() -> ApiMetaResponse:
         contract_version=API_CONTRACT_VERSION,
         minimum_compatible_client_version=MINIMUM_COMPATIBLE_CLIENT_VERSION,
     )
+
+

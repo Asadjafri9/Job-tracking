@@ -62,6 +62,7 @@ class Settings(BaseModel):
     key_vault_credential_kek_id: str | None = Field(
         default=None, alias="KEY_VAULT_CREDENTIAL_KEK_ID"
     )
+    web_dist_dir: str | None = Field(default=None, alias="WEB_DIST_DIR")
 
     @model_validator(mode="after")
     def validate_environment(self) -> "Settings":
