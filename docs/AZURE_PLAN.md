@@ -5,6 +5,16 @@ was used. Nothing in `infra/azure/` has been applied. Every value marked
 REPLACE-* and every identity/network/role decision below requires owner
 review before any provisioning.
 
+**Owner constraint (2026-10-14): free tier only — no paid SKUs.** The
+topology below predates that constraint and is NOT free-tier compliant:
+App Service Linux containers require B1+ (~USD 13/mo), ACR Basic is
+~USD 5/mo, and PostgreSQL Flexible B1ms is only free inside the
+12-month new-account grant (750 h/mo). Before any provisioning the
+plan must be reworked to zero-cost components (e.g. F1 code-deploy,
+Container Apps free grant, or an external free Postgres) or the
+deployment stays local-only. The USD 150/mo envelope is superseded
+by this constraint.
+
 ## Resources (`infra/azure/main.bicep`, `parameters.staging.json`)
 
 | Resource | Planned shape | Review before apply |
