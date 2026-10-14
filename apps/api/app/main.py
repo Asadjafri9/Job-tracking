@@ -25,7 +25,14 @@ from app.contracts import (
     ErrorField,
     error_response,
 )
+from app.modules.applications import router as applications_router
 from app.modules.credentials import router as credentials_router
+from app.modules.documents import router as documents_router
+from app.modules.emails import router as emails_router
+from app.modules.extractions import router as extractions_router
+from app.modules.monitoring import router as monitoring_router
+from app.modules.privacy import router as privacy_router
+from app.modules.profile import router as profile_router
 
 _LOCAL_AZURITE_ACCOUNT_KEY = (
     "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
@@ -46,7 +53,15 @@ class ReadinessResponse(HealthResponse):
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     """Reject invalid production and local-test configuration before serving traffic."""
-    get_settings()
+    settings = get_settings()
+    if settings.web_dist_dir and not any(
+        getattr(route, "name", None) == "web" for route in app.routes
+    ):
+        from fastapi.staticfiles import StaticFiles
+
+        # Single-origin deployment: the API serves the prebuilt web bundle for
+        # non-/api paths. Hash-based routes need no history fallback.
+        app.mount("/", StaticFiles(directory=settings.web_dist_dir, html=True), name="web")
     yield
 
 
@@ -61,6 +76,13 @@ app = FastAPI(
 )
 app.include_router(auth_router)
 app.include_router(credentials_router)
+app.include_router(profile_router)
+app.include_router(documents_router)
+app.include_router(extractions_router)
+app.include_router(applications_router)
+app.include_router(emails_router)
+app.include_router(monitoring_router)
+app.include_router(privacy_router)
 
 
 def _request_id(request: Request) -> str:
@@ -378,3 +400,5 @@ async def api_meta() -> ApiMetaResponse:
         contract_version=API_CONTRACT_VERSION,
         minimum_compatible_client_version=MINIMUM_COMPATIBLE_CLIENT_VERSION,
     )
+
+

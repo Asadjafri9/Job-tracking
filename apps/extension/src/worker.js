@@ -1,5 +1,6 @@
 import "./extraction.js";
 import "./api-origin.js";
+import "./outbox.js";
 
 // Bind the side panel to the tab whose toolbar action the user clicked. Looking
 // up the "active" tab later from a side panel can return a different tab (or a
@@ -96,6 +97,78 @@ function apiOrigin() {
   );
 }
 
+async function sha256Hex(text) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function extensionSession() {
+  const { authSession } = await chrome.storage.session.get("authSession");
+  if (!authSession?.access_token || Date.parse(authSession.expires_at) <= Date.now()) {
+    return null;
+  }
+  return authSession;
+}
+
+async function accountKey() {
+  const session = await extensionSession();
+  return session ? sha256Hex(session.access_token) : null;
+}
+
+const outbox = globalThis.ExtensionOutbox.createOutbox({
+  storage: chrome.storage.local,
+  send: async (event) => {
+    const session = await extensionSession();
+    if (!session) throw Object.assign(new Error("signed_out"), { terminal: true });
+    const response = await fetch(`${apiOrigin()}/api/v1/submission-events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify(event),
+    });
+    if (!response.ok) {
+      // 4xx means the session, window, or shape is wrong; replay cannot fix it.
+      const terminal = response.status >= 400 && response.status < 500;
+      throw Object.assign(new Error(`api_${response.status}`), { terminal });
+    }
+  },
+});
+
+async function trackingSessionFor(tabId, documentHandle) {
+  const { trackingSessions } = await chrome.storage.session.get("trackingSessions");
+  const binding = trackingSessions?.[tabId];
+  return binding?.document_handle === documentHandle ? binding : null;
+}
+
+async function buildSubmissionEvent(observation, contextHandles, sessionId) {
+  const kindMap = {
+    user_submit_intent: ["SUBMIT_CLICK", "USER_GESTURE"],
+    validation_blocked: ["VALIDATION_BLOCKED", "CONTENT_OBSERVER"],
+    native_submit_observed: ["SITE_SIGNAL", "CONTENT_OBSERVER"],
+  };
+  const mapped = kindMap[observation?.kind];
+  if (!mapped || typeof observation.observed_at !== "string") return null;
+  const keySource = `${observation.kind}:${contextHandles.form_handle}:${observation.observed_at}`;
+  const keyDigest = await sha256Hex(keySource);
+  return {
+    event_idempotency_key: [
+      keyDigest.slice(0, 8), keyDigest.slice(8, 12), keyDigest.slice(12, 16),
+      keyDigest.slice(16, 20), keyDigest.slice(20, 32),
+    ].join("-"),
+    application_session_id: sessionId,
+    evidence_type: mapped[0],
+    evidence_source: mapped[1],
+    observed_at: observation.observed_at,
+    gesture_ref_hash: await sha256Hex(
+      `${observation.kind}:${contextHandles.tab_handle}:${contextHandles.document_handle}:${contextHandles.form_handle}`,
+    ),
+    ...(observation.kind === "validation_blocked" ? { signal_code: "VALIDATION_BLOCKED" } : {}),
+    evidence: { outcome_code: observation.outcome ?? "unknown" },
+  };
+}
+
 function randomToken(bytes = 32) {
   const value = new Uint8Array(bytes);
   crypto.getRandomValues(value);
@@ -132,7 +205,180 @@ async function signInExtension() {
   if (!response.ok) throw new Error("Sign-in could not be completed.");
   const session = await response.json();
   await chrome.storage.session.set({ authSession: session });
+  const key = await accountKey();
+  if (key) await outbox.flush(key);
   return { ok: true, expires_at: session.expires_at };
+}
+
+// Service-worker restarts must not lose queued events: flush whatever the
+// current account still owns on every cold start.
+void accountKey().then((key) => (key ? outbox.flush(key) : null)).catch(() => {});
+
+async function recordObservation(tabId, contextHandles, observation) {
+  const binding = await trackingSessionFor(tabId, contextHandles.document_handle);
+  if (!binding) return; // passive tracking only exists inside a prepared session
+  const event = await buildSubmissionEvent(observation, contextHandles, binding.session_id);
+  const key = await accountKey();
+  if (!event || !key) return;
+  await outbox.enqueue(event, key);
+  await outbox.flush(key);
+}
+
+async function prepareTracking(message) {
+  const session = await extensionSession();
+  if (!session) return { error: "signed_out", explanation: "Sign in before tracking this page." };
+  const tab = await activeTab();
+  if (tab?.error) return tab;
+  const tabHandle = tabHandles.get(tab.id);
+  const documentHandle = documentHandles.get(tab.id);
+  if (!tabHandle || !documentHandle) {
+    return { error: "stale_context", explanation: "Inspect the page before tracking it." };
+  }
+  // Snapshot every currently confirmed AUTOFILL-permitted fact at its exact
+  // revision; the server revalidates each ref before binding it.
+  const profileResponse = await fetch(`${apiOrigin()}/api/v1/profile`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+  let selectedFactVersions = [];
+  if (profileResponse.ok) {
+    const profile = await profileResponse.json();
+    selectedFactVersions = (profile.facts ?? [])
+      .filter(
+        (fact) =>
+          fact.confirmation_state === "CONFIRMED" &&
+          (fact.allowed_purposes ?? []).includes("AUTOFILL"),
+      )
+      .slice(0, 100)
+      .map((fact) => ({ fact_id: fact.id, revision: fact.current_revision }));
+  }
+  const response = await fetch(`${apiOrigin()}/api/v1/application-sessions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      employer: String(message.employer ?? "").slice(0, 255),
+      role: String(message.role ?? "").slice(0, 255),
+      raw_job_url: tab.url,
+      job_context: { excerpt: String(message.excerpt ?? "").slice(0, 4000) },
+      form_reference: message.form_handle ?? null,
+      selected_fact_versions: selectedFactVersions,
+    }),
+  });
+  if (!response.ok) {
+    const detail = await response.json().catch(() => null);
+    return { error: "api_error", explanation: detail?.detail ?? "The session could not be prepared." };
+  }
+  const created = await response.json();
+  const { trackingSessions } = await chrome.storage.session.get("trackingSessions");
+  await chrome.storage.session.set({
+    trackingSessions: {
+      ...(trackingSessions ?? {}),
+      [tab.id]: {
+        session_id: created.id,
+        document_handle: documentHandle,
+        context_revision: created.context_revision,
+        profile_revision: created.profile_revision,
+      },
+    },
+  });
+  return { ok: true, session: created };
+}
+
+const FIELD_TYPE_MAP = {
+  text: "TEXT", url: "TEXT", number: "TEXT", textarea: "TEXTAREA",
+  select: "SELECT", radio: "RADIO", checkbox: "CHECKBOX",
+  date: "DATE", email: "EMAIL", tel: "TEL",
+};
+const MAX_DRAFT_QUESTIONS = 10;
+
+async function draftAnswers(message) {
+  const session = await extensionSession();
+  if (!session) return { error: "signed_out", explanation: "Sign in before drafting answers." };
+  const tab = await activeTab();
+  if (tab?.error) return tab;
+  const binding = await trackingSessionFor(tab.id, documentHandles.get(tab.id));
+  if (!binding) {
+    return { error: "no_session", explanation: "Prepare a tracked session before drafting answers." };
+  }
+  const fields = Array.isArray(message.fields) ? message.fields : [];
+  const questions = fields
+    .filter((field) => FIELD_TYPE_MAP[field.type] && !field.sensitive)
+    .slice(0, MAX_DRAFT_QUESTIONS)
+    .map((field) => ({
+      field_id: String(field.id).slice(0, 128),
+      label: String(field.label).slice(0, 512),
+      field_type: FIELD_TYPE_MAP[field.type],
+      options: (field.options ?? []).slice(0, 100).map((option) => String(option.label)),
+      required: field.required === true,
+      sensitive: false,
+    }));
+  if (!questions.length) {
+    return { error: "no_questions", explanation: "No ordinary open questions were found to draft." };
+  }
+  const response = await fetch(
+    `${apiOrigin()}/api/v1/application-sessions/${binding.session_id}/draft-answers`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        questions,
+        expected_profile_revision: binding.profile_revision,
+        context_excerpt: String(message.context_excerpt ?? "").slice(0, 10000),
+      }),
+    },
+  );
+  if (!response.ok) {
+    const detail = await response.json().catch(() => null);
+    const status = response.status === 409 ? "stale_context" : "api_error";
+    return { error: status, explanation: detail?.detail ?? "Answers could not be drafted." };
+  }
+  const drafted = await response.json();
+  if (Number.isInteger(drafted.revision)) {
+    const { trackingSessions } = await chrome.storage.session.get("trackingSessions");
+    await chrome.storage.session.set({
+      trackingSessions: {
+        ...(trackingSessions ?? {}),
+        [tab.id]: { ...binding, context_revision: drafted.revision },
+      },
+    });
+  }
+  return { ok: true, ...drafted };
+}
+
+async function reportAppliedAnswers(tabId, entries) {
+  const session = await extensionSession();
+  const documentHandle = documentHandles.get(tabId);
+  const binding = documentHandle ? await trackingSessionFor(tabId, documentHandle) : null;
+  if (!session || !binding) return;
+  const response = await fetch(
+    `${apiOrigin()}/api/v1/application-sessions/${binding.session_id}/applied-answers`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        entries: entries.slice(0, 50).map((entry) => ({
+          field_id: String(entry.field_id ?? entry.fieldId ?? "").slice(0, 128),
+          value: entry.value ?? null,
+          status: entry.status ?? "unknown",
+          expected_option_ids: Array.isArray(entry.expected_option_ids)
+            ? entry.expected_option_ids.slice(0, 100)
+            : [],
+        })),
+        expected_context_revision: binding.context_revision,
+      }),
+    },
+  );
+  // A stale revision means the page/context changed; reporting is best-effort
+  // and never blocks the user's own fill.
+  return response.ok;
 }
 
 async function signOutExtension() {
@@ -158,6 +404,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       && contextHandles.tab_handle === tabHandles.get(sender.tab.id)
       && contextHandles.document_handle === documentHandles.get(sender.tab.id)) {
       chrome.runtime.sendMessage({ type: "panel-submit-observation", observation: message.observation }).catch(() => {});
+      void recordObservation(sender.tab.id, contextHandles, message.observation);
     }
     return false;
   }
@@ -168,7 +415,16 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
     return true;
   }
   if (message?.type === "panel-auth-sign-out") {
-    signOutExtension().then(respond).catch(() => respond({ error: "Sign-out failed." }));
+    signOutExtension()
+      .then(async (result) => {
+        await Promise.all([
+          outbox.purge(),
+          chrome.storage.session.remove("trackingSessions"),
+        ]);
+        return result;
+      })
+      .then(respond)
+      .catch(() => respond({ error: "Sign-out failed." }));
     return true;
   }
   if (message?.type === "panel-auth-status") {
@@ -190,13 +446,32 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
     case "panel-get-selected-job-text":
       operation = sendToActivePage({ type: "rolevo-get-selected-job-text", context_handles: message.context_handles });
       break;
+    case "panel-prepare-tracking":
+      operation = prepareTracking(message);
+      break;
+    case "panel-draft-answers":
+      operation = draftAnswers(message);
+      break;
     case "panel-apply-reviewed-values":
       operation = sendToActivePage({
         type: "rolevo-apply-reviewed-values",
         form_id: message.context_handles?.form_handle,
         context_handles: message.context_handles,
         entries: message.entries,
-      }, { requireForm: true });
+      }, { requireForm: true }).then(async (result) => {
+        if (!result?.error && Number.isInteger(activatedTabId)) {
+          const statusMap = { unchanged: "skipped", unsupported: "skipped" };
+          const reported = (result.results ?? []).map((item) => ({
+            field_id: item.field_id,
+            value: item.status === "filled" || item.status === "filled_invalid"
+              ? (message.entries ?? []).find((entry) => entry.field_id === item.field_id)?.value ?? null
+              : null,
+            status: statusMap[item.status] ?? item.status,
+          }));
+          await reportAppliedAnswers(activatedTabId, reported).catch(() => {});
+        }
+        return result;
+      });
       break;
     default:
       return false;

@@ -5,15 +5,15 @@ from __future__ import annotations
 import base64
 import json
 import os
-import threading
-import time
 from dataclasses import dataclass
 from typing import Protocol
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+from app.security.managed_identity import ManagedIdentityError, managed_identity_token
 
 
 class KeyEncryptionError(RuntimeError):
@@ -49,10 +49,6 @@ class KeyVaultKeyEncryption:
     Authentication uses the App Service managed-identity endpoint. No key
     material or access token is written to disk or logged.
     """
-
-    _token_lock = threading.Lock()
-    _cached_token: str | None = None
-    _token_expiry = 0.0
 
     def __init__(self, key_id: str, *, timeout: float = 5.0) -> None:
         parsed = urlsplit(key_id)
@@ -116,34 +112,11 @@ class KeyVaultKeyEncryption:
         return payload
 
     def _access_token(self) -> str:
-        now = time.monotonic()
-        with self._token_lock:
-            if self._cached_token and now < self._token_expiry - 60:
-                return self._cached_token
-            endpoint = os.environ.get("IDENTITY_ENDPOINT")
-            secret = os.environ.get("IDENTITY_HEADER")
-            if not endpoint or not secret:
-                raise KeyEncryptionError("App Service managed identity is unavailable")
-            query = urlencode({"resource": "https://vault.azure.net", "api-version": "2019-08-01"})
-            request = Request(
-                f"{endpoint}?{query}",
-                headers={"X-IDENTITY-HEADER": secret, "Metadata": "true"},
-                method="GET",
-            )
-            try:
-                with urlopen(request, timeout=self.timeout) as response:
-                    payload = json.loads(response.read(16_384))
-            except (HTTPError, URLError, TimeoutError, OSError, ValueError) as error:
-                raise KeyEncryptionError("Managed identity token request failed") from error
-            if not isinstance(payload, dict):
-                raise KeyEncryptionError("Managed identity returned an invalid response")
-            token = payload.get("access_token")
-            expires_in = payload.get("expires_in")
-            if not isinstance(token, str) or not isinstance(expires_in, (str, int, float)):
-                raise KeyEncryptionError("Managed identity returned an invalid access token")
-            self.__class__._cached_token = token
-            self.__class__._token_expiry = now + float(expires_in)
-            return token
+        try:
+            token, _ = managed_identity_token("https://vault.azure.net", self.timeout)
+        except ManagedIdentityError as error:
+            raise KeyEncryptionError(str(error)) from error
+        return token
 
 
 def _encode_b64url(value: bytes) -> str:

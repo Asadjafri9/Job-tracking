@@ -38,6 +38,7 @@
           <button id="inspect-form" class="button secondary" type="button" disabled>Review selected form</button>
         </div>
         <div id="fields" class="field-list" aria-live="polite"></div>
+        <button id="draft-answers" class="button secondary hidden" type="button">Draft answers with AI</button>
         <button id="fill" class="button primary hidden" type="button" disabled>Fill reviewed values</button>
       </section>
 
@@ -49,6 +50,19 @@
         <p class="muted">Select a job description on the page, then add only that selection. Nothing is sent to a server.</p>
         <button id="capture-job" class="button secondary" type="button">Use selected job text</button>
         <p id="job-summary" class="job-summary">No job text selected.</p>
+      </section>
+
+      <section class="card" aria-labelledby="tracking-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">TRACKING</p><h2 id="tracking-title">Track this page</h2></div>
+          <span id="tracking-state" class="tag quiet">Not tracked</span>
+        </div>
+        <p class="muted">Preparing a session lets the extension record an honest submit attempt. It is never an application until you say so.</p>
+        <label for="track-employer">Employer</label>
+        <input id="track-employer" type="text" maxlength="255" placeholder="Employer name" />
+        <label for="track-role">Role</label>
+        <input id="track-role" type="text" maxlength="255" placeholder="Role title" />
+        <button id="prepare-tracking" class="button secondary" type="button" disabled>Prepare tracked session</button>
       </section>
 
       <section class="card observation-card" aria-labelledby="observation-title">

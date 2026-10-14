@@ -1,0 +1,37 @@
+{
+  "kind": "EMAIL",
+  "cases": [
+    {
+      "name": "bounded subject and body with supplied facts only",
+      "input": {
+        "recipient_email": "hiring@example.test",
+        "employer": "Example Corp",
+        "role": "Backend Engineer",
+        "job_excerpt": "Reliability work on distributed systems.",
+        "facts": [
+          {"fact_key": "skills.primary", "value_type": "TEXT", "value": "distributed systems"}
+        ],
+        "tone_tips": ["concise", "plain language"]
+      },
+      "expect_valid": {
+        "subject": "Backend Engineer application",
+        "body": "Hello,\n\nI am applying for the Backend Engineer role. My recent work on distributed systems maps to your reliability focus.\n\nRegards,\nCandidate"
+      }
+    },
+    {
+      "name": "overlong subject fails schema bounds",
+      "input": {
+        "recipient_email": "hiring@example.test",
+        "employer": "Example Corp",
+        "role": "Backend Engineer",
+        "job_excerpt": "",
+        "facts": [],
+        "tone_tips": []
+      },
+      "expect_schema_violation": {
+        "subject": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "body": "Hello"
+      }
+    }
+  ]
+}

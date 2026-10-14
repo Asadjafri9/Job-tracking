@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": { "value": "eastus" },
+    "environmentName": { "value": "staging" },
+    "imageDigest": { "value": "rolevo:REPLACE-WITH-IMMUTABLE-DIGEST" },
+    "oidcIssuer": { "value": "REPLACE-WITH-DEDICATED-EXTERNAL-ID-ISSUER" },
+    "oidcClientId": { "value": "REPLACE-WITH-CLIENT-ID" },
+    "publicAppUrl": { "value": "https://rolevo-staging.example.invalid" },
+    "chromeExtensionIds": { "value": "REPLACE-WITH-PUBLISHED-EXTENSION-ID" },
+    "postgresAdminPassword": { "value": "REPLACE-AT-DEPLOY-TIME-NEVER-COMMIT-A-REAL-VALUE" }
+  }
+}

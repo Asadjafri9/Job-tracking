@@ -7,8 +7,6 @@ import logging
 import os
 import signal
 import socket
-from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
 from datetime import timedelta
 from functools import lru_cache
 from uuid import UUID
@@ -22,32 +20,13 @@ from app.config import get_settings
 from app.db.connection import sqlalchemy_url
 from app.db.jobs import claim_next_job, finish_job, heartbeat, retry_job
 from app.db.models import Job
+from app.worker.registry import HANDLERS, JobContext, register  # noqa: F401  (re-exported)
 
 logger = logging.getLogger("app.worker")
 LEASE_HEARTBEAT = timedelta(seconds=20)
 MAX_RUNTIME = 15 * 60
 MAX_CONCURRENCY = 4
 CLAIM_RETRY_DELAY = 5.0
-
-
-@dataclass(frozen=True)
-class JobContext:
-    id: UUID
-    owner_id: UUID
-    kind: str
-    reference_type: str | None
-    reference_id: UUID | None
-    attempt: int
-
-
-Handler = Callable[[JobContext, asyncio.Event], Awaitable[None]]
-HANDLERS: dict[str, Handler] = {}
-
-
-def register(kind: str, handler: Handler) -> None:
-    if not kind or len(kind) > 64 or kind in HANDLERS:
-        raise ValueError("invalid or duplicate job handler")
-    HANDLERS[kind] = handler
 
 
 @lru_cache(maxsize=1)
@@ -81,9 +60,7 @@ def _heartbeat_once(job_id: UUID, worker_id: str) -> bool:
         return heartbeat(session, job_id, worker_id)
 
 
-def _finish(
-    job_id: UUID, worker_id: str, *, state: str, stage: str | None = None
-) -> None:
+def _finish(job_id: UUID, worker_id: str, *, state: str, stage: str | None = None) -> None:
     with Session(_worker_engine()) as session, session.begin():
         finish_job(session, job_id, worker_id, state=state, stage=stage)
 
@@ -113,9 +90,7 @@ async def _heartbeat(job: JobContext, worker_id: str, stopped: asyncio.Event) ->
 async def _run_job(job: JobContext, worker_id: str) -> None:
     handler = HANDLERS.get(job.kind)
     if handler is None:
-        await asyncio.to_thread(
-            _finish, job.id, worker_id, state="FAILED", stage="NO_HANDLER"
-        )
+        await asyncio.to_thread(_finish, job.id, worker_id, state="FAILED", stage="NO_HANDLER")
         logger.error("job failed with no handler: kind=%s id=%s", job.kind, job.id)
         return
 
@@ -155,9 +130,7 @@ async def _run_job(job: JobContext, worker_id: str) -> None:
             "job attempt failed: kind=%s id=%s error=%s", job.kind, job.id, type(error).__name__
         )
     else:
-        await asyncio.to_thread(
-            _finish, job.id, worker_id, state="SUCCEEDED", stage="COMPLETE"
-        )
+        await asyncio.to_thread(_finish, job.id, worker_id, state="SUCCEEDED", stage="COMPLETE")
     finally:
         stop_heartbeat.set()
         await heartbeat_task
@@ -198,6 +171,9 @@ async def run(stop: asyncio.Event, *, worker_id: str | None = None) -> None:
 
 
 async def main() -> None:
+    from app.worker.handlers import register_builtin_handlers
+
+    register_builtin_handlers()
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):

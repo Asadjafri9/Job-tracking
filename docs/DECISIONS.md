@@ -46,6 +46,8 @@ One App Service Linux B1 container initially serves React assets/FastAPI at the 
 
 East US defaults: PostgreSQL Flexible Server 17/Burstable B1ms/32 GiB with private VNet path; Standard LRS blobs, Standard Key Vault, Basic ACR, Azure Monitor. Bicep and protected GitHub OIDC deployment, scoped runtime/auth/migration/worker roles. USD 150/month initial infrastructure envelope is a planning cap, not a quote or spending authorization; produce actual cost/availability preflight before applying resources.
 
+**Owner override (2026-10-14): only free-tier services may be used; no paid SKUs at all.** This supersedes the USD 150/month envelope and invalidates the listed SKUs as defaults (B1 App Service containers and Basic ACR are paid; Flexible Server B1ms is free only within the 12-month new-account grant). Any future provisioning requires a reworked zero-cost topology and a fresh owner review of `docs/AZURE_PLAN.md` before apply.
+
 ## ADR-009 — Isolation and lifecycle
 
 API owner checks + composite-owner FKs + PostgreSQL RLS for every product record. Non-owner/no-BYPASSRLS runtime role sets transaction-local user context; separate auth/migration privileges. Worker job ownership comes from durable server records, not client assertions.

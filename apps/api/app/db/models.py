@@ -213,7 +213,14 @@ class Document(Base):
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
     user_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
     document_type: Mapped[str] = mapped_column(
-        enum_type("document_type", "RESUME", "LINKEDIN_PDF", "COVER_LETTER", "OTHER"),
+        enum_type(
+            "document_type",
+            "RESUME",
+            "LINKEDIN_PDF",
+            "COVER_LETTER",
+            "SUPPORTING_DOCUMENT",
+            "OTHER",
+        ),
         nullable=False,
     )
     revision: Mapped[int] = mapped_column(sa.Integer, nullable=False, server_default="1")
@@ -549,7 +556,10 @@ class AiOperation(Base):
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
     user_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
     kind: Mapped[str] = mapped_column(
-        enum_type("ai_operation_kind", "AUTOFILL", "EMAIL", "JOB_MATCH"), nullable=False
+        enum_type(
+            "ai_operation_kind", "AUTOFILL", "EMAIL", "JOB_MATCH", "EXTRACTION", "CLASSIFY"
+        ),
+        nullable=False,
     )
     input_hmac: Mapped[str] = mapped_column(sa.String(64), nullable=False)
     idempotency_key: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
@@ -1143,7 +1153,14 @@ class MonitoringRun(Base):
     scheduled_local_date: Mapped[date | None] = mapped_column(sa.Date)
     state: Mapped[str] = mapped_column(
         enum_type(
-            "monitor_run_state", "QUEUED", "RUNNING", "PARTIAL", "SUCCEEDED", "FAILED", "CANCELED"
+            "monitor_run_state",
+            "QUEUED",
+            "RUNNING",
+            "PARTIAL",
+            "SUCCEEDED",
+            "FAILED",
+            "SKIPPED",
+            "CANCELED",
         ),
         nullable=False,
     )
@@ -1294,6 +1311,14 @@ class Job(Base):
         sa.Index("ix_jobs_claim", "state", "next_run_at", "created_at"),
         sa.Index("ix_jobs_user_state", "user_id", "state", "created_at"),
         sa.Index("ix_jobs_lease", "state", "lease_until"),
+        sa.Index(
+            "uq_jobs_active_reference",
+            "user_id",
+            "kind",
+            "reference_id",
+            unique=True,
+            postgresql_where=sa.text("state IN ('QUEUED','RUNNING') AND reference_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
@@ -1417,5 +1442,36 @@ class DeletionJournal(Base):
     revoked_session_digest: Mapped[str | None] = mapped_column(sa.String(64))
     integrity_hmac: Mapped[str] = mapped_column(sa.String(64), nullable=False)
     deleted_at: Mapped[datetime] = mapped_column(
+        INSTANT, nullable=False, server_default=NOW_DEFAULT
+    )
+
+
+class ExportArtifact(Base):
+    """A private, expiring export ZIP produced by a durable export job."""
+
+    __tablename__ = "export_artifacts"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        sa.UniqueConstraint("user_id", "id", name="uq_export_artifacts_user_id_id"),
+        sa.UniqueConstraint("job_id", name="uq_export_artifacts_job"),
+        sa.CheckConstraint("length(sha256) = 64 OR sha256 IS NULL", name="export_sha_length"),
+        sa.CheckConstraint("size_bytes >= 0", name="export_size_nonnegative"),
+        sa.Index("ix_export_artifacts_user_created", "user_id", "created_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(UUID_TYPE, primary_key=True, server_default=ID_DEFAULT)
+    user_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+    job_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+    storage_key: Mapped[str | None] = mapped_column(sa.String(1024))
+    sha256: Mapped[str | None] = mapped_column(sa.String(64))
+    size_bytes: Mapped[int] = mapped_column(sa.BigInteger, nullable=False, server_default="0")
+    state: Mapped[str] = mapped_column(
+        enum_type("export_artifact_state", "BUILDING", "READY", "EXPIRED", "DELETED"),
+        nullable=False,
+        server_default="BUILDING",
+    )
+    redacted_error: Mapped[str | None] = mapped_column(sa.String(512))
+    expires_at: Mapped[datetime] = mapped_column(INSTANT, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
         INSTANT, nullable=False, server_default=NOW_DEFAULT
     )

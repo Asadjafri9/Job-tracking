@@ -29,6 +29,8 @@
     "local:services:up": "bash scripts/local-services-up.sh",
     "local:services:down": "docker compose down",
     "local:services:status": "docker compose ps",
-    "verify:backend": "corepack pnpm lint:api && corepack pnpm typecheck:api && corepack pnpm test:api"
+    "verify:backend": "corepack pnpm lint:api && corepack pnpm typecheck:api && corepack pnpm test:api",
+    "dev:worker": "cd apps/api && uv run --env-file ../../.env python -m app.worker.runner",
+    "dev:scheduler": "cd apps/api && uv run --env-file ../../.env python -m app.worker.scheduler"
   }
 }

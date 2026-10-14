@@ -4,6 +4,9 @@ export const navigation = [
   { label: "Email", key: "email", icon: "email" },
   { label: "Job alerts", key: "job-alerts", icon: "alerts" },
   { label: "Profile", key: "profile", icon: "profile" },
+  { label: "Documents", key: "documents", icon: "documents" },
+  { label: "AI providers", key: "providers", icon: "key" },
+  { label: "Privacy", key: "privacy", icon: "shield" },
 ] as const;
 
 export type Page = (typeof navigation)[number]["key"];

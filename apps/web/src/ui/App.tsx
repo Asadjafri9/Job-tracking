@@ -1,5 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { AlertsPage } from "./alerts";
+import { ApplicationsPage } from "./applications";
+import { DocumentsPage } from "./documents";
+import { EmailPage } from "./email";
+import { LandingPage } from "./Landing";
 import { navigation, resolvePage, type Page } from "./navigation";
+import { PrivacyPage } from "./privacy";
+import { ProfilePage } from "./profile";
+import { ProvidersPage } from "./providers";
 
 function pageFromHash(): Page {
   return resolvePage(window.location.hash);
@@ -48,6 +56,23 @@ function Icon({ name }: { name: string }) {
         <path d="M5 12h14M13 6l6 6-6 6" />
       </>
     ),
+    key: (
+      <>
+        <circle cx="8" cy="15" r="4" />
+        <path d="m10.8 12.2 8.7-8.7M17 6l2 2M14.5 8.5l2 2" />
+      </>
+    ),
+    documents: (
+      <>
+        <path d="M7 3h7l5 5v13H7z" />
+        <path d="M14 3v5h5M10 13h6M10 17h6" />
+      </>
+    ),
+    shield: (
+      <>
+        <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z" />
+      </>
+    ),
   };
 
   return (
@@ -64,6 +89,8 @@ export function App() {
     csrf: string;
   } | null>(null);
   const [authStatus, setAuthStatus] = useState("Checking account…");
+  const [authChecked, setAuthChecked] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   async function refreshAccount() {
     try {
@@ -75,6 +102,8 @@ export function App() {
     } catch {
       setAccount(null);
       setAuthStatus("Sign in to your workspace");
+    } finally {
+      setAuthChecked(true);
     }
   }
 
@@ -98,8 +127,43 @@ export function App() {
     void refreshAccount();
   }, []);
 
+  useEffect(() => {
+    if (!account) return;
+    let stopped = false;
+    async function pollUnread() {
+      try {
+        const response = await fetch("/api/v1/notifications?limit=1", {
+          credentials: "include",
+        });
+        if (!response.ok || stopped) return;
+        const body = (await response.json()) as { unread_count?: number };
+        setUnreadCount(body.unread_count ?? 0);
+      } catch {
+        // Offline or API unreachable: keep the last known count.
+      }
+    }
+    void pollUnread();
+    const timer = window.setInterval(() => void pollUnread(), 60_000);
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
+  }, [account, page]);
+
   const pageTitle =
     navigation.find((item) => item.key === page)?.label ?? "Home";
+
+  if (!authChecked) {
+    return (
+      <div className="app-loading" role="status">
+        Checking your account…
+      </div>
+    );
+  }
+
+  if (!account) {
+    return <LandingPage />;
+  }
 
   return (
     <div className="app-frame">
@@ -149,22 +213,16 @@ export function App() {
               <Icon name="profile" />
             </span>
             <span>
-              <strong>{account?.email ?? "Workspace shell"}</strong>
+              <strong>{account.email}</strong>
               <small>{authStatus}</small>
             </span>
-            {account ? (
-              <button
-                className="preview-pill"
-                type="button"
-                onClick={() => void signOut()}
-              >
-                Sign out
-              </button>
-            ) : (
-              <a className="preview-pill" href="/auth/login">
-                Sign in
-              </a>
-            )}
+            <button
+              className="preview-pill"
+              type="button"
+              onClick={() => void signOut()}
+            >
+              Sign out
+            </button>
           </div>
         </div>
       </aside>
@@ -176,32 +234,48 @@ export function App() {
             <span aria-hidden="true">/</span>
             <strong>{pageTitle}</strong>
           </p>
-          {account ? (
-            <button
-              className="preview-pill account-action"
-              type="button"
-              onClick={() => void signOut()}
-            >
-              Sign out
-            </button>
-          ) : (
-            <a className="preview-pill account-action" href="/auth/login">
-              Sign in
-            </a>
-          )}
           <button
-            className="icon-button"
+            className="preview-pill account-action"
             type="button"
-            aria-label="Notifications are not connected"
-            disabled
+            onClick={() => void signOut()}
+          >
+            Sign out
+          </button>
+          <a
+            className="icon-button"
+            href="#job-alerts"
+            aria-label={
+              unreadCount > 0
+                ? `${unreadCount} unread notifications`
+                : "Notifications"
+            }
           >
             <Icon name="bell" />
-          </button>
+            {unreadCount > 0 ? (
+              <span className="bell-badge" aria-hidden="true">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            ) : null}
+          </a>
         </header>
 
         <div className="content">
           {page === "home" ? (
             <Home />
+          ) : page === "applications" ? (
+            <ApplicationsPage csrf={account.csrf} signedIn />
+          ) : page === "email" ? (
+            <EmailPage csrf={account.csrf} signedIn />
+          ) : page === "job-alerts" ? (
+            <AlertsPage csrf={account.csrf} signedIn />
+          ) : page === "providers" ? (
+            <ProvidersPage csrf={account.csrf} signedIn />
+          ) : page === "profile" ? (
+            <ProfilePage csrf={account.csrf} signedIn />
+          ) : page === "documents" ? (
+            <DocumentsPage csrf={account.csrf} signedIn />
+          ) : page === "privacy" ? (
+            <PrivacyPage csrf={account.csrf} signedIn />
           ) : (
             <section
               className="placeholder"
